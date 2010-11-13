@@ -6,6 +6,7 @@ SET( PROJECT_NAME "dva")
 SET( PROJECT_SOURCES
   # Add all the cpp source files here
   main.cpp
+  Scene/GridNode.cpp
 )
 
 # Include needed to use SDL under Mac OS X
@@ -28,5 +29,6 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   OpenEngine_Scene
   # Extension dependencies
   Extensions_SDL
-  Extensions_SetupHelpers  
+  Extensions_SetupHelpers
+  Extensions_GenericHandlers
 )

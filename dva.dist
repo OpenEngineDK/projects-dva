@@ -20,6 +20,7 @@ darcs /extensions/OpenGLRenderer         http://openengine.dk/code/extensions/Op
 darcs /extensions/TGAResource            http://openengine.dk/code/extensions/TGAResource
 darcs /extensions/OBJResource            http://openengine.dk/code/extensions/OBJResource
 darcs /extensions/AccelerationStructures http://openengine.dk/code/extensions/AccelerationStructures
+darcs /extensions/GenericHandlers 	 http://openengine.dk/code/extensions/GenericHandlers
 
 darcs-dev /extensions/SetupHelpers           fh.daimi.au.dk:/users/cgd/code/extensions/SetupHelpers
 darcs-dev /extensions/HUD                    fh.daimi.au.dk:/users/cgd/code/extensions/HUD
