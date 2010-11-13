@@ -16,14 +16,16 @@
 #include <Display/SDLEnvironment.h>
 #include <Display/PerspectiveViewingVolume.h>
 #include <Devices/IKeyboard.h>
+#include <Resources/OpenGLShader.h>
 #include <Resources/ResourceManager.h>
 #include <Resources/AssimpResource.h>
 #include <Scene/SceneNode.h>
 #include <Scene/RenderStateNode.h>
+#include <Scene/PostProcessNode.h>
+#include <Scene/ChainPostProcessNode.h>
 
 #include <Utils/SimpleSetup.h>
 #include <Utils/MoveHandler.h>
-
 
 // DVA stuff
 #include "setup.h"
@@ -45,6 +47,8 @@ Camera* camera;
 IMouse* mouse;
 IKeyboard* keyboard;
 ISceneNode* scene;
+RenderStateNode *rsn;
+IRenderer* renderer;
 
 void SetupEngine();
 void SetupScene();
@@ -52,8 +56,7 @@ void SetupDevices();
 void SetupResources();
 
 int main(int argc, char** argv) {
-    // Setup logging facilities.
-    Logger::AddLogger(new StreamLogger(&std::cout));
+    // Print start message
     logger.info << "========= OpenEngine Warm Up =========" << logger.end;
 
     //
@@ -82,7 +85,8 @@ void SetupEngine() {
 
     // Create simple setup
     setup = new SimpleSetup("Det Virtuelle Akvarium", env);
-    setup->GetRenderer().SetBackgroundColor(Vector<4, float>(1.0, 1.0, 1.0, 1.0));
+    renderer = &setup->GetRenderer();
+    renderer->SetBackgroundColor(Vector<4, float>(0.8, 0.8, 0.8, 1.0));
 
     // Get Engine
     engine = &setup->GetEngine();
@@ -93,15 +97,18 @@ void SetupScene() {
     scene = new SceneNode();
     setup->SetScene(*scene);
 
-    RenderStateNode *rsn = new RenderStateNode();
-    rsn->EnableOption(RenderStateNode::LIGHTING);
+    rsn = new RenderStateNode();
+    rsn->EnableOption(RenderStateNode::TEXTURE);
+    rsn->EnableOption(RenderStateNode::SHADER);
+    //rsn->EnableOption(RenderStateNode::LIGHTING);
     rsn->EnableOption(RenderStateNode::COLOR_MATERIAL);
     rsn->EnableOption(RenderStateNode::BACKFACE);
+    rsn->EnableOption(RenderStateNode::DEPTH_TEST);
     scene->AddNode(rsn);
     
     // Just for test
     GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
-    rsn->AddNode(grid);
+    scene->AddNode(grid);
     
     // Setup camera
     camera  = new Camera(*(new PerspectiveViewingVolume(1, 4000)));
@@ -122,8 +129,47 @@ void SetupDevices() {
 }
 
 void SetupResources() {
-    ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
+    //
+    ISceneNode* lastNode = rsn;
 
+    // Load Shaders
+    DirectoryManager::AppendPath("resources/shaders/");
+    ResourceManager<IShaderResource>::AddPlugin(new GLShaderPlugin());
+    Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    /*
+    IShaderResourcePtr glow = ResourceManager<IShaderResource>::Create("extensions/OpenGLPostProcessEffects/shaders/Glow.glsl");
+    glow->SetUniform("coefficients", Vector<3, float>(0.3, 0.5, 0.0));
+    PostProcessNode* glowNode = new PostProcessNode(glow, dimension);
+    glowNode->SetEnabled(true);
+    renderer->InitializeEvent().Attach(*glowNode);
+    lastNode->AddNode(glowNode);
+    lastNode = glowNode;
+*/
+
+    std::list<IShaderResourcePtr> effects;
+    IShaderResourcePtr glow = ResourceManager<IShaderResource>::Create("Glow.glsl");
+    IShaderResourcePtr blur = ResourceManager<IShaderResource>::Create("HorizontalBoxBlur.glsl");
+    effects.push_back(glow);
+    effects.push_back(blur);
+
+    ChainPostProcessNode* glowNode = new ChainPostProcessNode(effects, dimension, 1, true);
+    glow->SetTexture("scene", glowNode->GetPostProcessNode(1)->GetSceneFrameBuffer()->GetTexAttachment(0));
+    renderer->InitializeEvent().Attach(*glowNode);
+
+    lastNode->AddNode(glowNode);
+    lastNode = glowNode;
+    /*    
+    IShaderResourcePtr grayscale = ResourceManager<IShaderResource>::Create("extensions/OpenGLPostProcessEffects/shaders/GrayScale.glsl");
+    PostProcessNode* grayScaleNode = new PostProcessNode(grayscale, dimension);
+    grayScaleNode->SetEnabled(true);
+    renderer->InitializeEvent().Attach(*grayScaleNode);
+    lastNode->AddNode(grayScaleNode);
+    lastNode = grayScaleNode;
+    */
+  
+    // Load Models
+    ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
     DirectoryManager::AppendPath("resources/models/");
  
     string boxPath = DirectoryManager::FindFileInPath("box/box.dae");
@@ -132,7 +178,7 @@ void SetupResources() {
 
     TransformationNode* boxTrans = new TransformationNode();
     boxTrans->AddNode(box->GetSceneNode());
-    //boxTrans->Rotate(0, 0, 0);
-
-    scene->AddNode(boxTrans);
+  
+    // Add model after shader effects.
+    lastNode->AddNode(boxTrans);
 }

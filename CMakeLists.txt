@@ -30,6 +30,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   # Extension dependencies
   Extensions_AssimpResource
   Extensions_GenericHandlers
+  Extensions_OpenGLPostProcessEffects
   Extensions_SDL
   Extensions_SetupHelpers
 )
