@@ -28,7 +28,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   OpenEngine_Devices
   OpenEngine_Scene
   # Extension dependencies
+  Extensions_AssimpResource
+  Extensions_GenericHandlers
   Extensions_SDL
   Extensions_SetupHelpers
-  Extensions_GenericHandlers
 )
