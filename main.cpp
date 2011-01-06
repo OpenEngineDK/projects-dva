@@ -266,21 +266,21 @@ void LoadResources() {
 //     sceneNodes.push_back(oceanFloor);
     
     // Create ocean floor
-    FloatTexture2DPtr map = FloatTexture2DPtr(new FloatTexture2D(1024, 1024, 1));
-    Empty(map);
-    // map, steps, radius, disp
-    map = CreateSmoothTerrain(map, 10, 160, 6);
-    map = CreateSmoothTerrain(map, 1, 500, -40);
-    map = CreateSmoothTerrain(map, 8000, 50, 3.0);
-    //    map = MakePlateau(map, 100, 100);
-    float widthScale = 4.0;
-    Vector<3, float> origo = Vector<3, float>(map->GetHeight() * widthScale / 2, 0, map->GetWidth() * widthScale / 2);
-    OceanFloorNode* node = new OceanFloorNode(map);
-    node->SetWidthScale(widthScale);
-    node->SetOffset(origo * -1);
-    setup->GetRenderer().InitializeEvent().Attach(*node);
-    setup->GetEngine().ProcessEvent().Attach(*node);
-    sceneNodes.push_back(node);
+//     FloatTexture2DPtr map = FloatTexture2DPtr(new FloatTexture2D(1024, 1024, 1));
+//     Empty(map);
+//     // map, steps, radius, disp
+//     map = CreateSmoothTerrain(map, 10, 160, 6);
+//     map = CreateSmoothTerrain(map, 1, 500, -40);
+//     map = CreateSmoothTerrain(map, 8000, 50, 3.0);
+//     //    map = MakePlateau(map, 100, 100);
+//     float widthScale = 4.0;
+//     Vector<3, float> origo = Vector<3, float>(map->GetHeight() * widthScale / 2, 0, map->GetWidth() * widthScale / 2);
+//     OceanFloorNode* node = new OceanFloorNode(map);
+//     node->SetWidthScale(widthScale);
+//     node->SetOffset(origo * -1);
+//     setup->GetRenderer().InitializeEvent().Attach(*node);
+//     setup->GetEngine().ProcessEvent().Attach(*node);
+//     sceneNodes.push_back(node);
     
     
     // Load boat
