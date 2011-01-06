@@ -12,6 +12,7 @@ darcs-dev / fh.daimi.au.dk:/users/cgd/code/openengine
 
 # dist dependencies
 dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/extensions/Assimp/Assimp.dist
+dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/HeightMap/HeightMap.dist
 
 # required extensions
 darcs /extensions/Assimp			http://openengine.dk/code/extensions/Assimp

@@ -1,0 +1,42 @@
+
+class FadeHandler : public IListener<KeyboardEventArg> {
+private:
+    IShaderResourcePtr mFade;
+    float mGrade;
+    int mFadeStat;
+ 
+    enum fadeStat {FADE_NONE, FADE_IN, FADE_OUT};
+ 
+public:
+    FadeHandler(IShaderResourcePtr fade): mFade(fade), mGrade(1.0), mFadeStat(0) {}
+
+    Vector<3, float> GetCoefficients(){
+        Vector<3, float> c;
+        mFade->GetUniform("coefficients", c);
+        return c;
+    }
+
+    void SetCoefficients(Vector<3, float> c){
+        mFade->SetUniform("coefficients", c);
+    }
+    void Handle(KeyboardEventArg arg) {
+        if( arg.type == EVENT_PRESS ){
+            if( arg.sym == KEY_k ) mFadeStat = FADE_OUT;
+            if( arg.sym == KEY_l ) mFadeStat = FADE_IN;
+        }else if( arg.type == EVENT_RELEASE ){
+            mFadeStat = FADE_NONE;
+        }
+
+        if( mFadeStat == FADE_OUT && mGrade > 0.0 )
+            mGrade -= 0.001f;
+
+        if( mFadeStat == FADE_IN && mGrade < 1.0 )
+            mGrade += 0.001f;
+
+      
+        if( mFadeStat != FADE_NONE ){
+            logger.info << "FadeGrade: " << mGrade << logger.end;
+            SetCoefficients(GetCoefficients() * mGrade);
+        }
+    }
+};

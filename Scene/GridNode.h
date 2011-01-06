@@ -7,13 +7,14 @@
 #include <Scene/ISceneNodeVisitor.h>
 
 using namespace OpenEngine;
+using namespace OpenEngine::Math;
 using namespace OpenEngine::Scene;
 using namespace OpenEngine::Renderers;
 
 class GridNode : public Scene::RenderNode {
  public:
     GridNode(float numberOfLinesPerAxis,
-             float spaceBetweenLines, Math::Vector<3,float> color);
+             float spaceBetweenLines, Vector<3,float> color);
     ~GridNode();
 
     //void Apply(RenderingEventArg arg);
@@ -23,7 +24,7 @@ class GridNode : public Scene::RenderNode {
  private:
     float numberOfLinesPerAxis;
     float spaceBetweenLines;
-    Math::Vector<3,float> color;
+    Vector<3,float> color;
 };
 
 #endif // _GRID_NODE_
