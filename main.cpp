@@ -274,7 +274,7 @@ void SetupBoids() {
     flock->AddRule(new AlignmentRule());
 
     flockFollow = new TransformationNode();
-    flockFollow->SetPosition(Vector<3,float>(100,0,0));
+    flockFollow->SetPosition(Vector<3,float>(0,0,-100));
     flock->AddRule(new FollowRule(flockFollow));
 
     FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
