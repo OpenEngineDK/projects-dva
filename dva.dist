@@ -34,7 +34,7 @@ darcs /extensions/GenericHandlers 	 	http://openengine.dk/code/extensions/Generi
 
 
 #dev
-darcs-dev /extensions/AccelerationStructures fh.daimi.au.dk:/users/cgd/code/extensions/AccelerationStructures
+darcs-dev /extensions/AccelerationStructures	fh.daimi.au.dk:/users/cgd/code/extensions/AccelerationStructures
 darcs-dev /extensions/Assimp			fh.daimi.au.dk:/users/cgd/code/branches/animation-Assimp
 
 darcs-dev /extensions/AnimationFramework     fh.daimi.au.dk:/users/cgd/code/extensions/AnimationFramework
