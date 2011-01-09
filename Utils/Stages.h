@@ -17,6 +17,7 @@
 #include <Resources/ITexture2D.h>
 #include <Display/ICanvasBackend.h>
 #include <Display/OpenGL/BlendCanvas.h>
+#include <list>
 
 namespace OpenEngine {
 namespace Utils {
@@ -28,6 +29,8 @@ using Display::ICanvasBackend;
 using Display::OpenGL::BlendCanvas;
 using Resources::ITexture2DPtr;
 
+using std::list;
+
 class Stages: public ICanvas {
 private:
     // IFrame& frame;
@@ -35,6 +38,7 @@ private:
     float progress, duration;    
     BlendCanvas* bc;
     ICanvas *source, *target;
+    list<ICanvas*> inits;
 public:
     Stages(ICanvasBackend* backend);
     virtual ~Stages();
@@ -54,6 +58,8 @@ public:
 
     void FadeIn(ICanvas* canvas, float duration);
     void FadeTo(ICanvas* canvas, float duration);
+
+    void InitCanvas(ICanvas* canvas);
 };
 
 }

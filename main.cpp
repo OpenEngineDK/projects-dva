@@ -145,8 +145,8 @@ int main(int argc, char** argv) {
 
 void SetupEngine() {
     // Create SDL environment handling display and input
-    env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT);
-    //env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, FRAME_FULLSCREEN);
+    //env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT);
+    env = new SDLEnvironment(800, 600);
 
     // Create rendering view.
     IRenderingView* rv = new TerrainRenderingView();
@@ -185,11 +185,14 @@ void SetupScene() {
     hud->AddTexture(img, 100, 100, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     hud->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
 
-    cq = new CanvasQueue();
-    cq->PushCanvas(s);
-    cq->PushCanvas(hud);
-    cq->PushCanvas(setup->GetCanvas());
-    setup->GetFrame().SetCanvas(cq);
+    // cq = new CanvasQueue();
+    // cq->PushCanvas(hud);
+    // cq->PushCanvas(setup->GetCanvas());
+    // cq->PushCanvas(s);
+    
+    s->InitCanvas(hud);
+    s->InitCanvas(setup->GetCanvas());
+    setup->GetFrame().SetCanvas(s);
 
     s->FadeIn(hud, 1.0);
     s->FadeTo(setup->GetCanvas(), 3.0);

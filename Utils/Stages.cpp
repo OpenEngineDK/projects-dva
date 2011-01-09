@@ -32,11 +32,19 @@ Stages::~Stages() {
 }
 
 void Stages::Handle(Display::InitializeEventArg arg) {
+    list<ICanvas*>::iterator i = inits.begin();
+    for (; i != inits.end(); ++i) {
+        ((IListener<Display::InitializeEventArg>*)*i)->Handle(arg);
+    }
     bc->Handle(arg);
 }
     
 void Stages::Handle(Display::DeinitializeEventArg arg) {
     bc->Handle(arg);
+    list<ICanvas*>::iterator i = inits.begin();
+    for (; i != inits.end(); ++i) {
+        ((IListener<Display::DeinitializeEventArg>*)*i)->Handle(arg);
+    }
 }
 
 void Stages::Handle(Display::ProcessEventArg arg) {
@@ -76,7 +84,8 @@ void Stages::SetHeight(const unsigned int height) {
 }
     
 ITexture2DPtr Stages::GetTexture() {
-    return bc->GetTexture();
+    if (fade) return bc->GetTexture();
+    else target->GetTexture();
 }
 
 
@@ -97,6 +106,10 @@ void Stages::FadeTo(ICanvas* canvas, float duration) {
     target = canvas;
     bc->Clear();
     bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
+}
+
+void Stages::InitCanvas(ICanvas* canvas) {
+    inits.push_back(canvas);
 }
 
 }
