@@ -86,8 +86,10 @@ void Stages::SetHeight(const unsigned int height) {
 }
     
 ITexture2DPtr Stages::GetTexture() {
-    if (fade) return bc->GetTexture();
-    else target->GetTexture();
+    if (fade) 
+        return bc->GetTexture();
+    else 
+        return target->GetTexture();
 }
 
 
