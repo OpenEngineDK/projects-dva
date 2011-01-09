@@ -192,7 +192,7 @@ void SetupScene() {
     setup->GetFrame().SetCanvas(cq);
 
     s->FadeIn(hud, 1.0);
-    s->FadeTo(setup->GetCanvas(), 1.0);
+    s->FadeTo(setup->GetCanvas(), 3.0);
     
     // Start by setting the root node in the scene graph.
     ISceneNode* sceneRoot = new SceneNode();
