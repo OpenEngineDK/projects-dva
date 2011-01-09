@@ -49,9 +49,9 @@
 #include <Animations/SeperationRule.h>
 #include <Animations/AlignmentRule.h>
 #include <Animations/CohersionRule.h>
-
 #include <Animations/GotoRule.h>
 #include <Animations/SpeedRule.h>
+#include <Animations/FollowRule.h>
 
 #include <Utils/PropertyTree.h>
 
@@ -90,6 +90,7 @@ AnimationNode* animations;
 ISceneNode* animated = NULL;
 
 Flock* flock = NULL;
+TransformationNode* flockFollow = NULL;
 
 // Forward declarations
 void SetupEngine();
@@ -187,7 +188,7 @@ void SetupScene() {
     // Create point light
     TransformationNode* lightTrans = new TransformationNode();
     DirectionalLightNode* lightNode = new DirectionalLightNode();
-    //lightTrans->SetRotation();
+    lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
     scene->AddNode(lightTrans);
     lightTrans->AddNode(lightNode);
 
@@ -240,6 +241,8 @@ void SetupBoids() {
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
 
+    flockFollow = new TransformationNode();
+    flock->AddRule(new FollowRule(flockFollow));
 
     FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
     
@@ -255,6 +258,7 @@ void SetupBoids() {
     
 
     rsn->AddNode(flock->GetRootNode());
+    flock->GetRootNode()->AddNode(flockFollow);
 }
 
 void SetupDevices() {
