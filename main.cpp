@@ -383,16 +383,16 @@ void LoadResources() {
     // Load boat
     //path = DirectoryManager::FindFileInPath("models/environment/boat.dae");
     //path = DirectoryManager::FindFileInPath("models/environment/Environment_org.dae");
-    path = DirectoryManager::FindFileInPath("models/boat/Wreck01.DAE");
+//     path = DirectoryManager::FindFileInPath("models/boat/Wreck01.DAE");
     
-    IModelResourcePtr boat_model = ResourceManager<IModelResource>::Create(path);
-    boat_model->Load();
-    TransformationNode* boat_trans = new TransformationNode();
-    boat_trans->Scale(0.1, 0.1, 0.1);
-    //boat_trans->Move(0, 0, 0);
-    //boat_trans->Rotate(0, -PI, 0);
-    boat_trans->AddNode(boat_model->GetSceneNode());
-    sceneNodes.push_back(boat_trans);
+//     IModelResourcePtr boat_model = ResourceManager<IModelResource>::Create(path);
+//     boat_model->Load();
+//     TransformationNode* boat_trans = new TransformationNode();
+//     boat_trans->Scale(0.1, 0.1, 0.1);
+//     //boat_trans->Move(0, 0, 0);
+//     //boat_trans->Rotate(0, -PI, 0);
+//     boat_trans->AddNode(boat_model->GetSceneNode());
+//     sceneNodes.push_back(boat_trans);
 
     // Load fish
     //path = DirectoryManager::FindFileInPath("models/finn/Finn08.DAE");
