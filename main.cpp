@@ -306,22 +306,26 @@ void LoadResources() {
     // Load fish
     //path = DirectoryManager::FindFileInPath("models/finn/Finn08.DAE");
     path = DirectoryManager::FindFileInPath("models/finn/Finn08_org.DAE");
+    //path = DirectoryManager::FindFileInPath("models/sharky/Sharky07.DAE");
     //path = DirectoryManager::FindFileInPath("models/finn/Finn10_org.DAE");
     //path = DirectoryManager::FindFileInPath("models/finn/Finn10.DAE");
+    //path = DirectoryManager::FindFileInPath("models/sharky/Animationstest med env.DAE");
+    //path = DirectoryManager::FindFileInPath("models/oe_logo/Bull_002_cea.dae");
+
     IModelResourcePtr fish_model = ResourceManager<IModelResource>::Create(path);
     fish_model->Load();
     ISceneNode* fish_node = fish_model->GetSceneNode();
     fish_node->SetNodeName("Collada Model\n[ISceneNode]");
 
     AnimationNode* animations = fish_model->GetAnimations();
-    if( animations ){
+     if( animations ){
         Animator* animator = new Animator(animations);
         UserDefaults::GetInstance()->map["Animator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* fishA = new TransformationNode();
-            fishA->Rotate(PI/2.0,0,0);
-            fishA->Move(0,0,-100);
-            fishA->Scale(10,10,10);
+            //            fishA->Rotate(PI/2.0,0,0);
+            //            fishA->Move(0,0,-100);
+            //            fishA->Scale(10,10,10);
             fishA->AddNode(animator->GetSceneNode());
             sceneNodes.push_back(fishA);
 
