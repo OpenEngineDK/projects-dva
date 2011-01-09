@@ -50,6 +50,7 @@
 #include <Animations/CohersionRule.h>
 
 #include <Animations/GotoRule.h>
+#include <Animations/SpeedRule.h>
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -223,9 +224,17 @@ void SetupBoids() {
     flock = new Flock();
     
     flock->AddRule(new SeperationRule());
-    //flock->AddRule(new AlignmentRule());
+
     flock->AddRule(new CohersionRule());
-    //flock->AddRule(new GotoRule(Vector<3,float>(0,0,0)));
+
+    flock->AddRule(new GotoRule(Vector<3,float>(0,0,0)));
+
+    flock->AddRule(new SpeedRule());
+
+    flock->AddRule(new AlignmentRule());
+
+
+    
     
 
     vector<ISceneNode*>::iterator itr;
