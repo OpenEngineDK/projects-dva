@@ -45,12 +45,15 @@
 #include <Animations/Animator.h>
 
 #include <Animations/Flock.h>
+#include <Animations/FlockPropertyReloader.h>
 #include <Animations/SeperationRule.h>
 #include <Animations/AlignmentRule.h>
 #include <Animations/CohersionRule.h>
 
 #include <Animations/GotoRule.h>
 #include <Animations/SpeedRule.h>
+
+#include <Utils/PropertyTree.h>
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -222,20 +225,23 @@ void SetupScene() {
 }
 
 void SetupBoids() {
-    flock = new Flock();
-    
+    string confPath = DirectoryManager::FindFileInPath("boids.yaml");
+    PropertyTree* ptree = new PropertyTree(confPath);    
+
+    engine->InitializeEvent().Attach(*ptree);
+    engine->ProcessEvent().Attach(*ptree);
+    engine->DeinitializeEvent().Attach(*ptree);
+
+
+    flock = new Flock();    
     flock->AddRule(new SeperationRule());
-
     //flock->AddRule(new CohersionRule());
-
-    flock->AddRule(new GotoRule(Vector<3,float>(0,0,0)));
-
+    flock->AddRule(new GotoRule());
     flock->AddRule(new SpeedRule());
-
     flock->AddRule(new AlignmentRule());
 
 
-    
+    FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
     
 
     vector<ISceneNode*>::iterator itr;
@@ -269,6 +275,7 @@ void SetupDevices() {
 void LoadResources() {
     ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
     DirectoryManager::AppendPath("resources/");
+    DirectoryManager::AppendPath("projects/dva/");
     string path;
 
 //     // Load Shaders
