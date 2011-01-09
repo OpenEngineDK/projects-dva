@@ -2,6 +2,7 @@
 # http://www.openengine.dk/wiki/Projects/dva
 
 # main repository
+darcs / http://openengine.dk/code/openengine
 darcs / http://openengine.dk/code/branches/animation-main
 darcs-dev / fh.daimi.au.dk:/users/cgd/code/branches/animation-main
 
