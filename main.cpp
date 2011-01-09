@@ -45,6 +45,11 @@
 #include <Animations/Animator.h>
 
 #include <Animations/Flock.h>
+#include <Animations/SeperationRule.h>
+#include <Animations/AlignmentRule.h>
+#include <Animations/CohersionRule.h>
+
+#include <Animations/GotoRule.h>
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -217,6 +222,12 @@ void SetupScene() {
 void SetupBoids() {
     flock = new Flock();
     
+    flock->AddRule(new SeperationRule());
+    flock->AddRule(new AlignmentRule());
+    flock->AddRule(new CohersionRule());
+    flock->AddRule(new GotoRule(Vector<3,float>(0,0,0)));
+    
+
     vector<ISceneNode*>::iterator itr;
     for(itr=sceneNodes.begin(); itr!=sceneNodes.end(); itr++){
         ISceneNode* node = *itr;
@@ -350,7 +361,7 @@ void LoadResources() {
         UserDefaults::GetInstance()->map["Animator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* fishA = new TransformationNode();
-            //            fishA->Rotate(PI/2.0,0,0);
+            fishA->Rotate(PI/2.0,0,0);
             //            fishA->Move(0,0,-100);
             //            fishA->Scale(10,10,10);
             fishA->AddNode(animator->GetSceneNode());
