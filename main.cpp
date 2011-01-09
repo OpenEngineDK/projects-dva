@@ -226,7 +226,7 @@ void SetupBoids() {
     
     flock->AddRule(new SeperationRule());
 
-    flock->AddRule(new CohersionRule());
+    //flock->AddRule(new CohersionRule());
 
     flock->AddRule(new GotoRule(Vector<3,float>(0,0,0)));
 
