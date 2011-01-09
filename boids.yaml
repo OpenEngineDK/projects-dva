@@ -1,3 +1,14 @@
 flock1:
   seperation:
     dist: 20.0
+  speed:
+    min: 50.0
+    max: 100.0
+  goto:
+    home: [0,0,0]
+    random: 100.0
+    magnitude: 0.01
+  alignment:
+    magnitude: 0.01
+  cohersion:
+    magnitude: 0.1

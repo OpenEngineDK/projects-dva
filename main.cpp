@@ -145,8 +145,7 @@ int main(int argc, char** argv) {
 
 void SetupEngine() {
     // Create SDL environment handling display and input
-    //env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT);
-    env = new SDLEnvironment(800, 600);
+    env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Create rendering view.
     IRenderingView* rv = new TerrainRenderingView();
@@ -158,7 +157,7 @@ void SetupEngine() {
     renderer->SetBackgroundColor(Vector<4, float>(0.4, 0.6, 0.8, 1.0));
 
     // Setup camera
-    camera  = new Camera(*(new PerspectiveViewingVolume(1, 2000)));
+    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
     camera->SetPosition(Vector<3, float>(70.0, 30.0, -10.0));
     camera->LookAt(0,0,0);
     //camera->SetPosition(Vector<3, float>(0.0, 220.0, -2100.0));
@@ -269,8 +268,8 @@ void SetupBoids() {
 
     flock = new Flock();    
     flock->AddRule(new SeperationRule());
-    //flock->AddRule(new CohersionRule());
-    flock->AddRule(new GotoRule());
+    flock->AddRule(new CohersionRule());
+    //flock->AddRule(new GotoRule());
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
 
