@@ -138,11 +138,11 @@ void SetupEngine() {
 
     // Setup camera
     camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-//     camera->SetPosition(Vector<3, float>(-10.0, 30.0, -40.0));
-//     camera->LookAt(0,0,0);
-    camera->SetPosition(Vector<3, float>(0.0, 220.0, -2100.0));
-    camera->SetDirection(Vector<3,float>(0,0,1),Vector<3,float>(0,1,0));
-    camera->LookAt(0,0,-1500);
+    camera->SetPosition(Vector<3, float>(60.0, 30.0, -10.0));
+    camera->LookAt(0,0,0);
+    //camera->SetPosition(Vector<3, float>(0.0, 220.0, -2100.0));
+    //camera->SetDirection(Vector<3,float>(0,0,1),Vector<3,float>(0,1,0));
+    //camera->LookAt(0,0,-1500);
     
     setup->SetCamera(*camera);
 
@@ -226,8 +226,8 @@ void SetupBoids() {
     }
     engine->ProcessEvent().Attach(*flock);
     
-    ISceneNode* scene = setup->GetScene();
-    scene->AddNode(flock->GetRootNode());
+
+    rsn->AddNode(flock->GetRootNode());
 }
 
 void SetupDevices() {
@@ -364,6 +364,7 @@ void LoadResources() {
         }
         setup->GetEngine().ProcessEvent().Attach(*animator);
         animator->SetActiveAnimation(0);
+        animator->Play();
     }
 }
 
