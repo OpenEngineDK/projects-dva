@@ -143,7 +143,7 @@ void SetupEngine() {
     renderer->SetBackgroundColor(Vector<4, float>(0.4, 0.6, 0.8, 1.0));
 
     // Setup camera
-    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+    camera  = new Camera(*(new PerspectiveViewingVolume(1, 2000)));
     camera->SetPosition(Vector<3, float>(70.0, 30.0, -10.0));
     camera->LookAt(0,0,0);
     //camera->SetPosition(Vector<3, float>(0.0, 220.0, -2100.0));
@@ -167,8 +167,14 @@ void SetupScene() {
     // scene represents where to insert next node.
     ISceneNode* scene = sceneRoot;
 
-    // Create caustics post process
+    // Create fog post process
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+    IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
+    PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
+    renderer->InitializeEvent().Attach(*fogNode);
+    scene->AddNode(fogNode); scene = fogNode;
+
+    // Create caustics post process
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
@@ -251,7 +257,7 @@ void SetupDevices() {
     keyboard = env->GetKeyboard();
 
     MoveHandler* move = new MoveHandler(*camera, *mouse);
-    move->SetMoveScale(0.002);
+    move->SetMoveScale(0.001);
     engine->InitializeEvent().Attach(*move);
     engine->ProcessEvent().Attach(*move);
     keyboard->KeyEvent().Attach(*move);
