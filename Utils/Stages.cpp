@@ -53,8 +53,10 @@ void Stages::Handle(Display::ProcessEventArg arg) {
     progress += arg.approx * 1e-6;
     float scale = fmin(progress / duration, 1.0);
     bc->Clear();
-    if (source) bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0));
-
+    if (source) {
+        ((IListener<Display::ProcessEventArg>*)source)->Handle(arg);
+        bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0));
+    }
     bc->AddTexture(target->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, scale));
     bc->Handle(arg);
     if (progress > duration) {
@@ -94,7 +96,7 @@ void Stages::FadeIn(ICanvas* canvas, float duration) {
     this->duration = duration;
     fade = true;
     target = canvas;
-    bc->AddTexture(target->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
+    // bc->AddTexture(target->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
     bc->SetBackground(Vector<4,float>(0.0,0.0,0.0,1.0));  
 }
 
@@ -105,7 +107,7 @@ void Stages::FadeTo(ICanvas* canvas, float duration) {
     source = target;
     target = canvas;
     bc->Clear();
-    bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
+    // bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
 }
 
 void Stages::InitCanvas(ICanvas* canvas) {
