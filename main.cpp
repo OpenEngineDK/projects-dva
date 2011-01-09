@@ -212,6 +212,7 @@ void SetupDevices() {
     keyboard = env->GetKeyboard();
 
     MoveHandler* move = new MoveHandler(*camera, *mouse);
+    move->SetMoveScale(0.002);
     engine->InitializeEvent().Attach(*move);
     engine->ProcessEvent().Attach(*move);
     keyboard->KeyEvent().Attach(*move);
