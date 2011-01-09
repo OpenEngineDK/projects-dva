@@ -143,7 +143,7 @@ void SetupEngine() {
 
     // Setup camera
     camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-    camera->SetPosition(Vector<3, float>(60.0, 30.0, -10.0));
+    camera->SetPosition(Vector<3, float>(70.0, 30.0, -10.0));
     camera->LookAt(0,0,0);
     //camera->SetPosition(Vector<3, float>(0.0, 220.0, -2100.0));
     //camera->SetDirection(Vector<3,float>(0,0,1),Vector<3,float>(0,1,0));
@@ -223,15 +223,15 @@ void SetupBoids() {
     flock = new Flock();
     
     flock->AddRule(new SeperationRule());
-    flock->AddRule(new AlignmentRule());
-    flock->AddRule(new CohersionRule());
+    //flock->AddRule(new AlignmentRule());
+    //flock->AddRule(new CohersionRule());
     flock->AddRule(new GotoRule(Vector<3,float>(0,0,0)));
     
 
     vector<ISceneNode*>::iterator itr;
     for(itr=sceneNodes.begin(); itr!=sceneNodes.end(); itr++){
         ISceneNode* node = *itr;
-        for (int i=0;i<10;i++) {
+        for (int i=0;i<100;i++) {
             flock->AddBoid(node->Clone());
         }
     }
