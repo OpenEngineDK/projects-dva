@@ -18,4 +18,4 @@ namespace dva {
 
 } // NS dva
 
-#endif _SETUP_H_
+#endif // _SETUP_H_
