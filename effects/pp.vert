@@ -1,8 +1,8 @@
-varying vec2 texCoord;
+varying vec2 screenUV;
 
 void main(void)
 {
-    texCoord = gl_Vertex.xy * 0.5 + 0.5;
+    screenUV = gl_Vertex.xy * 0.5 + 0.5;
 
     gl_Position = gl_Vertex;
 }
