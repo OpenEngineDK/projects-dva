@@ -44,7 +44,7 @@ darcs-dev /extensions/TGAResource            fh.daimi.au.dk:/users/cgd/code/exte
 darcs-dev /extensions/OBJResource            fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
 darcs-dev /extensions/OpenGLRenderer         fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
 darcs-dev /extensions/OpenGLPostProcessEffects fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLPostProcessEffects
-
+darcs-dev /extensions/GenericHandlers 	 	fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
 
 
 # windows libraries
