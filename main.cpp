@@ -26,6 +26,7 @@
 #include <Scene/PostProcessNode.h>
 #include <Scene/ChainPostProcessNode.h>
 #include <Scene/SunNode.h>
+#include <Scene/PostProcessNode.h>
 
 #include <Utils/SimpleSetup.h>
 #include <Utils/MoveHandler.h>
@@ -151,6 +152,13 @@ void SetupScene() {
 
     // scene represents where to insert next node.
     ISceneNode* scene = sceneRoot;
+
+    // Create caustics post process
+    Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+    IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
+    PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
+    renderer->InitializeEvent().Attach(*causticsNode);
+    scene->AddNode(causticsNode); scene = causticsNode;
 
     // Create sun
     Vector<3, float> origo = Vector<3, float>(0.0, 100.0, 0.0);
