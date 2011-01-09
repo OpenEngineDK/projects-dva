@@ -35,4 +35,5 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   Extensions_SDL
   Extensions_SetupHelpers
   Extensions_AnimationFramework
+  Extensions_Boids
 )

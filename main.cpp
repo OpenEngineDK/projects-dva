@@ -44,6 +44,8 @@
 #include "Utils/CustomKeyHandler.h"
 #include <Animations/Animator.h>
 
+#include <Animations/Flock.h>
+
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -78,10 +80,13 @@ ISceneNode* boat;
 AnimationNode* animations;
 ISceneNode* animated = NULL;
 
+Flock* flock = NULL;
+
 // Forward declarations
 void SetupEngine();
 void SetupScene();
 void SetupDevices();
+void SetupBoids();
 void LoadResources();
 
 
@@ -100,6 +105,9 @@ int main(int argc, char** argv) {
 
     //
     SetupScene();
+
+    //
+    SetupBoids();
 
     // Write dot graph    
     DotVisitor dv;
@@ -204,6 +212,22 @@ void SetupScene() {
     // Just for debug
     GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
     scene->AddNode(grid);
+}
+
+void SetupBoids() {
+    flock = new Flock();
+    
+    vector<ISceneNode*>::iterator itr;
+    for(itr=sceneNodes.begin(); itr!=sceneNodes.end(); itr++){
+        ISceneNode* node = *itr;
+        for (int i=0;i<10;i++) {
+            flock->AddBoid(node->Clone());
+        }
+    }
+    engine->ProcessEvent().Attach(*flock);
+    
+    ISceneNode* scene = setup->GetScene();
+    scene->AddNode(flock->GetRootNode());
 }
 
 void SetupDevices() {
@@ -317,6 +341,8 @@ void LoadResources() {
     fish_model->Load();
     ISceneNode* fish_node = fish_model->GetSceneNode();
     fish_node->SetNodeName("Collada Model\n[ISceneNode]");
+
+    
 
     AnimationNode* animations = fish_model->GetAnimations();
      if( animations ){
