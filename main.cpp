@@ -268,12 +268,13 @@ void SetupBoids() {
 
     flock = new Flock();    
     flock->AddRule(new SeperationRule());
-    flock->AddRule(new CohersionRule());
+    //flock->AddRule(new CohersionRule());
     //flock->AddRule(new GotoRule());
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
 
     flockFollow = new TransformationNode();
+    flockFollow->SetPosition(Vector<3,float>(100,0,0));
     flock->AddRule(new FollowRule(flockFollow));
 
     FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
@@ -380,16 +381,18 @@ void LoadResources() {
     
     
     // Load boat
-    //    path = DirectoryManager::FindFileInPath("models/environment/boat.dae");
-//     path = DirectoryManager::FindFileInPath("models/environment/Environment_org.dae");
-//     IModelResourcePtr boat_model = ResourceManager<IModelResource>::Create(path);
-//     boat_model->Load();
-//     TransformationNode* boat_trans = new TransformationNode();
-//     boat_trans->Scale(0.1, 0.1, 0.1);
-//     //boat_trans->Move(0, 0, 0);
-//     //boat_trans->Rotate(0, -PI, 0);
-//     boat_trans->AddNode(boat_model->GetSceneNode());
-//     sceneNodes.push_back(boat_trans);
+    //path = DirectoryManager::FindFileInPath("models/environment/boat.dae");
+    //path = DirectoryManager::FindFileInPath("models/environment/Environment_org.dae");
+    path = DirectoryManager::FindFileInPath("models/boat/Wreck01.DAE");
+    
+    IModelResourcePtr boat_model = ResourceManager<IModelResource>::Create(path);
+    boat_model->Load();
+    TransformationNode* boat_trans = new TransformationNode();
+    boat_trans->Scale(0.1, 0.1, 0.1);
+    //boat_trans->Move(0, 0, 0);
+    //boat_trans->Rotate(0, -PI, 0);
+    boat_trans->AddNode(boat_model->GetSceneNode());
+    sceneNodes.push_back(boat_trans);
 
     // Load fish
     //path = DirectoryManager::FindFileInPath("models/finn/Finn08.DAE");
