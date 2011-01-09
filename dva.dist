@@ -64,4 +64,4 @@ darwin /libraries http://openengine.dk/data/libraries/pcrecpp-osx-i32.zip
 
 # project data
 any /resources http://openengine.dk/data/animation_models.zip
-any /resources http://openengine.dk/data/projects/dva/causticTexs.zip
+any /resources http://openengine.dk/data/projects/dva/causticTexs.tgz
