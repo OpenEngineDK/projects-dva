@@ -57,7 +57,9 @@
 
 #include <Utils/PropertyTree.h>
 
+#include <Display/FollowCamera.h>
 #include <Display/TrackingCamera.h>
+#include <Display/TrackingFollowCamera.h>
 #include <Display/InterpolatedViewingVolume.h>
 
 // HUD stuff
@@ -78,6 +80,53 @@ using namespace OpenEngine::Resources;
 using namespace OpenEngine::Renderers::OpenGL;
 using namespace OpenEngine::Animations;
 using namespace dva;
+
+
+class CameraSwitcher : public IListener<KeyboardEventArg> {
+    SimpleSetup* setup;
+    vector<Camera*> cams;
+    unsigned int idx;
+    
+public:
+    CameraSwitcher(SimpleSetup* setup) : setup(setup), idx(0) {
+        cams.push_back(setup->GetCamera());
+    }
+
+    void AddCamera(Camera* c) {
+        cams.push_back(c);
+    }
+
+    void Handle(KeyboardEventArg arg) {
+        if (arg.type != EVENT_RELEASE) return;
+        if (arg.sym == KEY_p && cams.size() > (idx+1)) {
+            ++idx;
+            setup->SetCamera(*cams[idx]);
+        } else if (arg.sym == KEY_o && cams.size() > (idx-1)) {
+            --idx;
+            setup->SetCamera(*cams[idx]);
+        }
+    }
+};
+
+class CircleMover : public IListener<Core::ProcessEventArg> {
+    TransformationNode* node;
+    float pos;
+    Vector<2,float> offset;
+    float speed;
+public:
+    CircleMover(TransformationNode *n, 
+                Vector<2,float> of=(Vector<2,float>(100,100)),
+                float s=2)
+        : node(n),pos(0),offset(of),speed(s) {}
+    void Handle(Core::ProcessEventArg arg) {
+        float delta = arg.approx/1000000.0;
+        pos += delta;
+        node->SetPosition(Vector<3,float>(offset[0]*sin(pos*speed),
+                                          0,
+                                          offset[1]*cos(pos*speed)));
+    }
+};
+
 
 // Global stuff only used for setup.
 IEngine* engine;
@@ -109,6 +158,8 @@ Stages* stages = NULL;
 Flock* flock = NULL;
 TransformationNode* flockFollow = NULL;
 
+CameraSwitcher* camSwitch = NULL;
+
 // Forward declarations
 void SetupEngine();
 void SetupScene();
@@ -117,24 +168,6 @@ void SetupBoids();
 void LoadResources();
 
 
-class CircleMover : public IListener<Core::ProcessEventArg> {
-    TransformationNode* node;
-    float pos;
-    Vector<2,float> offset;
-    float speed;
-public:
-    CircleMover(TransformationNode *n, 
-                Vector<2,float> of=(Vector<2,float>(100,100)),
-                float s=2)
-        : node(n),pos(0),offset(of),speed(s) {}
-    void Handle(Core::ProcessEventArg arg) {
-        float delta = arg.approx/1000000.0;
-        pos += delta;
-        node->SetPosition(Vector<3,float>(offset[0]*sin(pos*speed),
-                                          0,
-                                          offset[1]*cos(pos*speed)));
-    }
-};
 
 int main(int argc, char** argv) {
     // Print start message
@@ -312,26 +345,57 @@ void SetupBoids() {
             flock->AddBoid(node->Clone());
         }
     }
-    TrackingCamera *tc = 
-    new TrackingCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
-    tc->Follow(flock->GetTransformationNode(0));
-    tc->SetPosition(Vector<3,float>(100,120,0));
-    setup->SetCamera(*tc);
-
 
     engine->ProcessEvent().Attach(*flock);
-    
-
+   
     rsn->AddNode(flock->GetRootNode());
     flock->GetRootNode()->AddNode(flockFollow);
 
     flockFollow->AddNode(sceneNodes[0]->Clone());
+
+
+
+    // cameras
+    // Follow a fish, look at target
+    TrackingFollowCamera *tfc = 
+        new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    tfc->SetPosition(Vector<3,float>(20,20,20));
+    tfc->Track(flockFollow);
+    tfc->Follow(flock->GetTransformationNode(0));
+    camSwitch->AddCamera(tfc);
+
+
+    // Follow target, look at a fish
+    tfc = 
+        new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    tfc->SetPosition(Vector<3,float>(20,20,20));
+    tfc->Follow(flockFollow);
+    tfc->Track(flock->GetTransformationNode(0));
+    camSwitch->AddCamera(tfc);
+
+    // Follow a fish, look straight
+    FollowCamera *fc = new FollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    fc->SetDirection(Vector<3,float>(1,0,0),Vector<3,float>(0,1,0));
+    fc->SetPosition(Vector<3,float>(10,10,10));
+    fc->Follow(flock->GetTransformationNode(0));
+    camSwitch->AddCamera(fc);
+    
+
+    // Stationary, look at a fish
+    TrackingCamera *tc = new TrackingCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    tc->SetPosition(Vector<3,float>(120,150,0));
+    tc->Track(flock->GetTransformationNode(0));
+    camSwitch->AddCamera(tc);
+
 }
 
 void SetupDevices() {
    // Setup move handlers
     mouse = env->GetMouse();
     keyboard = env->GetKeyboard();
+
+    camSwitch = new CameraSwitcher(setup);
+    keyboard->KeyEvent().Attach(*camSwitch);
 
     MoveHandler* move = new MoveHandler(*camera, *mouse);
     move->SetMoveScale(0.001);

@@ -11,4 +11,8 @@ flock1:
   alignment:
     magnitude: 0.01
   cohersion:
-    magnitude: 0.1
+    magnitude: 0.01
+  follow:
+    magnitude: 0.01
+  random:
+    magnitude: 8.0
