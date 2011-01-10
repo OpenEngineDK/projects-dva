@@ -58,8 +58,9 @@
 // HUD stuff
 #include <Display/OpenGL/BlendCanvas.h>
 #include <Display/OpenGL/TextureCopy.h>
-#include <Display/CanvasQueue.h>
+// #include <Display/CanvasQueue.h>
 #include <Renderers/TextureLoader.h>
+// #include <Display/OpenGL/FadeCanvas.h>
 #include "Utils/Stages.h"
 
 using namespace OpenEngine::Logging;
@@ -97,8 +98,8 @@ ISceneNode* boat;
 AnimationNode* animations;
 ISceneNode* animated = NULL;
 
-BlendCanvas* hud = NULL;
-CanvasQueue* cq = NULL;
+Stages* stages = NULL;
+// CanvasQueue* cq = NULL;
 
 Flock* flock = NULL;
 TransformationNode* flockFollow = NULL;
@@ -175,26 +176,18 @@ void SetupEngine() {
 
 void SetupScene() {
     // Setup stage fading Stuff
-    Stages* s = new Stages(new TextureCopy());
-
-    // Setup HUD stuff
-    hud = new BlendCanvas(new TextureCopy());
-    ITexture2DPtr img = ResourceManager<ITextureResource>::Create("projects/dva/data/small.jpg");
-    setup->GetTextureLoader().Load(img);
-    hud->AddTexture(img, 100, 100, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
-    hud->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
-
-    // cq = new CanvasQueue();
-    // cq->PushCanvas(hud);
-    // cq->PushCanvas(setup->GetCanvas());
-    // cq->PushCanvas(s);
+    stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), setup->GetCanvas());
+    engine->InitializeEvent().Attach(*stages);
+    engine->DeinitializeEvent().Attach(*stages);
+    engine->ProcessEvent().Attach(*stages);
     
-    s->InitCanvas(hud);
-    s->InitCanvas(setup->GetCanvas());
-    setup->GetFrame().SetCanvas(s);
-
-    s->FadeIn(hud, 1.0);
-    s->FadeTo(setup->GetCanvas(), 3.0);
+    // Setup HUD stuff
+    // hud = new BlendCanvas(new TextureCopy());
+    // ITexture2DPtr img = ResourceManager<ITextureResource>::Create("projects/dva/data/small.jpg");
+    // setup->GetTextureLoader().Load(img);
+    // hud->AddTexture(setup->GetCanvas(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
+    // hud->AddTexture(img, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
+    // hud->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
     
     // Start by setting the root node in the scene graph.
     ISceneNode* sceneRoot = new SceneNode();

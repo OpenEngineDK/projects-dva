@@ -12,109 +12,68 @@
 
 #include <Math/Vector.h>
 #include <Display/OpenGL/TextureCopy.h>
+#include <Resources/ResourceManager.h>
+#include <Resources/ITexture2D.h>
 
 namespace OpenEngine {
 namespace Utils {
 
-using namespace Display::OpenGL;
 using namespace Core;
+using namespace Resources;
+using namespace Display::OpenGL;
 
-Stages::Stages(ICanvasBackend* backend)
-    : fade(false)
-     , bc(new BlendCanvas(backend))
-     , source(NULL)
-     , target(NULL)
+Stages::Stages(IFrame& frame, TextureLoader& tl, ICanvas* sceneStage)
+    : frame(frame)
+    , tl(tl)
+    , loadStage(NULL)
+    , sceneStage(sceneStage)
+    , fader(new FadeCanvas(new TextureCopy()))
+    , prevTime(0.0)
+    , progress(0.0)
+    , loadTime(1.0)
+    , sceneTime(8.0)
 {
+    BlendCanvas* bc = new BlendCanvas(new TextureCopy());
+    ITexture2DPtr img = ResourceManager<ITextureResource>::Create("projects/dva/data/small.jpg");
+    tl.Load(img);
+    bc->AddTexture(img, 100, 100, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
+    bc->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
+    loadStage = bc;
+
+
+    fader->InitCanvas(loadStage);
+    fader->InitCanvas(sceneStage);
+    fader->InitCanvas(bc);
+    
+    frame.SetCanvas(fader);
 }
 
 Stages::~Stages() {
-    delete bc;
+    delete loadStage;
+    delete fader;
 }
 
-void Stages::Handle(Display::InitializeEventArg arg) {
-    list<ICanvas*>::iterator i = inits.begin();
-    for (; i != inits.end(); ++i) {
-        ((IListener<Display::InitializeEventArg>*)*i)->Handle(arg);
-    }
-    bc->Handle(arg);
+void Stages::Handle(Core::InitializeEventArg arg) {
+
 }
     
-void Stages::Handle(Display::DeinitializeEventArg arg) {
-    bc->Handle(arg);
-    list<ICanvas*>::iterator i = inits.begin();
-    for (; i != inits.end(); ++i) {
-        ((IListener<Display::DeinitializeEventArg>*)*i)->Handle(arg);
-    }
+void Stages::Handle(Core::DeinitializeEventArg arg) {
 }
 
-void Stages::Handle(Display::ProcessEventArg arg) {
-    ((IListener<Display::ProcessEventArg>*)target)->Handle(arg);
-    if (!fade) return;
-    progress += arg.approx * 1e-6;
-    float scale = fmin(progress / duration, 1.0);
-    bc->Clear();
-    if (source) {
-        ((IListener<Display::ProcessEventArg>*)source)->Handle(arg);
-        bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0));
+void Stages::Handle(Core::ProcessEventArg arg) {
+    progress += arg.approx * 1e-06;
+    if (prevTime <= loadTime && loadTime <= progress) {
+        logger.info << "fadeIn" << logger.end;
+        fader->FadeIn(loadStage, 2.0);
     }
-    bc->AddTexture(target->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, scale));
-    bc->Handle(arg);
-    if (progress > duration) {
-        fade = false;
-        source = NULL;
+
+    if (prevTime <= sceneTime && sceneTime <= progress) {
+        logger.info << "fadeTo" << logger.end;
+        fader->FadeTo(sceneStage, 3.0);
     }
+
+    prevTime = progress;
 }
     
-void Stages::Handle(Display::ResizeEventArg arg) {
-    bc->Handle(arg);
-}
-
-unsigned int Stages::GetWidth() const {
-    return bc->GetWidth();
-}
-
-unsigned int Stages::GetHeight() const {
-    return bc->GetHeight();
-}
-    
-void Stages::SetWidth(const unsigned int width) {
-    bc->SetWidth(width);
-}
-
-void Stages::SetHeight(const unsigned int height) {
-    bc->SetHeight(height);
-}
-    
-ITexture2DPtr Stages::GetTexture() {
-    if (fade) 
-        return bc->GetTexture();
-    else 
-        return target->GetTexture();
-}
-
-
-void Stages::FadeIn(ICanvas* canvas, float duration) {
-    progress = 0.0;
-    this->duration = duration;
-    fade = true;
-    target = canvas;
-    // bc->AddTexture(target->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
-    bc->SetBackground(Vector<4,float>(0.0,0.0,0.0,1.0));  
-}
-
-void Stages::FadeTo(ICanvas* canvas, float duration) {
-    progress = 0.0;
-    this->duration = duration;
-    fade = true;
-    source = target;
-    target = canvas;
-    bc->Clear();
-    // bc->AddTexture(source->GetTexture(), 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
-}
-
-void Stages::InitCanvas(ICanvas* canvas) {
-    inits.push_back(canvas);
-}
-
 }
 }

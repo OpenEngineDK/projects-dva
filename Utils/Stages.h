@@ -10,56 +10,37 @@
 #ifndef _DVA_STAGES_H_
 #define _DVA_STAGES_H_
 
-// #include <Core/IModule.h>
+#include <Core/IModule.h>
 
 #include <Display/IFrame.h>
 #include <Display/ICanvas.h>
-#include <Resources/ITexture2D.h>
-#include <Display/ICanvasBackend.h>
-#include <Display/OpenGL/BlendCanvas.h>
-#include <list>
+#include <Display/OpenGL/FadeCanvas.h>
+#include <Renderers/TextureLoader.h>
 
 namespace OpenEngine {
 namespace Utils {
 
-// using Core::IModule;
+using Core::IModule;
 using Display::IFrame;
 using Display::ICanvas;
-using Display::ICanvasBackend;
-using Display::OpenGL::BlendCanvas;
-using Resources::ITexture2DPtr;
+using Display::OpenGL::FadeCanvas;
+using Renderers::TextureLoader;
 
-using std::list;
-
-class Stages: public ICanvas {
+class Stages: public IModule {
 private:
-    // IFrame& frame;
-    bool fade;
-    float progress, duration;    
-    BlendCanvas* bc;
-    ICanvas *source, *target;
-    list<ICanvas*> inits;
+    IFrame& frame;
+    TextureLoader& tl;
+    ICanvas *loadStage, *sceneStage;
+    FadeCanvas* fader;
+    float prevTime, progress, loadTime, sceneTime;
+    
 public:
-    Stages(ICanvasBackend* backend);
+    Stages(IFrame& frame, TextureLoader& tl, ICanvas* sceneStage);
     virtual ~Stages();
     
-    void Handle(Display::InitializeEventArg arg);
-    void Handle(Display::DeinitializeEventArg arg);
-    void Handle(Display::ProcessEventArg arg);
-    void Handle(Display::ResizeEventArg arg);
-    // void Handle(Core::InitializeEventArg arg);
-    // void Handle(Core::ProcessEventArg arg);
-    // void Handle(Core::DeinitializeEventArg arg);
-    unsigned int GetWidth() const;
-    unsigned int GetHeight() const;
-    void SetWidth(const unsigned int width);
-    void SetHeight(const unsigned int height);
-    ITexture2DPtr GetTexture();
-
-    void FadeIn(ICanvas* canvas, float duration);
-    void FadeTo(ICanvas* canvas, float duration);
-
-    void InitCanvas(ICanvas* canvas);
+    void Handle(Core::InitializeEventArg arg);
+    void Handle(Core::ProcessEventArg arg);
+    void Handle(Core::DeinitializeEventArg arg);
 };
 
 }
