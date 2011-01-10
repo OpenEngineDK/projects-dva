@@ -52,6 +52,8 @@
 #include <Animations/GotoRule.h>
 #include <Animations/SpeedRule.h>
 #include <Animations/FollowRule.h>
+#include <Animations/BoxRule.h>
+#include <Animations/RandomRule.h>
 
 #include <Utils/PropertyTree.h>
 
@@ -111,6 +113,25 @@ void SetupDevices();
 void SetupBoids();
 void LoadResources();
 
+
+class CircleMover : public IListener<Core::ProcessEventArg> {
+    TransformationNode* node;
+    float pos;
+    Vector<2,float> offset;
+    float speed;
+public:
+    CircleMover(TransformationNode *n, 
+                Vector<2,float> of=(Vector<2,float>(100,100)),
+                float s=2)
+        : node(n),pos(0),offset(of),speed(s) {}
+    void Handle(Core::ProcessEventArg arg) {
+        float delta = arg.approx/1000000.0;
+        pos += delta;
+        node->SetPosition(Vector<3,float>(offset[0]*sin(pos*speed),
+                                          0,
+                                          offset[1]*cos(pos*speed)));
+    }
+};
 
 int main(int argc, char** argv) {
     // Print start message
@@ -259,16 +280,24 @@ void SetupBoids() {
     engine->DeinitializeEvent().Attach(*ptree);
 
 
+    flockFollow = new TransformationNode();
+    flockFollow->SetPosition(Vector<3,float>(0,0,-100));
+    CircleMover *cm = new CircleMover(flockFollow,Vector<2,float>(10,100),1);
+    engine->ProcessEvent().Attach(*cm);
+
+
     flock = new Flock();    
     flock->AddRule(new SeperationRule());
-    //flock->AddRule(new CohersionRule());
+    flock->AddRule(new CohersionRule());
     //flock->AddRule(new GotoRule());
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
-
-    flockFollow = new TransformationNode();
-    flockFollow->SetPosition(Vector<3,float>(0,0,-100));
     flock->AddRule(new FollowRule(flockFollow));
+    flock->AddRule(new RandomRule());
+    flock->AddRule(new BoxRule(Box(Vector<3,float>(0.0),
+                                   Vector<3,float>(100.0))));
+        
+
 
     FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
     
@@ -285,6 +314,8 @@ void SetupBoids() {
 
     rsn->AddNode(flock->GetRootNode());
     flock->GetRootNode()->AddNode(flockFollow);
+
+    flockFollow->AddNode(sceneNodes[0]->Clone());
 }
 
 void SetupDevices() {
