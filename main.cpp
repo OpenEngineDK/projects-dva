@@ -339,9 +339,10 @@ void SetupBoids() {
     
 
     vector<ISceneNode*>::iterator itr;
+    int size = ptree->GetNode("flock1").GetPath<int>("size",100);
     for(itr=sceneNodes.begin(); itr!=sceneNodes.end(); itr++){
-        ISceneNode* node = *itr;
-        for (int i=0;i<100;i++) {
+        ISceneNode* node = *itr;        
+        for (int i=0;i<size;i++) {
             flock->AddBoid(node->Clone());
         }
     }
