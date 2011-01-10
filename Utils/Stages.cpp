@@ -30,8 +30,8 @@ Stages::Stages(IFrame& frame, TextureLoader& tl, ICanvas* sceneStage)
     , fader(new FadeCanvas(new TextureCopy()))
     , prevTime(0.0)
     , progress(0.0)
-    , loadTime(1.0)
-    , sceneTime(8.0)
+    , loadTime(0.0)
+    , sceneTime(2.0)
 {
     BlendCanvas* bc = new BlendCanvas(new TextureCopy());
     ITexture2DPtr img = ResourceManager<ITextureResource>::Create("projects/dva/data/small.jpg");
@@ -64,12 +64,12 @@ void Stages::Handle(Core::ProcessEventArg arg) {
     progress += arg.approx * 1e-06;
     if (prevTime <= loadTime && loadTime <= progress) {
         logger.info << "fadeIn" << logger.end;
-        fader->FadeIn(loadStage, 2.0);
+        fader->FadeIn(loadStage, 1.0);
     }
 
     if (prevTime <= sceneTime && sceneTime <= progress) {
         logger.info << "fadeTo" << logger.end;
-        fader->FadeTo(sceneStage, 3.0);
+        fader->FadeTo(sceneStage, 1.0);
     }
 
     prevTime = progress;
