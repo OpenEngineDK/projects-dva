@@ -57,6 +57,9 @@
 
 #include <Utils/PropertyTree.h>
 
+#include <Display/TrackingCamera.h>
+#include <Display/InterpolatedViewingVolume.h>
+
 // HUD stuff
 #include <Display/OpenGL/BlendCanvas.h>
 #include <Display/OpenGL/TextureCopy.h>
@@ -296,8 +299,8 @@ void SetupBoids() {
     flock->AddRule(new RandomRule());
     flock->AddRule(new BoxRule(Box(Vector<3,float>(0.0),
                                    Vector<3,float>(100.0))));
-        
-
+    
+    
 
     FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
     
@@ -309,6 +312,13 @@ void SetupBoids() {
             flock->AddBoid(node->Clone());
         }
     }
+    TrackingCamera *tc = 
+    new TrackingCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    tc->Follow(flock->GetTransformationNode(0));
+    tc->SetPosition(Vector<3,float>(100,120,0));
+    setup->SetCamera(*tc);
+
+
     engine->ProcessEvent().Attach(*flock);
     
 
