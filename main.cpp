@@ -330,8 +330,8 @@ void SetupBoids() {
     flock->AddRule(new AlignmentRule());
     flock->AddRule(new FollowRule(flockFollow));
     flock->AddRule(new RandomRule());
-    flock->AddRule(new BoxRule(Box(Vector<3,float>(0.0),
-                                   Vector<3,float>(100.0))));
+    flock->AddRule(new BoxRule(Vector<3,float>(-100,0,-100),  // The two corners
+                               Vector<3,float>(100,50,100))); // - must be axis aligned
     
     
 
@@ -515,7 +515,7 @@ void LoadResources() {
         UserDefaults::GetInstance()->map["Animator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* fishA = new TransformationNode();
-            fishA->Rotate(PI/2.0,0,0);
+            fishA->Rotate(-PI/2.0,0,0);
             //            fishA->Move(0,0,-100);
             //            fishA->Scale(10,10,10);
             fishA->AddNode(animator->GetSceneNode());
