@@ -23,6 +23,7 @@
 #include <Scene/SceneNode.h>
 #include <Scene/DotVisitor.h>
 #include <Scene/DirectionalLightNode.h>
+#include <Scene/PointLightNode.h>
 #include <Scene/RenderStateNode.h>
 #include <Scene/PostProcessNode.h>
 #include <Scene/ChainPostProcessNode.h>
@@ -69,6 +70,10 @@
 #include <Renderers/TextureLoader.h>
 // #include <Display/OpenGL/FadeCanvas.h>
 #include "Utils/Stages.h"
+
+// temporary hack ... remove next two lines when animation branch has been merged with main branch
+#include <Renderers/OpenGL/ShaderLoader.h>
+#include <Renderers/OpenGL/LightRenderer.h>
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -210,6 +215,7 @@ void SetupEngine() {
 
     // Create simple setup
     setup = new SimpleSetup("Det Virtuelle Akvarium", env, rv);
+
     renderer = &setup->GetRenderer();
     //    renderer->SetBackgroundColor(Vector<4, float>(0.1, 0.1, 0.3, 1.0));
     renderer->SetBackgroundColor(Vector<4, float>(0.4, 0.6, 0.8, 1.0));
@@ -250,6 +256,9 @@ void SetupScene() {
     ISceneNode* sceneRoot = new SceneNode();
     setup->SetScene(*sceneRoot);
 
+    // temporary hack ... remove next line when animation branch has been merged with main branch
+    setup->GetShaderLoader()->SetLightRenderer(setup->GetLightRenderer());
+
     // scene represents where to insert next node.
     ISceneNode* scene = sceneRoot;
 
@@ -269,14 +278,28 @@ void SetupScene() {
 
     // Create point light
     TransformationNode* lightTrans = new TransformationNode();
-    DirectionalLightNode* lightNode = new DirectionalLightNode();
+    PointLightNode* lightNode = new PointLightNode();
+    lightTrans->SetPosition(Vector<3,float>(0.0,100.0,0.0));
     //lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
-    lightNode->ambient = Vector<4,float>(0.15,0.2,0.125,1.0);
+    lightNode->ambient = Vector<4,float>(0.0,0.4,0.0,1.0);
+    lightNode->diffuse = Vector<4,float>(0.0,1.0,0.0,1.0);
+    lightNode->specular = Vector<4,float>(.2,.2,.2,1.0);
+    lightNode->linearAtt = 0.01;
     scene->AddNode(lightTrans);
     lightTrans->AddNode(lightNode);
 
+    TransformationNode* lightTrans1 = new TransformationNode();
+    // lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
+    lightTrans1->SetPosition(Vector<3,float>(0.0,-100.0,0.0));
+    PointLightNode* lightNode1 = new PointLightNode();
+    lightNode1->ambient = Vector<4,float>(0.4,0.0,0.0,1.0);
+    lightNode1->diffuse = Vector<4,float>(1.0,0.0,0.0,1.0);
+    lightNode1->linearAtt = 0.01;
+    scene->AddNode(lightTrans1);
+    lightTrans1->AddNode(lightNode1);
+
     rsn = new RenderStateNode();
-    //    rsn->DisableOption(RenderStateNode::BACKFACE);
+    rsn->DisableOption(RenderStateNode::BACKFACE);
     rsn->EnableOption(RenderStateNode::LIGHTING);
     scene->AddNode(rsn);
     scene = rsn;
