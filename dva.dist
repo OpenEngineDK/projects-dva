@@ -16,7 +16,7 @@ darcs-dev /projects/dva fh.daimi.au.dk:/users/cgd/code/projects/dva
 dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/branches/animation-Assimp/Assimp.dist
 dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/HeightMap/HeightMap.dist
 dist /extensions/Boids/Boids.dist http://openengine.dk/code/extensions/Boids/Boids.dist
-dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/branches/animation-OpenGLRenderer.dist
+dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/branches/animation-OpenGLRenderer/OpenGLRenderer.dist
 
 # required extensions
 darcs /extensions/Assimp			http://openengine.dk/code/branches/animation-Assimp
