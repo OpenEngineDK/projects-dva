@@ -270,7 +270,8 @@ void SetupScene() {
     // Create point light
     TransformationNode* lightTrans = new TransformationNode();
     DirectionalLightNode* lightNode = new DirectionalLightNode();
-    lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
+    //lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
+    lightNode->ambient = Vector<4,float>(0.3,0.4,0.25,1.0);
     scene->AddNode(lightTrans);
     lightTrans->AddNode(lightNode);
 
