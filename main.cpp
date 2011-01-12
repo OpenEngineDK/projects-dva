@@ -399,7 +399,7 @@ void SetupDevices() {
     keyboard->KeyEvent().Attach(*camSwitch);
 
     MoveHandler* move = new MoveHandler(*camera, *mouse);
-    move->SetMoveScale(0.001);
+    move->SetMoveScale(0.0002);
     engine->InitializeEvent().Attach(*move);
     engine->ProcessEvent().Attach(*move);
     keyboard->KeyEvent().Attach(*move);
