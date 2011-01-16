@@ -8,6 +8,8 @@ SET( PROJECT_SOURCES
   main.cpp
   Scene/GridNode.cpp
   Utils/Stages.cpp
+  Devices/LaserSensor.cpp
+  Devices/SICKDeviceDriver.cpp
 )
 
 # Include needed to use SDL under Mac OS X
@@ -36,6 +38,6 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   Extensions_SDL
   Extensions_SetupHelpers
   Extensions_AnimationFramework
-
   Extensions_Boids
+  Extensions_Sockets
 )
