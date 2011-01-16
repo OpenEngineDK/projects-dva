@@ -25,6 +25,7 @@ darcs /extensions/SetupHelpers           	http://openengine.dk/code/extensions/S
 darcs /extensions/HUD                    	http://openengine.dk/code/extensions/HUD
 darcs /extensions/SDL                    	http://openengine.dk/code/extensions/SDL
 darcs /extensions/SDLImage               	http://openengine.dk/code/extensions/SDLImage
+darcs /extensions/Sockets			http://openengine.dk/code/extensions/Sockets
 darcs /extensions/CairoResource          	http://openengine.dk/code/extensions/CairoResource
 #darcs /extensions/OpenGLRenderer         	http://openengine.dk/code/extensions/OpenGLRenderer
 darcs /extensions/OpenGLPostProcessEffects      http://openengine.dk/code/extensions/OpenGLPostProcessEffects
@@ -37,17 +38,17 @@ darcs /extensions/GenericHandlers 	 	http://openengine.dk/code/extensions/Generi
 #dev
 darcs-dev /extensions/AccelerationStructures	fh.daimi.au.dk:/users/cgd/code/extensions/AccelerationStructures
 darcs-dev /extensions/Assimp			fh.daimi.au.dk:/users/cgd/code/branches/animation-Assimp
-
-darcs-dev /extensions/AnimationFramework     fh.daimi.au.dk:/users/cgd/code/extensions/AnimationFramework
-darcs-dev /extensions/CairoResource          fh.daimi.au.dk:/users/cgd/code/extensions/CairoResource
-darcs-dev /extensions/HUD                    fh.daimi.au.dk:/users/cgd/code/extensions/HUD
-darcs-dev /extensions/SetupHelpers           fh.daimi.au.dk:/users/cgd/code/extensions/SetupHelpers
-darcs-dev /extensions/SDL                    fh.daimi.au.dk:/users/cgd/code/extensions/SDL
-darcs-dev /extensions/SDLImage               fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
-darcs-dev /extensions/TGAResource            fh.daimi.au.dk:/users/cgd/code/extensions/TGAResource
-darcs-dev /extensions/OBJResource            fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
-#darcs-dev /extensions/OpenGLRenderer         fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
-darcs-dev /extensions/OpenGLPostProcessEffects fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLPostProcessEffects
+darcs-dev /extensions/AnimationFramework     	fh.daimi.au.dk:/users/cgd/code/extensions/AnimationFramework
+darcs-dev /extensions/CairoResource          	fh.daimi.au.dk:/users/cgd/code/extensions/CairoResource
+darcs-dev /extensions/HUD                    	fh.daimi.au.dk:/users/cgd/code/extensions/HUD
+darcs-dev /extensions/SetupHelpers           	fh.daimi.au.dk:/users/cgd/code/extensions/SetupHelpers
+darcs-dev /extensions/SDL                    	fh.daimi.au.dk:/users/cgd/code/extensions/SDL
+darcs-dev /extensions/SDLImage               	fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
+darcs-dev /extensions/Sockets		     	fh.daimi.au.dk:/users/cgd/code/extensions/Sockets
+darcs-dev /extensions/TGAResource            	fh.daimi.au.dk:/users/cgd/code/extensions/TGAResource
+darcs-dev /extensions/OBJResource            	fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
+#darcs-dev /extensions/OpenGLRenderer         	fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
+darcs-dev /extensions/OpenGLPostProcessEffects 	fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLPostProcessEffects
 darcs-dev /extensions/GenericHandlers 	 	fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
 
 
