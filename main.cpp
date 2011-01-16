@@ -160,6 +160,11 @@ public:
         return ptr;
     }
     virtual ~LaserDebug() {}
+
+    void UpdateTextute() {
+        changedEvent
+            .Notify(Texture2DChangedEventArg(Resources::ITexture2DPtr(weak_this)));
+    }
 };
 
 LaserDebugPtr laserDebug;
