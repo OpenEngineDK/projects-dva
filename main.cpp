@@ -397,21 +397,21 @@ void SetupScene() {
     scene->AddNode(fogNode); 
     scene = fogNode;
 
-    // Create Shadow post process
+    //Create Shadow post process
     IShaderResourcePtr shadow = ResourceManager<IShaderResource>::Create("projects/dva/effects/shadowmap.glsl");
     ShadowLightPostProcessNode* shadowPost = 
         new ShadowLightPostProcessNode(shadow, 
                                        dimension,
-                                       dimension
-                                       //Vector<2,int>(800,600)
+                                       //dimension
+                                       Vector<2,int>(400,300)
                                        );
     renderer->InitializeEvent().Attach(*shadowPost);
     renderer->PreProcessEvent().Attach(*shadowPost);
     scene->AddNode(shadowPost); 
     scene = shadowPost;
     Camera* cam = new Camera(*(new PerspectiveViewingVolume(100,1000)));
-    cam->SetPosition(Vector<3,float>(-600,1000,0));
-    cam->LookAt(Vector<3,float>(-600,0,0));
+    cam->SetPosition(Vector<3,float>(-300,800,0));
+    cam->LookAt(Vector<3,float>(-500,0,0));
     camSwitch->AddCamera(cam);    
     shadowPost->SetViewingVolume(cam);
 
