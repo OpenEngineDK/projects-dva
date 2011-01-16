@@ -85,6 +85,8 @@
 
 #include <Scene/ShadowLightPostProcessNode.h>
 
+#include <Renderers/DataBlockBinder.h>
+
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
@@ -210,6 +212,11 @@ int main(int argc, char** argv) {
 
     //
     SetupBoids();
+
+    DataBlockBinder* bob = new DataBlockBinder(setup->GetRenderer(), 
+                                               DataBlockBinder::RELOAD_IMMEDIATE);
+    bob->Bind(*setup->GetScene());
+
 
     // Write dot graph    
     DotVisitor dv;
