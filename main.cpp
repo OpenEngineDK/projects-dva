@@ -426,9 +426,9 @@ void SetupScene() {
     renderer->PreProcessEvent().Attach(*shadowPost);
     scene->AddNode(shadowPost); 
     scene = shadowPost;
-    Camera* cam = new Camera(*(new PerspectiveViewingVolume(100,1000)));
-    cam->SetPosition(Vector<3,float>(0,800,-250));
-    cam->LookAt(Vector<3,float>(0,0,-500));
+    Camera* cam = new Camera(*(new PerspectiveViewingVolume(100,2000)));
+    cam->SetPosition(Vector<3,float>(0,1000,-200));
+    cam->LookAt(Vector<3,float>(0,0,-400));
     camSwitch->AddCamera(cam);    
     shadowPost->SetViewingVolume(cam);
 
