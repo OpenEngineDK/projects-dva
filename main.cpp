@@ -1,3 +1,4 @@
+
 // main
 // -------------------------------------------------------------------
 // Copyright (C) 2007 OpenEngine.dk (See AUTHORS) 
@@ -28,6 +29,7 @@
 #include <Scene/PostProcessNode.h>
 #include <Scene/ChainPostProcessNode.h>
 #include <Scene/PostProcessNode.h>
+#include <Scene/SearchTool.h>
 
 #include <Utils/SimpleSetup.h>
 #include <Utils/MoveHandler.h>
@@ -43,8 +45,13 @@
 #include "Scene/OceanFloorNode.h"
 #include "Utils/UserDefaults.h"
 #include "Utils/CustomKeyHandler.h"
-#include <Animations/Animator.h>
+#include "Devices/LaserSensor.h"
+#include "Predator.h"
 
+
+#include <Animations/Animator.h>
+#include <Animations/Animation.h>
+#include <Animations/AnimatedTransformation.h>
 #include <Animations/Flock.h>
 #include <Animations/FlockPropertyReloader.h>
 #include <Animations/SeperationRule.h>
@@ -55,6 +62,7 @@
 #include <Animations/FollowRule.h>
 #include <Animations/BoxRule.h>
 #include <Animations/RandomRule.h>
+#include <Animations/FleeRule.h>
 
 #include <Utils/PropertyTree.h>
 
@@ -116,19 +124,20 @@ public:
 class CircleMover : public IListener<Core::ProcessEventArg> {
     TransformationNode* node;
     float pos;
-    Vector<2,float> offset;
+    Vector<3,float> offset;
+    Vector<2,float> circle;
     float speed;
 public:
     CircleMover(TransformationNode *n, 
-                Vector<2,float> of=(Vector<2,float>(100,100)),
+                Vector<2,float> cir=(Vector<2,float>(10,100)),
                 float s=2)
-        : node(n),pos(0),offset(of),speed(s) {}
+        : node(n),pos(0),offset(n->GetPosition()), circle(cir),speed(s) {}
     void Handle(Core::ProcessEventArg arg) {
         float delta = arg.approx/1000000.0;
         pos += delta;
-        node->SetPosition(Vector<3,float>(offset[0]*sin(pos*speed),
-                                          0,
-                                          offset[1]*cos(pos*speed)));
+        node->SetPosition(Vector<3,float>(offset[0]+circle[0]*sin(pos*speed),
+                                          offset[1],
+                                          offset[2]+circle[1]*cos(pos*speed)));
     }
 };
 
@@ -140,7 +149,6 @@ SimpleSetup* setup;
 Camera* camera;
 IMouse* mouse;
 IKeyboard* keyboard;
-//ISceneNode* scene;
 RenderStateNode *rsn;
 IRenderer* renderer;
 
@@ -152,7 +160,12 @@ ISceneNode* light;
 
 OceanFloorNode* oceanFloor;
 ISceneNode* fish = NULL;
-ISceneNode* boat;
+TransformationNode* human = NULL;  // Laser input for predator instance.
+TransformationNode* shark = NULL;
+TransformationNode* box = NULL;
+
+ISceneNode* sharkAnimRoot = NULL;
+
 
 AnimationNode* animations;
 ISceneNode* animated = NULL;
@@ -209,6 +222,7 @@ int main(int argc, char** argv) {
 void SetupEngine() {
     // Create SDL environment handling display and input
     env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT);
+    //env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, FRAME_FULLSCREEN);
 
     // Create rendering view.
     IRenderingView* rv = new TerrainRenderingView();
@@ -217,25 +231,132 @@ void SetupEngine() {
     setup = new SimpleSetup("Det Virtuelle Akvarium", env, rv);
 
     renderer = &setup->GetRenderer();
-    //    renderer->SetBackgroundColor(Vector<4, float>(0.1, 0.1, 0.3, 1.0));
     renderer->SetBackgroundColor(Vector<4, float>(0.4, 0.6, 0.8, 1.0));
-
-    // Setup camera
-    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-    camera->SetPosition(Vector<3, float>(70.0, 30.0, -10.0));
-    camera->LookAt(0,0,0);
-    //camera->SetPosition(Vector<3, float>(0.0, 220.0, -2100.0));
-    //camera->SetDirection(Vector<3,float>(0,0,1),Vector<3,float>(0,1,0));
-    //camera->LookAt(0,0,-1500);
-    
-    setup->SetCamera(*camera);
 
     // Get Engine
     engine = &setup->GetEngine();
 
     // Show frame pr. second.
-    setup->ShowFPS();
+    //    setup->ShowFPS();
 }
+
+
+void SetupDevices() {
+   // Setup move handlers
+    mouse = env->GetMouse();
+    keyboard = env->GetKeyboard();
+
+    UserDefaults::GetInstance()->map["Mouse"] = mouse;
+    UserDefaults::GetInstance()->map["Keyboard"] = keyboard;
+
+    camSwitch = new CameraSwitcher(setup);
+    keyboard->KeyEvent().Attach(*camSwitch);
+
+    // Setup cameras
+    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+    camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
+    camera->LookAt(-2000,190,0);
+    camSwitch->AddCamera(camera);
+    setup->SetCamera(*camera);
+
+    MoveHandler* move = new MoveHandler(*camera, *mouse);
+    move->SetMoveScale(0.001);
+    engine->InitializeEvent().Attach(*move);
+    engine->ProcessEvent().Attach(*move);
+    keyboard->KeyEvent().Attach(*move);
+
+    CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
+    keyboard->KeyEvent().Attach(*ckh);
+
+    // Setup laser sensor device.
+//     LaserSensor* laserSensor = new LaserSensor();
+//     laserSensor->Connect(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+//     engine->InitializeEvent().Attach(*laserSensor);
+}
+
+
+void LoadResources() {
+    ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
+    DirectoryManager::AppendPath("resources/");
+    DirectoryManager::AppendPath("projects/dva/");
+    string path;
+
+    // Load place holder box.
+    path = DirectoryManager::FindFileInPath("models/box/box.dae");
+    IModelResourcePtr boxModel = ResourceManager<IModelResource>::Create(path);
+    boxModel->Load();
+    TransformationNode* boxTrans = new TransformationNode();
+    boxTrans->SetScale(Vector<3,float>(0.8));
+    boxTrans->AddNode(boxModel->GetSceneNode());
+    box = boxTrans;
+
+    // Load model representing human interaction.
+    path = DirectoryManager::FindFileInPath("models/box/box.dae");
+    IModelResourcePtr humanModel = ResourceManager<IModelResource>::Create(path);
+    humanModel->Load();
+    human = new TransformationNode();
+    human->SetScale(Vector<3,float>(0.1));
+    human->AddNode(humanModel->GetSceneNode());
+
+    // Load environment.
+    path = DirectoryManager::FindFileInPath("models/environment/Environment03.DAE");
+    IModelResourcePtr envModel = ResourceManager<IModelResource>::Create(path);
+    envModel->Load();
+    ISceneNode* env = envModel->GetSceneNode();
+    env->SetNodeName("Environment Model\n[ISceneNode]");
+    TransformationNode* envTrans = new TransformationNode();
+    envTrans->Rotate(-PI/2.0, PI/2.0, 0);
+    envTrans->SetPosition(Vector<3,float>(0, 0, 0));
+    envTrans->AddNode(env);
+    sceneNodes.push_back(envTrans);
+
+    // Load shark.
+    path = DirectoryManager::FindFileInPath("models/sharky/Sharky09.DAE");
+    IModelResourcePtr sharkModel = ResourceManager<IModelResource>::Create(path);
+    sharkModel->Load();
+    ISceneNode* sharky = sharkModel->GetSceneNode();
+    sharky->SetNodeName("Sharky the not so friendly shark\n[ISceneNode]");
+    AnimationNode* sharkAnim = sharkModel->GetAnimations();
+    if( sharkAnim ){
+        Animator* animator = new Animator(sharkAnim);
+        UserDefaults::GetInstance()->map["SharkAnimator"] = animator;
+        if( animator->GetSceneNode() ){
+            sharkAnimRoot = sharkAnim;
+            TransformationNode* sharkTrans = new TransformationNode();
+            sharkTrans->SetNodeName("SHARK TRANSFORMATION");
+            sharkTrans->Rotate(-PI/2.0, PI/2.0,0);
+            sharkTrans->AddNode(animator->GetSceneNode());
+            //            shark = sharkTrans;
+            sceneNodes.push_back(sharkTrans);
+        }
+        setup->GetEngine().ProcessEvent().Attach(*animator);
+        animator->SetActiveAnimation(0);
+        //animator->Play();
+    }
+    
+    // Load fish
+    path = DirectoryManager::FindFileInPath("models/finn/Finn08_org.DAE");
+    IModelResourcePtr model = ResourceManager<IModelResource>::Create(path);
+    model->Load();
+    ISceneNode* fishModel = model->GetSceneNode();
+    fishModel->SetNodeName("Finn the fish model\n[ISceneNode]");
+    AnimationNode* animations = model->GetAnimations();
+     if( animations ){
+        Animator* animator = new Animator(animations);
+        UserDefaults::GetInstance()->map["Animator"] = animator;
+        if( animator->GetSceneNode() ){
+            TransformationNode* fishTrans = new TransformationNode();
+            fishTrans->Rotate(PI/2.0,0,0);
+            fishTrans->AddNode(animator->GetSceneNode());
+            fish = fishTrans;
+            //            sceneNodes.push_back(fishTrans);
+        }
+        setup->GetEngine().ProcessEvent().Attach(*animator);
+        animator->SetActiveAnimation(0);
+        animator->Play();
+    }
+}
+
 
 void SetupScene() {
     // Setup stage fading Stuff
@@ -267,46 +388,46 @@ void SetupScene() {
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
     renderer->InitializeEvent().Attach(*fogNode);
-    scene->AddNode(fogNode); scene = fogNode;
+    scene->AddNode(fogNode); 
+    scene = fogNode;
 
     // Create caustics post process
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
+
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
     renderer->InitializeEvent().Attach(*causticsNode);
-    scene->AddNode(causticsNode); scene = causticsNode;
+    scene->AddNode(causticsNode); 
+    scene = causticsNode;
 
     // Create point light
     TransformationNode* lightTrans = new TransformationNode();
     PointLightNode* lightNode = new PointLightNode();
     lightTrans->SetPosition(Vector<3,float>(0.0,100.0,0.0));
-    //lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
-    lightNode->ambient = Vector<4,float>(0.0,0.4,0.0,1.0);
-    lightNode->diffuse = Vector<4,float>(0.0,1.0,0.0,1.0);
-    lightNode->specular = Vector<4,float>(.2,.2,.2,1.0);
-    lightNode->linearAtt = 0.01;
+    lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
+//     lightNode->ambient = Vector<4,float>(0.0,0.4,0.0,1.0);
+//     lightNode->diffuse = Vector<4,float>(0.0,1.0,0.0,1.0);
+//     lightNode->specular = Vector<4,float>(.2,.2,.2,1.0);
+    //lightNode->linearAtt = 0.01;
     scene->AddNode(lightTrans);
     lightTrans->AddNode(lightNode);
 
-    TransformationNode* lightTrans1 = new TransformationNode();
-    // lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
-    lightTrans1->SetPosition(Vector<3,float>(0.0,-100.0,0.0));
-    PointLightNode* lightNode1 = new PointLightNode();
-    lightNode1->ambient = Vector<4,float>(0.4,0.0,0.0,1.0);
-    lightNode1->diffuse = Vector<4,float>(1.0,0.0,0.0,1.0);
-    lightNode1->linearAtt = 0.01;
-    scene->AddNode(lightTrans1);
-    lightTrans1->AddNode(lightNode1);
+//     TransformationNode* lightTrans1 = new TransformationNode();
+//     // lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
+//     lightTrans1->SetPosition(Vector<3,float>(0.0,-100.0,0.0));
+//     PointLightNode* lightNode1 = new PointLightNode();
+//     lightNode1->ambient = Vector<4,float>(0.4,0.0,0.0,1.0);
+//     lightNode1->diffuse = Vector<4,float>(1.0,0.0,0.0,1.0);
+//     lightNode1->linearAtt = 0.01;
+//     scene->AddNode(lightTrans1);
+//     lightTrans1->AddNode(lightNode1);
 
     rsn = new RenderStateNode();
     rsn->DisableOption(RenderStateNode::BACKFACE);
     rsn->EnableOption(RenderStateNode::LIGHTING);
+    rsn->EnableOption(RenderStateNode::COLOR_MATERIAL);
     scene->AddNode(rsn);
     scene = rsn;
-
-    //rsn->AddNode(fog);
-    //ISceneNode* oceanScene = fog;
-
 
     // Add all scene nodes.
     vector<ISceneNode*>::iterator itr;
@@ -315,16 +436,27 @@ void SetupScene() {
         scene->AddNode(node);
     }
 
-    // Ocean floor as height map.
-    //    if( oceanFloor ) oceanScene->AddNode(oceanFloor);
-    
-    //
-    //oceanScene->AddNode(fog);
-    //    fog->AddNode(boat);
-    //oceanScene->AddNode(boat);
+    // Add predator to the scene.
+    Predator* humanPredator = new Predator(human); // same shark trans as given to the flee rule.
+    mouse->MouseMovedEvent().Attach(*humanPredator);
+    scene->AddNode(human);
 
-    // Add single fish
-    //    if(fish) oceanScene->AddNode(fish);
+    SearchTool search;
+    std::list<AnimationNode*> animNodeRes;
+    animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
+    if( animNodeRes.size() > 0 ){
+        shark = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
+        logger.info << "ADDED SHARK TRANS: " << shark->GetNodeName() << logger.end;
+    }
+
+    Predator* sharkPredator = new Predator(shark);
+    engine->ProcessEvent().Attach(*sharkPredator);
+    shark = sharkPredator->GetTransformationNode();
+    
+//     ISceneNode* test = sharkPredator->GetTransformationNode();
+//     test->AddNode(box);
+//     scene->AddNode(test);
+//     scene->AddNode(sharkAnimRoot);
 
     // Just for debug
     GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
@@ -341,46 +473,48 @@ void SetupBoids() {
 
 
     flockFollow = new TransformationNode();
-    flockFollow->SetPosition(Vector<3,float>(0,0,-100));
-    CircleMover *cm = new CircleMover(flockFollow,Vector<2,float>(10,100),1);
+    flockFollow->SetPosition(Vector<3,float>(-300,100,0));
+    CircleMover *cm = new CircleMover(flockFollow,Vector<2,float>(10,100),0.7);
     engine->ProcessEvent().Attach(*cm);
 
-
+     // Setup flock rules.
     flock = new Flock();    
     flock->AddRule(new SeperationRule());
     flock->AddRule(new CohersionRule());
-    //flock->AddRule(new GotoRule());
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
     flock->AddRule(new FollowRule(flockFollow));
     flock->AddRule(new RandomRule());
-    flock->AddRule(new BoxRule(Vector<3,float>(-100,0,-100),  // The two corners
-                               Vector<3,float>(100,50,100))); // - must be axis aligned
+
+    flock->AddRule(new BoxRule(Vector<3,float>(-400,30,-400),  // The two corners
+                               Vector<3,float>(400,400,400))); // - must be axis aligned
     
-    
+    flock->AddRule(new FleeRule(human, 100.0, 1.0));
+    flock->AddRule(new FleeRule(shark, 150.0, 20.0));
 
     FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
-    
 
     vector<ISceneNode*>::iterator itr;
-    int size = ptree->GetNode("flock1").GetPath<int>("size",100);
-    for(itr=sceneNodes.begin(); itr!=sceneNodes.end(); itr++){
-        ISceneNode* node = *itr;        
-        for (int i=0;i<size;i++) {
-            flock->AddBoid(node->Clone());
-        }
+    int size = ptree->GetNode("flock1").GetPath<int>("size", 100);
+    for (int i=0;i<size;i++) {
+        flock->AddBoid(fish->Clone());
     }
-
     engine->ProcessEvent().Attach(*flock);
    
+    // Add flock to the scene.
     rsn->AddNode(flock->GetRootNode());
-    flock->GetRootNode()->AddNode(flockFollow);
+    // Add visual rep of the object the flock is following.
+//     flock->GetRootNode()->AddNode(flockFollow);
+//     flockFollow->AddNode(box->Clone());
 
-    flockFollow->AddNode(sceneNodes[0]->Clone());
+    // Static default view
+//     Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+//     camera->SetPosition(Vector<3, float>(0, 54, 0));
+//     camera->LookAt(-1000,0,0);
+//     camSwitch->AddCamera(stc);
+//     setup->SetCamera(*stc);
 
 
-
-    // cameras
     // Follow a fish, look at target
     TrackingFollowCamera *tfc = 
         new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
@@ -389,10 +523,8 @@ void SetupBoids() {
     tfc->Follow(flock->GetTransformationNode(0));
     camSwitch->AddCamera(tfc);
 
-
     // Follow target, look at a fish
-    tfc = 
-        new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    tfc = new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     tfc->SetPosition(Vector<3,float>(20,20,20));
     tfc->Follow(flockFollow);
     tfc->Track(flock->GetTransformationNode(0));
@@ -405,7 +537,6 @@ void SetupBoids() {
     fc->Follow(flock->GetTransformationNode(0));
     camSwitch->AddCamera(fc);
     
-
     // Stationary, look at a fish
     TrackingCamera *tc = new TrackingCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     tc->SetPosition(Vector<3,float>(120,150,0));
@@ -413,151 +544,3 @@ void SetupBoids() {
     camSwitch->AddCamera(tc);
 
 }
-
-void SetupDevices() {
-   // Setup move handlers
-    mouse = env->GetMouse();
-    keyboard = env->GetKeyboard();
-
-    camSwitch = new CameraSwitcher(setup);
-    keyboard->KeyEvent().Attach(*camSwitch);
-
-    MoveHandler* move = new MoveHandler(*camera, *mouse);
-    move->SetMoveScale(0.0002);
-    engine->InitializeEvent().Attach(*move);
-    engine->ProcessEvent().Attach(*move);
-    keyboard->KeyEvent().Attach(*move);
-
-    CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
-    keyboard->KeyEvent().Attach(*ckh);
-}
-
-void LoadResources() {
-    ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
-    DirectoryManager::AppendPath("resources/");
-    DirectoryManager::AppendPath("projects/dva/");
-    string path;
-
-//     // Load Shaders
-    Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
-//     std::list<IShaderResourcePtr> effects;
-//     IShaderResourcePtr glow = ResourceManager<IShaderResource>::Create("shaders/Glow.glsl");
-//     IShaderResourcePtr blur = ResourceManager<IShaderResource>::Create("shaders/HorizontalBoxBlur.glsl");
-//     effects.push_back(glow);
-//     effects.push_back(blur);
-//  
-//     ChainPostProcessNode* glowNode = new ChainPostProcessNode(effects, dimension, 1, true);
-//     glow->SetTexture("scene", glowNode->GetPostProcessNode(1)->GetSceneFrameBuffer()->GetTexAttachment(0));
-//     renderer->InitializeEvent().Attach(*glowNode);
-//     postEffects = glowNode;
-//     IShaderResourcePtr underwater = ResourceManager<IShaderResource>::Create("shaders/UnderWater.glsl");
-//     PostProcessNode* underwaterNode = new PostProcessNode(underwater, dimension);
-//     underwaterNode->SetEnabled(true);
-//     renderer->InitializeEvent().Attach(*underwaterNode);
-//     postEffects = underwaterNode;
-
-//     IShaderResourcePtr grayscale = ResourceManager<IShaderResource>::Create("shaders/grayscale/grayscale.glsl");
-//     PostProcessNode* grayScaleNode = new PostProcessNode(grayscale, dimension);
-//     grayScaleNode->SetEnabled(true);
-//     renderer->InitializeEvent().Attach(*grayScaleNode);
-//     postEffects = grayScaleNode;
-
-
-//     IShaderResourcePtr lightPtr = ResourceManager<IShaderResource>::Create("shaders/dir_light.glsl");
-//     PostProcessNode* lightNode = new PostProcessNode(lightPtr, dimension);
-//     lightNode->SetEnabled(true);
-//     renderer->InitializeEvent().Attach(*lightNode);
-//     light = lightNode;
-
-
-//     IShaderResourcePtr fogPtr = ResourceManager<IShaderResource>::Create("shaders/fog/fog.glsl");
-//     PostProcessNode* fogNode = new PostProcessNode(fogPtr, dimension);
-//     fogNode->SetEnabled(true);
-//     renderer->InitializeEvent().Attach(*fogNode);
-//     fog = fogNode;
-
-
-    // Load ocean floor
-//     path = DirectoryManager::FindFileInPath("models/environment/environment.DAE");
-//     IModelResourcePtr model = ResourceManager<IModelResource>::Create(path);
-//     model->Load();
-//     ISceneNode* oceanFloor = model->GetSceneNode();
-//     oceanFloor->SetNodeName("Ocean Floor Model\n[ISceneNode]");
-//     sceneNodes.push_back(oceanFloor);
-    
-    // Create ocean floor
-//     FloatTexture2DPtr map = FloatTexture2DPtr(new FloatTexture2D(1024, 1024, 1));
-//     Empty(map);
-//     // map, steps, radius, disp
-//     map = CreateSmoothTerrain(map, 10, 160, 6);
-//     map = CreateSmoothTerrain(map, 1, 500, -40);
-//     map = CreateSmoothTerrain(map, 8000, 50, 3.0);
-//     //    map = MakePlateau(map, 100, 100);
-//     float widthScale = 4.0;
-//     Vector<3, float> origo = Vector<3, float>(map->GetHeight() * widthScale / 2, 0, map->GetWidth() * widthScale / 2);
-//     OceanFloorNode* node = new OceanFloorNode(map);
-//     node->SetWidthScale(widthScale);
-//     node->SetOffset(origo * -1);
-//     setup->GetRenderer().InitializeEvent().Attach(*node);
-//     setup->GetEngine().ProcessEvent().Attach(*node);
-//     sceneNodes.push_back(node);
-    
-    
-    // Load boat
-    //path = DirectoryManager::FindFileInPath("models/environment/boat.dae");
-    //path = DirectoryManager::FindFileInPath("models/environment/Environment_org.dae");
-//     path = DirectoryManager::FindFileInPath("models/boat/Wreck01.DAE");
-    
-//     IModelResourcePtr boat_model = ResourceManager<IModelResource>::Create(path);
-//     boat_model->Load();
-//     TransformationNode* boat_trans = new TransformationNode();
-//     boat_trans->Scale(0.1, 0.1, 0.1);
-//     //boat_trans->Move(0, 0, 0);
-//     //boat_trans->Rotate(0, -PI, 0);
-//     boat_trans->AddNode(boat_model->GetSceneNode());
-//     sceneNodes.push_back(boat_trans);
-
-    // Load fish
-    //path = DirectoryManager::FindFileInPath("models/finn/Finn08.DAE");
-    path = DirectoryManager::FindFileInPath("models/finn/Finn08_org.DAE");
-    //path = DirectoryManager::FindFileInPath("models/sharky/Sharky07.DAE");
-    //path = DirectoryManager::FindFileInPath("models/finn/Finn10_org.DAE");
-    //path = DirectoryManager::FindFileInPath("models/finn/Finn10.DAE");
-    //path = DirectoryManager::FindFileInPath("models/sharky/Animationstest med env.DAE");
-    //path = DirectoryManager::FindFileInPath("models/oe_logo/Bull_002_cea.dae");
-
-    IModelResourcePtr fish_model = ResourceManager<IModelResource>::Create(path);
-    fish_model->Load();
-    ISceneNode* fish_node = fish_model->GetSceneNode();
-    fish_node->SetNodeName("Collada Model\n[ISceneNode]");
-
-    
-
-    AnimationNode* animations = fish_model->GetAnimations();
-     if( animations ){
-        Animator* animator = new Animator(animations);
-        UserDefaults::GetInstance()->map["Animator"] = animator;
-        if( animator->GetSceneNode() ){
-            TransformationNode* fishA = new TransformationNode();
-            fishA->Rotate(-PI/2.0,0,0);
-            //            fishA->Move(0,0,-100);
-            //            fishA->Scale(10,10,10);
-            fishA->AddNode(animator->GetSceneNode());
-            sceneNodes.push_back(fishA);
-
-//             TransformationNode* fishB = new TransformationNode();
-//             fishB->Rotate(PI/2.0,0,0);
-//             fishB->Move(0,0,-10);
-//             fishB->AddNode(animator->GetSceneNode()->Clone());
-//             sceneNodes.push_back(fishB);
-        }
-        setup->GetEngine().ProcessEvent().Attach(*animator);
-        animator->SetActiveAnimation(0);
-        animator->Play();
-    }
-}
-
-
-void SetupTerrain(SimpleSetup* setup){
-}
-

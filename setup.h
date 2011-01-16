@@ -10,11 +10,14 @@
 #ifndef _SETUP_H_
 #define _SETUP_H_
 
+#include <string>
 
 namespace dva {
-
     const unsigned int SCREEN_WIDTH  = 1024;
     const unsigned int SCREEN_HEIGHT = 768; 
+
+    const std::string LASER_SENSOR_IP   = "192.168.0.100";
+    const int         LASER_SENSOR_PORT = 2111; // 2111 or 2112
 
 } // NS dva
 
