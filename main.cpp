@@ -591,4 +591,19 @@ void SetupBoids() {
     tc->Track(flock->GetTransformationNode(0));
     camSwitch->AddCamera(tc);
 
+    // Shark cam
+    FollowCamera* fcs = new FollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    fcs->SetDirection(Vector<3,float>(1,0,0),Vector<3,float>(0,-1,0));    
+    fcs->SetPosition(Vector<3,float>(-150,-80,0));
+    fcs->Follow(shark);
+    camSwitch->AddCamera(fcs);
+
+
+    // Shark mouth cam
+    FollowCamera* fcsm = new FollowCamera(*(new PerspectiveViewingVolume(1,8000)));
+    //FollowCamera* fcs = new FollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
+    fcsm->SetDirection(Vector<3,float>(1,0,0),Vector<3,float>(0,-1,0));    
+    fcsm->SetPosition(Vector<3,float>(110,25,0));
+    fcsm->Follow(shark);
+    camSwitch->AddCamera(fcsm);
 }
