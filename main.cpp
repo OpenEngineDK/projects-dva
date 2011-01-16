@@ -83,6 +83,8 @@
 #include <Renderers/OpenGL/ShaderLoader.h>
 #include <Renderers/OpenGL/LightRenderer.h>
 
+#include <Scene/ShadowLightPostProcessNode.h>
+
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -94,14 +96,14 @@ using namespace OpenEngine::Renderers::OpenGL;
 using namespace OpenEngine::Animations;
 using namespace dva;
 
-
 class CameraSwitcher : public IListener<KeyboardEventArg> {
     SimpleSetup* setup;
     vector<Camera*> cams;
     unsigned int idx;
     
 public:
-    CameraSwitcher(SimpleSetup* setup) : setup(setup), idx(0) {
+    CameraSwitcher(SimpleSetup* setup)
+        : setup(setup), idx(0) {
         cams.push_back(setup->GetCamera());
     }
 
@@ -249,15 +251,15 @@ void SetupDevices() {
     UserDefaults::GetInstance()->map["Mouse"] = mouse;
     UserDefaults::GetInstance()->map["Keyboard"] = keyboard;
 
-    camSwitch = new CameraSwitcher(setup);
-    keyboard->KeyEvent().Attach(*camSwitch);
-
     // Setup cameras
     camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
     camera->LookAt(-2000,190,0);
-    camSwitch->AddCamera(camera);
     setup->SetCamera(*camera);
+
+    camSwitch = new CameraSwitcher(setup); // CameraSwitcher adds the current cam from setup
+    keyboard->KeyEvent().Attach(*camSwitch);
+
 
     MoveHandler* move = new MoveHandler(*camera, *mouse);
     move->SetMoveScale(0.001);
@@ -382,15 +384,37 @@ void SetupScene() {
 
     // scene represents where to insert next node.
     ISceneNode* scene = sceneRoot;
-
-    // Create fog post process
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
+ 
+
+
+
+    // Create fog post process   
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
     //fogNode->SetEnabled(false);
     renderer->InitializeEvent().Attach(*fogNode);
     scene->AddNode(fogNode); 
     scene = fogNode;
+
+    // Create Shadow post process
+    IShaderResourcePtr shadow = ResourceManager<IShaderResource>::Create("projects/dva/effects/shadowmap.glsl");
+    ShadowLightPostProcessNode* shadowPost = 
+        new ShadowLightPostProcessNode(shadow, 
+                                       dimension,
+                                       dimension
+                                       //Vector<2,int>(800,600)
+                                       );
+    renderer->InitializeEvent().Attach(*shadowPost);
+    renderer->PreProcessEvent().Attach(*shadowPost);
+    scene->AddNode(shadowPost); 
+    scene = shadowPost;
+    Camera* cam = new Camera(*(new PerspectiveViewingVolume(100,1000)));
+    cam->SetPosition(Vector<3,float>(-600,1000,0));
+    cam->LookAt(Vector<3,float>(-600,0,0));
+    camSwitch->AddCamera(cam);    
+    shadowPost->SetViewingVolume(cam);
+
 
     // Create caustics post process
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
