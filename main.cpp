@@ -387,7 +387,7 @@ void SetupScene() {
     BlendCanvas* b = new BlendCanvas(new TextureCopy());
     b->AddTexture(setup->GetCanvas()->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
-    b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 0.8));
+    b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 0.0));
     b->InitCanvas(setup->GetCanvas());
 
     stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), b);
