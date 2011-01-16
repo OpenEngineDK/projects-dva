@@ -168,6 +168,7 @@ ISceneNode* light;
 ISceneNode* fish = NULL;
 TransformationNode* human = NULL;  // Laser input for predator instance.
 TransformationNode* shark = NULL;
+TransformationNode* sharkHead = NULL;
 TransformationNode* box = NULL;
 
 ISceneNode* sharkAnimRoot = NULL;
@@ -493,6 +494,7 @@ void SetupScene() {
     animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
     if( animNodeRes.size() > 0 ){
         shark = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
+        sharkHead = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(4)->GetAnimatedNode(); 
         logger.info << "ADDED SHARK TRANS: " << shark->GetInfo() << logger.end;
     }
 
@@ -603,7 +605,7 @@ void SetupBoids() {
     FollowCamera* fcsm = new FollowCamera(*(new PerspectiveViewingVolume(1,8000)));
     //FollowCamera* fcs = new FollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     fcsm->SetDirection(Vector<3,float>(1,0,0),Vector<3,float>(0,-1,0));    
-    fcsm->SetPosition(Vector<3,float>(110,25,0));
-    fcsm->Follow(shark);
+    fcsm->SetPosition(Vector<3,float>(-12,22,0));
+    fcsm->Follow(sharkHead);
     camSwitch->AddCamera(fcsm);
 }
