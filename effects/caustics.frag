@@ -51,6 +51,7 @@ void main(void) {
 
     vec4 caustics = texture2D(causticsMap, surfaceUV * CAUSTICS_SIZE + vec2(0.0, time / 10000.0));
     caustics += texture2D(causticsMap, surfaceUV * CAUSTICS_SIZE * 1.11 + vec2(time / 15000.0, time / 15000.0));
+    caustics *= 0.5;
 
     gl_FragColor = color + Intensity(color.rgb) * caustics;
     gl_FragDepth = shadow2D(depth, vec3(screenUV, 0.0)).x;

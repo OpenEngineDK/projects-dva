@@ -394,8 +394,8 @@ void SetupScene() {
     // Create caustics post process
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
-
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
+    //causticsNode->SetEnabled(false);
     renderer->InitializeEvent().Attach(*causticsNode);
     scene->AddNode(causticsNode); 
     scene = causticsNode;
