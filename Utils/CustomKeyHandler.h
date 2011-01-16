@@ -84,7 +84,7 @@ public:
             case KEY_1: rsn->ToggleOption(RenderStateNode::LIGHTING); break;
             case KEY_2: rsn->ToggleOption(RenderStateNode::WIREFRAME); break;
             case KEY_3: rsn->ToggleOption(RenderStateNode::TEXTURE); break;
-                //case KEY_4: rsn->ToggleOption(RenderStateNode::SHADER); break;
+            case KEY_4: rsn->ToggleOption(RenderStateNode::SHADER); break;
             case KEY_5: rsn->ToggleOption(RenderStateNode::COLOR_MATERIAL); break;
             case KEY_6: rsn->ToggleOption(RenderStateNode::SOFT_NORMAL); break;
             case KEY_7: rsn->ToggleOption(RenderStateNode::HARD_NORMAL); break;

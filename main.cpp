@@ -42,7 +42,6 @@
 // DVA stuff
 #include "setup.h"
 #include "Scene/GridNode.h"
-#include "Scene/OceanFloorNode.h"
 #include "Utils/UserDefaults.h"
 #include "Utils/CustomKeyHandler.h"
 #include "Devices/LaserSensor.h"
@@ -161,7 +160,6 @@ ISceneNode* postEffects;
 ISceneNode* fog;
 ISceneNode* light;
 
-OceanFloorNode* oceanFloor;
 ISceneNode* fish = NULL;
 TransformationNode* human = NULL;  // Laser input for predator instance.
 TransformationNode* shark = NULL;
@@ -452,6 +450,7 @@ void SetupScene() {
     rsn->DisableOption(RenderStateNode::BACKFACE);
     rsn->EnableOption(RenderStateNode::LIGHTING);
     rsn->EnableOption(RenderStateNode::COLOR_MATERIAL);
+    rsn->DisableOption(RenderStateNode::SHADER);
     scene->AddNode(rsn);
     scene = rsn;
 
