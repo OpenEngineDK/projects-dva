@@ -52,7 +52,7 @@ void LaserSensor::Handle(Core::ProcessEventArg arg) {
   
     // Get data from device driver.
     std::list< Math::Vector<2,float> > readings = device->GetReadings();
-    //    UpdateCalibrationCanvas(readings);
+    UpdateCalibrationCanvas(readings);
     
     // Debug print points
     std::list< Math::Vector<2,float> >::iterator itr;
@@ -69,28 +69,32 @@ void LaserSensor::Handle(Core::DeinitializeEventArg arg) {
     device->Close();
 }
 
-void LaserSensor::SetCalibrationCanvas(Texture2D<unsigned char>* canvas) {
-    if( canvas ) {
-        this->canvas = canvas;
-    }
+void LaserSensor::SetLaserDebug(LaserDebugPtr debug){
+    this->laserDebug = debug;
 }
     
 void LaserSensor::UpdateCalibrationCanvas(std::list< Math::Vector<2,float> > readings) {
-    if( canvas ){
-        int width = canvas->GetWidth();
-        int height = canvas->GetHeight();
+    if( laserDebug ){
         
-        unsigned char* canvasPtr = canvas->GetData();
+        int width = laserDebug->GetWidth();
+        int height = laserDebug->GetHeight();
+        
+        unsigned char* canvasPtr = laserDebug->GetData();
 
         // Calculate all canvas points.
         std::list< Math::Vector<2,float> >::iterator itr;
         for(itr=readings.begin(); itr!=readings.end(); itr++){
             Vector<2,float> reading = *itr;
-            int x = abs((int)(reading[0] * width));
-            int y = abs((int)(reading[1] * height));
+            int x = abs((int)(reading[0] * (width-1)));
+            int y = abs((int)(reading[1] * (height-1)));
 
-            canvasPtr[(y*height + x)*4] = 255.0;
+            canvasPtr[(y*width + x)*4+0] = 255.0;
+            canvasPtr[(y*width + x)*4+1] = 0.0;
+            canvasPtr[(y*width + x)*4+2] = 0.0;
+            canvasPtr[(y*width + x)*4+3] = 1.0;
         }
+        //
+        laserDebug->UpdateTexture();
     }
 }
 

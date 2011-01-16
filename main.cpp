@@ -46,7 +46,7 @@
 #include "Utils/CustomKeyHandler.h"
 #include "Devices/LaserSensor.h"
 #include "Predator.h"
-
+#include "LaserDebug.h"
 
 #include <Animations/Animator.h>
 #include <Animations/Animation.h>
@@ -146,28 +146,6 @@ public:
     }
 };
 
-class LaserDebug;
-typedef boost::shared_ptr<LaserDebug> LaserDebugPtr;
-class LaserDebug : public virtual Resources::Texture2D<unsigned char> {
-private:
-    boost::weak_ptr<LaserDebug> weak_this;
-    LaserDebug(unsigned int height, unsigned int width)
-        : Resources::Texture2D<unsigned char>(height,width,3) {}
-public:
-    static LaserDebugPtr Create(unsigned int width, unsigned int height) {
-        LaserDebugPtr ptr(new LaserDebug(width, height));
-        ptr->weak_this = ptr;
-        return ptr;
-    }
-    virtual ~LaserDebug() {}
-
-    void UpdateTextute() {
-        changedEvent
-            .Notify(Texture2DChangedEventArg(Resources::ITexture2DPtr(weak_this)));
-    }
-};
-
-LaserDebugPtr laserDebug;
 
 // Global stuff only used for setup.
 IEngine* engine;
@@ -192,6 +170,7 @@ TransformationNode* box = NULL;
 
 ISceneNode* sharkAnimRoot = NULL;
 
+LaserDebugPtr laserDebug;
 
 AnimationNode* animations;
 ISceneNode* animated = NULL;
@@ -299,6 +278,7 @@ void SetupDevices() {
 
     // Setup laser sensor device.
     LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+    laserSensor->SetLaserDebug(laserDebug);
     engine->InitializeEvent().Attach(*laserSensor);
     engine->ProcessEvent().Attach(*laserSensor);
     
@@ -389,7 +369,7 @@ void SetupScene() {
     BlendCanvas* b = new BlendCanvas(new TextureCopy());
     b->AddTexture(setup->GetCanvas()->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
-    //b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 0.0));
+    //b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->InitCanvas(setup->GetCanvas());
 
     stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), b);

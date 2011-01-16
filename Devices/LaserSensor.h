@@ -13,6 +13,7 @@
 
 #include <Core/IModule.h>
 #include <Resources/Texture2D.h>
+#include "../LaserDebug.h"
 #include <string>
 
 
@@ -21,6 +22,7 @@ namespace Devices {
 
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Resources;
+    using namespace dva;
 
 class SICKDeviceDriver;
 
@@ -41,11 +43,11 @@ public:
     void Handle(Core::ProcessEventArg arg);
     void Handle(Core::DeinitializeEventArg arg);
 
-    void SetCalibrationCanvas(Texture2D<unsigned char>* canvas);
+    void SetLaserDebug(LaserDebugPtr debug);
    
 private:
     SICKDeviceDriver* device;
-    Texture2D<unsigned char>* canvas;
+    LaserDebugPtr laserDebug;
 
     void UpdateCalibrationCanvas(std::list< Math::Vector<2,float> > readings);
 };
