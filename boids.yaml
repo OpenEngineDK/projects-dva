@@ -19,3 +19,6 @@ flock1:
   flee:
     radius: 120.0
     scare: 20.0
+  box:
+    speed: 5.0
+    dist: 25.0

@@ -60,6 +60,7 @@
 #include <Animations/GotoRule.h>
 #include <Animations/SpeedRule.h>
 #include <Animations/FollowRule.h>
+#include <Animations/BoxLimitRule.h>
 #include <Animations/BoxRule.h>
 #include <Animations/RandomRule.h>
 #include <Animations/FleeRule.h>
@@ -510,7 +511,8 @@ void SetupBoids() {
     flock->AddRule(new AlignmentRule());
     flock->AddRule(new FollowRule(flockFollow));
     flock->AddRule(new RandomRule());
-
+    flock->AddRule(new BoxLimitRule(Vector<3,float>(-400,30,-400), 
+                                    Vector<3,float>(400,400,400)));
     flock->AddRule(new BoxRule(Vector<3,float>(-400,30,-400),  // The two corners
                                Vector<3,float>(400,400,400))); // - must be axis aligned
     
