@@ -12,6 +12,7 @@
 #define _LASER_SENSOR_H_
 
 #include <Core/IModule.h>
+#include <Resources/Texture2D.h>
 #include <string>
 
 
@@ -19,6 +20,7 @@ namespace OpenEngine {
 namespace Devices {
 
 using namespace OpenEngine::Core;
+using namespace OpenEngine::Resources;
 
 class SICKDeviceDriver;
 
@@ -29,29 +31,23 @@ class SICKDeviceDriver;
  */
 class LaserSensor : public IModule {
 public:
-    enum SensorStatus {
-        NOT_CONNECTED,   // Idle and not connected yet.
-        CONNECTING,      // Connection in progress.
-        CONNECTED,       // Connected successfully and receiving data.
-        CONNECTION_ERR,  // Could not connect.
-        DATA_ERR,        // Connected but cannot parse input data.
-    };
-
-    LaserSensor();
+    LaserSensor(std::string ip, unsigned short port);
     ~LaserSensor();
 
-    bool Connect(std::string ip, unsigned short port);    
-    SensorStatus GetSensorStatus();
+    void Connect();    
 
     // IModule handlers
     void Handle(Core::InitializeEventArg arg);
     void Handle(Core::ProcessEventArg arg);
     void Handle(Core::DeinitializeEventArg arg);
+
+    void SetCalibrationCanvas(Texture2D<unsigned char>* canvas);
    
 private:
     SICKDeviceDriver* device;
-    SensorStatus status;
+    Texture2D<unsigned char>* canvas;
 
+    void UpdateCalibrationCanvas(std::list< Math::Vector<2,float> > readings);
 };
 
 } // NS Devices

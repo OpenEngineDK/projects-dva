@@ -273,7 +273,7 @@ void SetupDevices() {
     // Setup cameras
     camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
-    camera->LookAt(-2000,190,0);
+    camera->LookAt(0,190,-2000);
     setup->SetCamera(*camera);
 
     camSwitch = new CameraSwitcher(setup); // CameraSwitcher adds the current cam from setup
@@ -293,9 +293,11 @@ void SetupDevices() {
     setup->GetTextureLoader().Load(laserDebug, Renderers::TextureLoader::RELOAD_IMMEDIATE);
 
     // Setup laser sensor device.
-//     LaserSensor* laserSensor = new LaserSensor();
-//     laserSensor->Connect(LASER_SENSOR_IP, LASER_SENSOR_PORT);
-//     engine->InitializeEvent().Attach(*laserSensor);
+    LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+    engine->InitializeEvent().Attach(*laserSensor);
+    engine->ProcessEvent().Attach(*laserSensor);
+    
+    
 }
 
 
@@ -329,7 +331,6 @@ void LoadResources() {
     ISceneNode* env = envModel->GetSceneNode();
     env->SetNodeName("Environment Model\n[ISceneNode]");
     TransformationNode* envTrans = new TransformationNode();
-    envTrans->Rotate(-PI/2.0, PI/2.0, 0);
     envTrans->SetPosition(Vector<3,float>(0, 0, 0));
     envTrans->AddNode(env);
     sceneNodes.push_back(envTrans);
@@ -348,9 +349,7 @@ void LoadResources() {
             sharkAnimRoot = sharkAnim;
             TransformationNode* sharkTrans = new TransformationNode();
             sharkTrans->SetNodeName("SHARK TRANSFORMATION");
-            sharkTrans->Rotate(-PI/2.0, PI/2.0,0);
             sharkTrans->AddNode(animator->GetSceneNode());
-            //            shark = sharkTrans;
             sceneNodes.push_back(sharkTrans);
         }
         setup->GetEngine().ProcessEvent().Attach(*animator);
@@ -370,10 +369,8 @@ void LoadResources() {
         UserDefaults::GetInstance()->map["Animator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* fishTrans = new TransformationNode();
-            fishTrans->Rotate(PI/2.0,0,0);
             fishTrans->AddNode(animator->GetSceneNode());
             fish = fishTrans;
-            //            sceneNodes.push_back(fishTrans);
         }
         setup->GetEngine().ProcessEvent().Attach(*animator);
         animator->SetActiveAnimation(0);
@@ -438,8 +435,8 @@ void SetupScene() {
     scene->AddNode(shadowPost); 
     scene = shadowPost;
     Camera* cam = new Camera(*(new PerspectiveViewingVolume(100,1000)));
-    cam->SetPosition(Vector<3,float>(-300,800,0));
-    cam->LookAt(Vector<3,float>(-500,0,0));
+    cam->SetPosition(Vector<3,float>(0,800,-250));
+    cam->LookAt(Vector<3,float>(0,0,-500));
     camSwitch->AddCamera(cam);    
     shadowPost->SetViewingVolume(cam);
 
@@ -527,8 +524,8 @@ void SetupBoids() {
 
 
     flockFollow = new TransformationNode();
-    flockFollow->SetPosition(Vector<3,float>(-300,100,0));
-    CircleMover *cm = new CircleMover(flockFollow,Vector<2,float>(10,100),0.7);
+    flockFollow->SetPosition(Vector<3,float>(0,100,-300));
+    CircleMover *cm = new CircleMover(flockFollow,Vector<2,float>(100,10),0.7);
     engine->ProcessEvent().Attach(*cm);
 
      // Setup flock rules.

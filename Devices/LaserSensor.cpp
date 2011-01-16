@@ -18,8 +18,8 @@ namespace Devices {
 
 using namespace OpenEngine::Math;
 
-LaserSensor::LaserSensor() : status(NOT_CONNECTED) {
-    device = new SICKDeviceDriver(0, 180, 1.0, Vector<2,float>(100,100));
+LaserSensor::LaserSensor(string ip, unsigned short port) {
+    device = new SICKDeviceDriver(ip, port, 0, 180, 1.0, Vector<2,float>(10,10));
 }
 
 LaserSensor::~LaserSensor() {
@@ -28,36 +28,37 @@ LaserSensor::~LaserSensor() {
 }
 
 
-bool LaserSensor::Connect(string ip, unsigned short port) {
-    if( status == NOT_CONNECTED || status == CONNECTION_ERR ){
-        // Try to connect to device
-        status = CONNECTING;
+void LaserSensor::Connect() {
+    if( device->GetStatus() == NOT_CONNECTED ) {
+        // Try to connect to device.
         logger.info << "[LaserSensor] Connecting to sensor..." << logger.end;
-        // Connect the device driver.
-        status = device->Connect(ip, port) ? CONNECTED : CONNECTION_ERR;
-        // Print status
-        if( status == CONNECTED ) 
-            logger.info << "[LaserSensor] Connected successfully." << logger.end;
-        else
-            logger.info << "[LaserSensor] Error connecting to sensor..." << logger.end;
-    }
-    return (status == CONNECTED);
-}
-
-void LaserSensor::Handle(Core::InitializeEventArg arg) {
-    logger.warning << "LASER SENSOR INIT" << logger.end;
-    // If connected to device, process readings.
-    if( status == CONNECTED ){
-        logger.info << "[LaserSensor] Starting SICK device driver" << logger.end;
         device->Start();
     }
 }
 
+void LaserSensor::Handle(Core::InitializeEventArg arg) {
+    logger.info << "[LaserSensor] Starting SICK device driver" << logger.end;
+    Connect();
+}
+
 
 void LaserSensor::Handle(Core::ProcessEventArg arg) {
+    // Check device status
+    if( device->GetStatus() == NOT_CONNECTED ){
+        // Connection probably lost, reconnect..
+        logger.error << "[LaserSensor] Error: connection lost, reconnecting..." << logger.end;
+        Connect();
+    }
+  
     // Get data from device driver.
-
-    // Parse sensor readings.
+    std::list< Math::Vector<2,float> > readings = device->GetReadings();
+    //    UpdateCalibrationCanvas(readings);
+    
+    // Debug print points
+    std::list< Math::Vector<2,float> >::iterator itr;
+    for(itr=readings.begin(); itr!=readings.end(); itr++){
+        logger.info << "Laser: " << *itr << logger.end;
+    }
 
     // Cluster analyse sensor readings.
     
@@ -66,7 +67,31 @@ void LaserSensor::Handle(Core::ProcessEventArg arg) {
 void LaserSensor::Handle(Core::DeinitializeEventArg arg) {
     // Close connection to device
     device->Close();
-    status = NOT_CONNECTED;
+}
+
+void LaserSensor::SetCalibrationCanvas(Texture2D<unsigned char>* canvas) {
+    if( canvas ) {
+        this->canvas = canvas;
+    }
+}
+    
+void LaserSensor::UpdateCalibrationCanvas(std::list< Math::Vector<2,float> > readings) {
+    if( canvas ){
+        int width = canvas->GetWidth();
+        int height = canvas->GetHeight();
+        
+        unsigned char* canvasPtr = canvas->GetData();
+
+        // Calculate all canvas points.
+        std::list< Math::Vector<2,float> >::iterator itr;
+        for(itr=readings.begin(); itr!=readings.end(); itr++){
+            Vector<2,float> reading = *itr;
+            int x = abs((int)(reading[0] * width));
+            int y = abs((int)(reading[1] * height));
+
+            canvasPtr[(y*height + x)*4] = 255.0;
+        }
+    }
 }
 
 
