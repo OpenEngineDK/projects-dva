@@ -387,6 +387,7 @@ void SetupScene() {
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
+    //fogNode->SetEnabled(false);
     renderer->InitializeEvent().Attach(*fogNode);
     scene->AddNode(fogNode); 
     scene = fogNode;

@@ -29,6 +29,6 @@ void main(void) {
     vec4 color = texture2D(color0, screenUV);
     float depth = shadow2D(depth, vec3(screenUV, 0.0)).x;
     
-    gl_FragColor = mix(color, FOG_COLOR, pow(depth, 512.0));
+    gl_FragColor = mix(color, FOG_COLOR, pow(depth, 256.0));
     gl_FragDepth = depth;
 }
