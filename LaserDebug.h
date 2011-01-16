@@ -35,9 +35,7 @@ public:
     virtual ~LaserDebug() {}
 
     void UpdateTexture() {
-        //Resources::Texture2DChangedEventArg arg(Resources::ITexture2DPtr(weak_this));
-        //ChangedEvent().Notify(arg);
-        //changedEvent.Notify(arg);
+        ChangedEvent().Notify(Resources::Texture2DChangedEventArg(Resources::ITexture2DPtr(weak_this)));
     }
 };
 
