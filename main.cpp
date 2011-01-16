@@ -492,9 +492,9 @@ void SetupScene() {
         logger.info << "ADDED SHARK TRANS: " << shark->GetNodeName() << logger.end;
     }
 
-    Predator* sharkPredator = new Predator(shark);
-    engine->ProcessEvent().Attach(*sharkPredator);
-    shark = sharkPredator->GetTransformationNode();
+    //Predator* sharkPredator = new Predator(shark);
+    //engine->ProcessEvent().Attach(*sharkPredator);
+    //shark = sharkPredator->GetTransformationNode();
     
 //     ISceneNode* test = sharkPredator->GetTransformationNode();
 //     test->AddNode(box);
