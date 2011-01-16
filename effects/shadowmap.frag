@@ -41,7 +41,7 @@ void main(void) {
     
     vec4 coord = lightMat * vec4(worldPos,1.0);
 
-    float sd=0.5;
+    float sd=1.0;
 
     float amount = 0.7;
 
