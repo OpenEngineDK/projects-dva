@@ -6,7 +6,7 @@ uniform vec3 lightDir;
 uniform sampler2D distortionMap;
 
 uniform sampler2D causticsMap;
-const float CAUSTICS_SIZE = 0.2;
+const float CAUSTICS_SIZE = 0.005;
 
 uniform float time;
 uniform mat4 viewProjectionInverse;
@@ -49,8 +49,8 @@ void main(void) {
     // Project world coord onto xz plane ie ocean surface
     vec2 surfaceUV = worldPos.xz + lightDir.xz * worldPos.y;
 
-    vec4 caustics = texture2D(causticsMap, surfaceUV * CAUSTICS_SIZE + vec2(0.0, time / 5000.0));
-    caustics += texture2D(causticsMap, surfaceUV * CAUSTICS_SIZE * 1.11 + vec2(time / 2500.0, time / 2500.0));
+    vec4 caustics = texture2D(causticsMap, surfaceUV * CAUSTICS_SIZE + vec2(0.0, time / 10000.0));
+    caustics += texture2D(causticsMap, surfaceUV * CAUSTICS_SIZE * 1.11 + vec2(time / 15000.0, time / 15000.0));
 
     gl_FragColor = color + Intensity(color.rgb) * caustics;
     gl_FragDepth = shadow2D(depth, vec3(screenUV, 0.0)).x;
