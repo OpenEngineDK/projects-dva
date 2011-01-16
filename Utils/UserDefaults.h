@@ -10,6 +10,8 @@
 #ifndef _USER_DEFAULTS_H_
 #define _USER_DEFAULTS_H_
 
+#include <map>
+
 namespace OpenEngine {
 namespace Utils {
 

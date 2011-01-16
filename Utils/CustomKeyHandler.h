@@ -84,27 +84,31 @@ public:
             case KEY_1: rsn->ToggleOption(RenderStateNode::LIGHTING); break;
             case KEY_2: rsn->ToggleOption(RenderStateNode::WIREFRAME); break;
             case KEY_3: rsn->ToggleOption(RenderStateNode::TEXTURE); break;
-//             case KEY_4: rsn->ToggleOption(OpenEngine::Scene::RenderStateNode::SHADER); break;
+                //case KEY_4: rsn->ToggleOption(RenderStateNode::SHADER); break;
             case KEY_5: rsn->ToggleOption(RenderStateNode::COLOR_MATERIAL); break;
             case KEY_6: rsn->ToggleOption(RenderStateNode::SOFT_NORMAL); break;
             case KEY_7: rsn->ToggleOption(RenderStateNode::HARD_NORMAL); break;
             case KEY_8: rsn->ToggleOption(RenderStateNode::BACKFACE); break;
 
-            case KEY_p:   
-                // Write dot graph    
-                dv.Write(*(setup.GetScene()), os);
-                break;
+//             case KEY_p:   
+//                 // Write dot graph    
+//                 dv.Write(*(setup.GetScene()), os);
+//                 break;
+
+            case KEY_f : setup.ShowFPS(); break;
 
             case KEY_SPACE: {
-                Animator* anim = (Animator*)UserDefaults::GetInstance()->map["Animator"];
+                Animator* anim = (Animator*)UserDefaults::GetInstance()->map["SharkAnimator"];
                 if( anim ){
                     if( anim->IsPlaying() )
                         anim->Pause();
                     else
                         anim->Play();
                 }
-                }
+            }
                 break;
+
+
 
             default:break;
             
