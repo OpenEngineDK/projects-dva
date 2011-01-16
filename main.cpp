@@ -85,6 +85,9 @@
 
 #include <Scene/ShadowLightPostProcessNode.h>
 
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -143,6 +146,23 @@ public:
     }
 };
 
+class LaserDebug;
+typedef boost::shared_ptr<LaserDebug> LaserDebugPtr;
+class LaserDebug : public virtual Resources::Texture2D<unsigned char> {
+private:
+    boost::weak_ptr<LaserDebug> weak_this;
+    LaserDebug(unsigned int height, unsigned int width)
+        : Resources::Texture2D<unsigned char>(height,width,3) {}
+public:
+    static LaserDebugPtr Create(unsigned int width, unsigned int height) {
+        LaserDebugPtr ptr(new LaserDebug(width, height));
+        ptr->weak_this = ptr;
+        return ptr;
+    }
+    virtual ~LaserDebug() {}
+};
+
+LaserDebugPtr laserDebug;
 
 // Global stuff only used for setup.
 IEngine* engine;
@@ -269,6 +289,9 @@ void SetupDevices() {
     CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
     keyboard->KeyEvent().Attach(*ckh);
 
+    laserDebug = LaserDebug::Create(SCREEN_WIDTH, SCREEN_HEIGHT);
+    setup->GetTextureLoader().Load(laserDebug, Renderers::TextureLoader::RELOAD_IMMEDIATE);
+
     // Setup laser sensor device.
 //     LaserSensor* laserSensor = new LaserSensor();
 //     laserSensor->Connect(LASER_SENSOR_IP, LASER_SENSOR_PORT);
@@ -361,7 +384,13 @@ void LoadResources() {
 
 void SetupScene() {
     // Setup stage fading Stuff
-    stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), setup->GetCanvas());
+    BlendCanvas* b = new BlendCanvas(new TextureCopy());
+    b->AddTexture(setup->GetCanvas()->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
+    b->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
+    b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 0.8));
+    b->InitCanvas(setup->GetCanvas());
+
+    stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), b);
     engine->InitializeEvent().Attach(*stages);
     engine->DeinitializeEvent().Attach(*stages);
     engine->ProcessEvent().Attach(*stages);
