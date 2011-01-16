@@ -43,7 +43,7 @@ void main(void) {
 
     float sd=1.0;
 
-    float amount = 0.7;
+    float amount = 0.5;
 
     float d2 = shadow2D(depth, vec3(screenUV,0.0)).x;
 
