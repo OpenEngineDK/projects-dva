@@ -403,7 +403,7 @@ void SetupScene() {
         new ShadowLightPostProcessNode(shadow, 
                                        dimension,
                                        //dimension
-                                       Vector<2,int>(400,300)
+                                       Vector<2,int>(800,600)
                                        );
     renderer->InitializeEvent().Attach(*shadowPost);
     renderer->PreProcessEvent().Attach(*shadowPost);
