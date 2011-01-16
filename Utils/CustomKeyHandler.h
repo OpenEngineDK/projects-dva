@@ -10,52 +10,12 @@ using namespace OpenEngine::Animations;
 namespace OpenEngine{
 namespace Utils{
 
-class SceneNodeFinder : public ISceneNodeVisitor {
-private:
-    string nodeName;
-    ISceneNode* foundNode;
-
-    void DefaultVisitNode(ISceneNode* node){
-        if( node->GetNodeName() == nodeName ){
-            foundNode = node;
-        }else if( node->subNodes.size() > 0 ) {
-            node->VisitSubNodes(*this);
-        }
-    }
-
-public:
-    ISceneNode* Find(string nodeWithName, ISceneNode* searchRoot){
-        nodeName = nodeWithName;
-        foundNode = NULL;
-
-        nodeName = nodeWithName;
-        //
-        DefaultVisitNode(searchRoot);
-        //
-        return foundNode;
-    }
-};
-
-
 class CustomKeyHandler : public IListener<KeyboardEventArg> {
 private:
     SimpleSetup& setup;
     RenderStateNode* rsn;
     DotVisitor dv;
     ofstream* os;
-
-    bool FindRenderStateNode(){
-        ISceneNode* scene = setup.GetScene();
-        if( scene != NULL && rsn == NULL ){
-            for(unsigned int i=0; i < scene->GetNumberOfNodes(); i++){
-                if( scene->GetNode(i)->GetNodeName() == "RenderStateNode" ){
-                    rsn = (RenderStateNode*)scene->GetNode(i);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
 public:
     CustomKeyHandler(SimpleSetup& setup) : setup(setup), rsn(NULL)  {
@@ -68,11 +28,11 @@ public:
 
     void Handle(KeyboardEventArg arg) {
         if( rsn == NULL ){
-            //if( FindRenderStateNode() ){
-            SceneNodeFinder finder;
-            if( (rsn = dynamic_cast<RenderStateNode*>(finder.Find("RenderStateNode", setup.GetScene()))) != NULL ){
+            SearchTool st;
+            rsn = st.DescendantRenderStateNode(setup.GetScene());
+            if (rsn) {
                 logger.info << "[CustomKeyhandler] found RenderStateNode in scene." << logger.end;
-            }else{
+            } else {
                 logger.info << "[CustomKeyhandler] could not find RenderStateNode in scene, custom keys are disabled." << logger.end;
                 return;
             }

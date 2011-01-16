@@ -193,6 +193,10 @@ void SetupBoids();
 void LoadResources();
 
 
+AnimationNode* GetAnimationNode(ISceneNode* node) {
+    SearchTool st;
+    return st.DescendantAnimationNode(node);
+}
 
 int main(int argc, char** argv) {
     // Print start message
@@ -321,7 +325,7 @@ void LoadResources() {
     IModelResourcePtr envModel = ResourceManager<IModelResource>::Create(path);
     envModel->Load();
     ISceneNode* env = envModel->GetSceneNode();
-    env->SetNodeName("Environment Model\n[ISceneNode]");
+    env->SetInfo("Environment Model\n[ISceneNode]");
     TransformationNode* envTrans = new TransformationNode();
     envTrans->SetPosition(Vector<3,float>(0, 0, 0));
     envTrans->AddNode(env);
@@ -332,15 +336,15 @@ void LoadResources() {
     IModelResourcePtr sharkModel = ResourceManager<IModelResource>::Create(path);
     sharkModel->Load();
     ISceneNode* sharky = sharkModel->GetSceneNode();
-    sharky->SetNodeName("Sharky the not so friendly shark\n[ISceneNode]");
-    AnimationNode* sharkAnim = sharkModel->GetAnimations();
+    sharky->SetInfo("Sharky the not so friendly shark\n[ISceneNode]");
+    AnimationNode* sharkAnim = GetAnimationNode(sharky);
     if( sharkAnim ){
         Animator* animator = new Animator(sharkAnim);
         UserDefaults::GetInstance()->map["SharkAnimator"] = animator;
         if( animator->GetSceneNode() ){
             sharkAnimRoot = sharkAnim;
             TransformationNode* sharkTrans = new TransformationNode();
-            sharkTrans->SetNodeName("SHARK TRANSFORMATION");
+            sharkTrans->SetInfo("SHARK TRANSFORMATION");
             sharkTrans->AddNode(animator->GetSceneNode());
             sceneNodes.push_back(sharkTrans);
         }
@@ -354,8 +358,8 @@ void LoadResources() {
     IModelResourcePtr model = ResourceManager<IModelResource>::Create(path);
     model->Load();
     ISceneNode* fishModel = model->GetSceneNode();
-    fishModel->SetNodeName("Finn the fish model\n[ISceneNode]");
-    AnimationNode* animations = model->GetAnimations();
+    fishModel->SetInfo("Finn the fish model\n[ISceneNode]");
+    AnimationNode* animations = GetAnimationNode(fishModel);
      if( animations ){
         Animator* animator = new Animator(animations);
         UserDefaults::GetInstance()->map["Animator"] = animator;
@@ -489,7 +493,7 @@ void SetupScene() {
     animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
     if( animNodeRes.size() > 0 ){
         shark = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
-        logger.info << "ADDED SHARK TRANS: " << shark->GetNodeName() << logger.end;
+        logger.info << "ADDED SHARK TRANS: " << shark->GetInfo() << logger.end;
     }
 
     //Predator* sharkPredator = new Predator(shark);
