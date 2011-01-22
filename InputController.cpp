@@ -19,7 +19,7 @@
 #include <Animations/SeperationRule.h>
 #include <Logging/Logger.h>
 #include "CylinderNode.h"
-#include "setup.h"
+#include "DVASetup.h"
 #include <vector>
 
 Vector<3,float> cylinderP0(0,54,0);

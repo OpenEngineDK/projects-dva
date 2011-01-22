@@ -40,12 +40,12 @@
 #include <Renderers/OpenGL/TerrainRenderingView.h>
 
 // DVA stuff
-#include "setup.h"
+#include "DVASetup.h"
 #include "Scene/GridNode.h"
 #include "Utils/UserDefaults.h"
 #include "Utils/CustomKeyHandler.h"
 #include "Devices/LaserSensor.h"
-#include "Predator.h"
+//#include "Predator.h"
 #include "LaserDebug.h"
 
 #include <Animations/Animator.h>
@@ -463,29 +463,6 @@ void SetupScene() {
         ISceneNode* node = *itr;
         scene->AddNode(node);
     }
-
-    // Add predator to the scene.
-    Predator* humanPredator = new Predator(human); // same shark trans as given to the flee rule.
-    mouse->MouseMovedEvent().Attach(*humanPredator);
-    scene->AddNode(human);
-
-    SearchTool search;
-    std::list<AnimationNode*> animNodeRes;
-    animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
-    if( animNodeRes.size() > 0 ){
-        shark = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
-        sharkHead = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(4)->GetAnimatedNode(); 
-        logger.info << "ADDED SHARK TRANS: " << shark->GetInfo() << logger.end;
-    }
-
-    //Predator* sharkPredator = new Predator(shark);
-    //engine->ProcessEvent().Attach(*sharkPredator);
-    //shark = sharkPredator->GetTransformationNode();
-    
-//     ISceneNode* test = sharkPredator->GetTransformationNode();
-//     test->AddNode(box);
-//     scene->AddNode(test);
-//     scene->AddNode(sharkAnimRoot);
 
     // Just for debug
     GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
