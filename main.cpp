@@ -164,6 +164,8 @@ Flock* flock = NULL;
 TransformationNode* flockFollow = NULL;
 
 CameraSwitcher* camSwitch = NULL;
+OpenEngine::Display::FrameOption frameOption = FRAME_NONE;
+FlockPropertyReloader *rl = NULL;
 
 // Forward declarations
 void SetupEngine();
@@ -179,8 +181,11 @@ AnimationNode* GetAnimationNode(ISceneNode* node) {
 }
 
 int main(int argc, char** argv) {
-    // Print start message
-    logger.info << "========= OpenEngine Warm Up =========" << logger.end;
+
+    // Parse command line arguments.
+    if( argc > 1 && (strcmp(argv[1],"--fullscreen") == 0)){
+        frameOption = FRAME_FULLSCREEN;
+    }
 
     //
     SetupEngine();
@@ -217,8 +222,7 @@ int main(int argc, char** argv) {
 
 void SetupEngine() {
     // Create SDL environment handling display and input
-    env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT);
-    //env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, FRAME_FULLSCREEN);
+    env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, frameOption);
 
     // Create rendering view.
     IRenderingView* rv = new TerrainRenderingView();
@@ -231,9 +235,6 @@ void SetupEngine() {
 
     // Get Engine
     engine = &setup->GetEngine();
-
-    // Show frame pr. second.
-    //    setup->ShowFPS();
 }
 
 
