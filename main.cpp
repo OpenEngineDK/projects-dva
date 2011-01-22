@@ -261,15 +261,31 @@ void SetupDevices() {
     inputCtrl->SetInputDevice(keyboard);
     inputCtrl->SetInputDevice(laserSensor);
 
-    camSwitch = new CameraSwitcher(setup); // CameraSwitcher adds the current cam from setup
+    inputCtrl->SetMode(INPUT_CTRL_MODE);
+    engine->InitializeEvent().Attach(*inputCtrl);
+    engine->ProcessEvent().Attach(*inputCtrl);
+    engine->DeinitializeEvent().Attach(*inputCtrl);
+    
+    // Static default view
+    Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+    stc->SetPosition(Vector<3, float>(0, 54, 0));
+    stc->LookAt(0,190,-2000);
+    setup->SetCamera(*stc);
+
+    // CameraSwitcher adds the current cam from setup
+    camSwitch = new CameraSwitcher(setup); 
     keyboard->KeyEvent().Attach(*camSwitch);
 
-
-    MoveHandler* move = new MoveHandler(*camera, *mouse);
-    move->SetMoveScale(0.001);
-    engine->InitializeEvent().Attach(*move);
-    engine->ProcessEvent().Attach(*move);
-    keyboard->KeyEvent().Attach(*move);
+    // Add movable camera
+//     camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+//     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
+//     camera->LookAt(0,190,-2000);
+//     camSwitch->AddCamera(camera);
+//     MoveHandler* move = new MoveHandler(*camera, *mouse);
+//     move->SetMoveScale(0.001);
+//     engine->InitializeEvent().Attach(*move);
+//     engine->ProcessEvent().Attach(*move);
+//     keyboard->KeyEvent().Attach(*move);
 
     CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
     keyboard->KeyEvent().Attach(*ckh);
@@ -287,7 +303,7 @@ void LoadResources() {
     IModelResourcePtr boxModel = ResourceManager<IModelResource>::Create(path);
     boxModel->Load();
     TransformationNode* boxTrans = new TransformationNode();
-    boxTrans->SetScale(Vector<3,float>(0.8));
+    boxTrans->SetScale(Vector<3,float>(0.1));
     boxTrans->AddNode(boxModel->GetSceneNode());
     box = boxTrans;
 
@@ -296,7 +312,6 @@ void LoadResources() {
     IModelResourcePtr humanModel = ResourceManager<IModelResource>::Create(path);
     humanModel->Load();
     human = new TransformationNode();
-    human->SetScale(Vector<3,float>(0.1));
     human->AddNode(humanModel->GetSceneNode());
 
     // Load environment.
@@ -359,7 +374,8 @@ void SetupScene() {
     BlendCanvas* b = new BlendCanvas(new TextureCopy());
     b->AddTexture(setup->GetCanvas()->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
-    //b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
+    if( LASER_DEBUG_ENABLED )
+        b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->InitCanvas(setup->GetCanvas());
 
     stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), b);
@@ -387,12 +403,9 @@ void SetupScene() {
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
  
 
-
-
     // Create fog post process   
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
-    //fogNode->SetEnabled(false);
     renderer->InitializeEvent().Attach(*fogNode);
     scene->AddNode(fogNode); 
     scene = fogNode;
@@ -403,14 +416,20 @@ void SetupScene() {
         new ShadowLightPostProcessNode(shadow, 
                                        dimension,
                                        //dimension
-                                       Vector<2,int>(800,600)
-                                       );
+                                       Vector<2,int>(1024,2048));
     renderer->InitializeEvent().Attach(*shadowPost);
     renderer->PreProcessEvent().Attach(*shadowPost);
     scene->AddNode(shadowPost); 
     scene = shadowPost;
-    Camera* cam = new Camera(*(new PerspectiveViewingVolume(100,2000)));
-    cam->SetPosition(Vector<3,float>(0,1000,-200));
+
+    // TODO adjust shadow camera...
+    IViewingVolume* shadowView = new PerspectiveViewingVolume(100,2000);
+    shadowView->SetDirection(Quaternion<float>(0, 45.0, 0));
+    
+    Camera* cam = new Camera(*(shadowView));
+    cam->SetPosition(Vector<3,float>(0,1000,-330));
+    //    cam->rotate(0, pi/4.0, 0);
+    //    cam->setdirection(vector<3,float>(0,-1,0), vector<3,float>(1,1,0));
     cam->LookAt(Vector<3,float>(0,0,-400));
     camSwitch->AddCamera(cam);    
     shadowPost->SetViewingVolume(cam);
@@ -420,32 +439,31 @@ void SetupScene() {
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
-    //causticsNode->SetEnabled(false);
     renderer->InitializeEvent().Attach(*causticsNode);
     scene->AddNode(causticsNode); 
     scene = causticsNode;
 
     // Create point light
-    TransformationNode* lightTrans = new TransformationNode();
-    PointLightNode* lightNode = new PointLightNode();
-    lightTrans->SetPosition(Vector<3,float>(0.0,100.0,0.0));
-    lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
-//     lightNode->ambient = Vector<4,float>(0.0,0.4,0.0,1.0);
+//     TransformationNode* lightTrans = new TransformationNode();
+//     PointLightNode* lightNode = new PointLightNode();
+//     lightTrans->SetPosition(Vector<3,float>(0.0,100.0,0.0));
+//     lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
+//     lightNode->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
 //     lightNode->diffuse = Vector<4,float>(0.0,1.0,0.0,1.0);
 //     lightNode->specular = Vector<4,float>(.2,.2,.2,1.0);
-    //lightNode->linearAtt = 0.01;
-    scene->AddNode(lightTrans);
-    lightTrans->AddNode(lightNode);
+//     lightNode->linearAtt = 0.01;
+//     scene->AddNode(lightTrans);
+//     lightTrans->AddNode(lightNode);
 
-//     TransformationNode* lightTrans1 = new TransformationNode();
-//     // lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
-//     lightTrans1->SetPosition(Vector<3,float>(0.0,-100.0,0.0));
-//     PointLightNode* lightNode1 = new PointLightNode();
-//     lightNode1->ambient = Vector<4,float>(0.4,0.0,0.0,1.0);
-//     lightNode1->diffuse = Vector<4,float>(1.0,0.0,0.0,1.0);
-//     lightNode1->linearAtt = 0.01;
-//     scene->AddNode(lightTrans1);
-//     lightTrans1->AddNode(lightNode1);
+    TransformationNode* lightTrans1 = new TransformationNode();
+    lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
+    lightTrans1->SetPosition(Vector<3,float>(0.0,-100.0,0.0));
+    PointLightNode* lightNode1 = new PointLightNode();
+    lightNode1->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
+    lightNode1->diffuse = Vector<4,float>(1.0,1.0,1.0,1.0);
+    lightNode1->linearAtt = 0.01;
+    scene->AddNode(lightTrans1);
+    lightTrans1->AddNode(lightNode1);
 
     rsn = new RenderStateNode();
     rsn->DisableOption(RenderStateNode::BACKFACE);
@@ -463,8 +481,8 @@ void SetupScene() {
     }
 
     // Just for debug
-    GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
-    scene->AddNode(grid);
+//     GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
+//     scene->AddNode(grid);
 }
 
 void SetupBoids() {
@@ -475,49 +493,49 @@ void SetupBoids() {
     engine->ProcessEvent().Attach(*ptree);
     engine->DeinitializeEvent().Attach(*ptree);
 
-
-    flockFollow = new TransformationNode();
-    flockFollow->SetPosition(Vector<3,float>(0,100,-300));
-    CircleMover *cm = new CircleMover(flockFollow,Vector<2,float>(100,10),0.7);
-    engine->ProcessEvent().Attach(*cm);
-
      // Setup flock rules.
     flock = new Flock();    
     flock->AddRule(new SeperationRule());
     flock->AddRule(new CohersionRule());
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
-    flock->AddRule(new FollowRule(flockFollow));
     flock->AddRule(new RandomRule());
     flock->AddRule(new BoxLimitRule(Vector<3,float>(-400,30,-400), 
                                     Vector<3,float>(400,400,400)));
     flock->AddRule(new BoxRule(Vector<3,float>(-400,30,-400),  // The two corners
                                Vector<3,float>(400,400,400))); // - must be axis aligned
     
-    flock->AddRule(new FleeRule(human, 100.0, 1.0));
-    flock->AddRule(new FleeRule(shark, 150.0, 20.0));
+    // Locate shark transformation node and add a flee rule to the boid system.
+    SearchTool search;
+    std::list<AnimationNode*> animNodeRes;
+    animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
+    if( animNodeRes.size() > 0 ){
+        shark     = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
+        sharkHead = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(4)->GetAnimatedNode(); 
+    }
+    flock->AddRule(new FleeSphereRule(sharkHead, 100.0, 20.0));
 
-    FlockPropertyReloader *rl = new FlockPropertyReloader(flock, ptree, "flock1");
+    // Set flock in input controller, enabling user interactions.
+    inputCtrl->SetFlock(flock);
+    inputCtrl->SetDebugMesh(box);
+    rsn->AddNode(inputCtrl->GetSceneNode());
+
+    // Set Flock property reloader listening on changes in boid.yaml
+    rl = new FlockPropertyReloader(flock, ptree, "flock1");
 
     vector<ISceneNode*>::iterator itr;
     int size = ptree->GetNode("flock1").GetPath<int>("size", 100);
+    RandomGenerator random;
+    Vector<3,float> offset(100, 0, -300);
     for (int i=0;i<size;i++) {
-        flock->AddBoid(fish->Clone());
+        Boid* b = new Boid(fish->Clone(), &random);
+        Vector<3,float> pos = b->GetPosition() + offset;
+        b->SetPosition(pos);
+        flock->AddBoid(b);
     }
     engine->ProcessEvent().Attach(*flock);
-   
     // Add flock to the scene.
     rsn->AddNode(flock->GetRootNode());
-    // Add visual rep of the object the flock is following.
-//     flock->GetRootNode()->AddNode(flockFollow);
-//     flockFollow->AddNode(box->Clone());
-
-    // Static default view
-//     Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-//     camera->SetPosition(Vector<3, float>(0, 54, 0));
-//     camera->LookAt(-1000,0,0);
-//     camSwitch->AddCamera(stc);
-//     setup->SetCamera(*stc);
 
 
     // Follow a fish, look at target
