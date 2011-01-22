@@ -14,12 +14,9 @@ class CustomKeyHandler : public IListener<KeyboardEventArg> {
 private:
     SimpleSetup& setup;
     RenderStateNode* rsn;
-    DotVisitor dv;
-    ofstream* os;
 
 public:
     CustomKeyHandler(SimpleSetup& setup) : setup(setup), rsn(NULL)  {
-        os = new ofstream("graph.dot", ofstream::out);
     }
     
     void SetRenderStateNode(RenderStateNode* rsn){
@@ -50,10 +47,6 @@ public:
             case KEY_7: rsn->ToggleOption(RenderStateNode::HARD_NORMAL); break;
             case KEY_8: rsn->ToggleOption(RenderStateNode::BACKFACE); break;
 
-//             case KEY_p:   
-//                 // Write dot graph    
-//                 dv.Write(*(setup.GetScene()), os);
-//                 break;
 
             case KEY_f : setup.ShowFPS(); break;
 
