@@ -9,47 +9,6 @@
 //--------------------------------------------------------------------
 
 // OpenEngine stuff
-//#include <Meta/Config.h>
-//#include <Logging/Logger.h>
-//#include <Logging/StreamLogger.h>
-#include <Core/Engine.h>
-//#include <Display/IFrame.h>
-//#include <Display/Frustum.h>
-#include <Display/SDLEnvironment.h>
-#include <Display/PerspectiveViewingVolume.h>
-#include <Devices/IKeyboard.h>
-#include <Resources/OpenGLShader.h>
-#include <Resources/ResourceManager.h>
-#include <Resources/AssimpResource.h>
-#include <Scene/AnimationNode.h>
-#include <Scene/SceneNode.h>
-#include <Scene/DotVisitor.h>
-#include <Scene/DirectionalLightNode.h>
-#include <Scene/PointLightNode.h>
-#include <Scene/RenderStateNode.h>
-#include <Scene/PostProcessNode.h>
-#include <Scene/ChainPostProcessNode.h>
-#include <Scene/PostProcessNode.h>
-#include <Scene/SearchTool.h>
-
-#include <Utils/SimpleSetup.h>
-#include <Utils/MoveHandler.h>
-
-// Terrain stuff
-#include <Utils/TerrainUtils.h>
-#include <Utils/TerrainTexUtils.h>
-#include <Renderers/OpenGL/TerrainRenderingView.h>
-
-// DVA stuff
-#include "DVASetup.h"
-#include "Scene/GridNode.h"
-#include "Utils/UserDefaults.h"
-#include "Utils/CustomKeyHandler.h"
-#include "Devices/LaserSensor.h"
-//#include "Predator.h"
-#include "LaserDebug.h"
-#include "InputController.h"
-
 #include <Animations/Animator.h>
 #include <Animations/Animation.h>
 #include <Animations/AnimatedTransformation.h>
@@ -58,34 +17,49 @@
 #include <Animations/SeperationRule.h>
 #include <Animations/AlignmentRule.h>
 #include <Animations/CohersionRule.h>
-#include <Animations/GotoRule.h>
 #include <Animations/SpeedRule.h>
-#include <Animations/FollowRule.h>
 #include <Animations/BoxLimitRule.h>
 #include <Animations/BoxRule.h>
 #include <Animations/RandomRule.h>
 #include <Animations/FleeSphereRule.h>
 
-#include <Utils/PropertyTree.h>
+#include <Core/Engine.h>
 
+#include <Display/SDLEnvironment.h>
+#include <Display/PerspectiveViewingVolume.h>
 #include <Display/FollowCamera.h>
 #include <Display/TrackingCamera.h>
 #include <Display/TrackingFollowCamera.h>
 #include <Display/InterpolatedViewingVolume.h>
-
-// HUD stuff
 #include <Display/OpenGL/BlendCanvas.h>
 #include <Display/OpenGL/TextureCopy.h>
-#include <Renderers/TextureLoader.h>
-#include "Utils/Stages.h"
 
-// temporary hack ... remove next two lines when animation branch has been merged with main branch
+#include <Resources/ResourceManager.h>
+#include <Resources/AssimpResource.h>
+#include <Renderers/TextureLoader.h>
 #include <Renderers/OpenGL/ShaderLoader.h>
-#include <Renderers/OpenGL/LightRenderer.h>
-#include <Scene/ShadowLightPostProcessNode.h>
 #include <Renderers/DataBlockBinder.h>
-#include <boost/serialization/weak_ptr.hpp>
-#include <boost/serialization/shared_ptr.hpp>
+
+#include <Scene/SearchTool.h>
+#include <Scene/AnimationNode.h>
+#include <Scene/SceneNode.h>
+#include <Scene/DotVisitor.h>
+#include <Scene/DirectionalLightNode.h>
+#include <Scene/PointLightNode.h>
+#include <Scene/RenderStateNode.h>
+#include <Scene/ShadowLightPostProcessNode.h>
+
+#include <Utils/PropertyTree.h>
+#include <Utils/MoveHandler.h>
+
+// DVA stuff
+#include "DVASetup.h"
+#include "Utils/UserDefaults.h"
+#include "Utils/CustomKeyHandler.h"
+#include "Devices/LaserSensor.h"
+#include "LaserDebug.h"
+#include "InputController.h"
+#include "Utils/Stages.h"
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -94,6 +68,7 @@ using namespace OpenEngine::Display;
 using namespace OpenEngine::Display::OpenGL;
 using namespace OpenEngine::Scene;
 using namespace OpenEngine::Resources;
+using namespace OpenEngine::Renderers;
 using namespace OpenEngine::Renderers::OpenGL;
 using namespace OpenEngine::Animations;
 using namespace dva;
@@ -224,11 +199,8 @@ void SetupEngine() {
     // Create SDL environment handling display and input
     env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, frameOption);
 
-    // Create rendering view.
-    IRenderingView* rv = new TerrainRenderingView();
-
     // Create simple setup
-    setup = new SimpleSetup("Det Virtuelle Akvarium", env, rv);
+    setup = new SimpleSetup("Det Virtuelle Akvarium", env);
 
     renderer = &setup->GetRenderer();
     renderer->SetBackgroundColor(Vector<4, float>(0.4, 0.6, 0.8, 1.0));
