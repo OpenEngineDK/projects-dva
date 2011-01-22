@@ -47,6 +47,7 @@
 #include "Devices/LaserSensor.h"
 //#include "Predator.h"
 #include "LaserDebug.h"
+#include "InputController.h"
 
 #include <Animations/Animator.h>
 #include <Animations/Animation.h>

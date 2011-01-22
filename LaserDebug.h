@@ -17,15 +17,16 @@
 
 namespace dva {
 
-    using namespace OpenEngine;
+using namespace OpenEngine;
 
 class LaserDebug;
 typedef boost::shared_ptr<LaserDebug> LaserDebugPtr;
+
 class LaserDebug : public virtual Resources::Texture2D<unsigned char> {
 private:
     boost::weak_ptr<LaserDebug> weak_this;
     LaserDebug(unsigned int height, unsigned int width)
-        : Resources::Texture2D<unsigned char>(height,width,3) {}
+        : Resources::Texture2D<unsigned char>(height,width,4) {}
 public:
     static LaserDebugPtr Create(unsigned int width, unsigned int height) {
         LaserDebugPtr ptr(new LaserDebug(width, height));
