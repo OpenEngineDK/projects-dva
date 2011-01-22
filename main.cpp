@@ -60,7 +60,7 @@
 #include "LaserDebug.h"
 #include "InputController.h"
 #include "Utils/Stages.h"
-
+#include "CameraSwitcher.h"
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -73,32 +73,6 @@ using namespace OpenEngine::Renderers::OpenGL;
 using namespace OpenEngine::Animations;
 using namespace dva;
 
-class CameraSwitcher : public IListener<KeyboardEventArg> {
-    SimpleSetup* setup;
-    vector<Camera*> cams;
-    unsigned int idx;
-    
-public:
-    CameraSwitcher(SimpleSetup* setup)
-        : setup(setup), idx(0) {
-        cams.push_back(setup->GetCamera());
-    }
-
-    void AddCamera(Camera* c) {
-        cams.push_back(c);
-    }
-
-    void Handle(KeyboardEventArg arg) {
-        if (arg.type != EVENT_RELEASE) return;
-        if (arg.sym == KEY_p && cams.size() > (idx+1)) {
-            ++idx;
-            setup->SetCamera(*cams[idx]);
-        } else if (arg.sym == KEY_o && cams.size() > (idx-1)) {
-            --idx;
-            setup->SetCamera(*cams[idx]);
-        }
-    }
-};
 
 
 // Global stuff only used for setup.
