@@ -1,4 +1,4 @@
-const vec4 FOG_COLOR = vec4(0.12, 0.18, 0.30, 1.0);
+const vec4 FOG_COLOR = vec4(0.22, 0.25, 0.29, 1.0);
 
 uniform sampler2D color0;
 uniform sampler2DShadow depth;
@@ -29,6 +29,6 @@ void main(void) {
     vec4 color = texture2D(color0, screenUV);
     float depth = shadow2D(depth, vec3(screenUV, 0.0)).x;
     
-    gl_FragColor = mix(color, FOG_COLOR, pow(depth, 256.0));
+    gl_FragColor = mix(color, FOG_COLOR, pow(depth, 500.0));
     gl_FragDepth = depth;
 }
