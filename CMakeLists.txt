@@ -11,6 +11,7 @@ SET( PROJECT_SOURCES
   Utils/Stages.cpp
   Devices/LaserSensor.cpp
   Devices/SICKDeviceDriver.cpp
+  Devices/ClusterAnalyser.cpp
 )
 
 # Include needed to use SDL under Mac OS X
