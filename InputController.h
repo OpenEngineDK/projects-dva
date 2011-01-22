@@ -15,6 +15,7 @@
 #include <Devices/IKeyboard.h>
 #include <Devices/IMouse.h>
 #include "CircleMover.h"
+#include "DVASetup.h"
 
 namespace OpenEngine {
     namespace Devices {
@@ -46,15 +47,6 @@ using OpenEngine::Animations::SeperationRule;
 using OpenEngine::Scene::ISceneNode;
 using OpenEngine::Scene::TransformationNode;
 
-typedef enum {
-    NONE,
-    MOUSE_SPHERE_FLEE,
-    MOUSE_CYLINDER_FLEE,
-    MOUSE_FLOCK_FOLLOW,
-    LASER_SPHERE_FLEE,
-    LASER_CYLINDER_FLEE,
-    LASER_FOLLOW_FLOCK_AND_RESIZE
-} CtrlMode;
 
 /**
  * Short description.
@@ -72,7 +64,7 @@ private:
 
     Flock* flock;
     TransformationNode* flockFollowTrans;
-    CircleMover *cm;
+    CircleMover* cm;
 
     IRule* mouseCtrlRule;
     std::vector<IRule*> laserCtrlRules;
@@ -81,6 +73,8 @@ private:
     ISceneNode* sceneNode;
     TransformationNode* mouseCtrlTrans;
     TransformationNode* debugMesh;
+
+    void Init();
 
     void HandleMouseInput();
     void HandleLaserSensorInput();

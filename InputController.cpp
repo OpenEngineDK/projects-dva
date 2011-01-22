@@ -32,20 +32,38 @@ using namespace std;
 
 namespace dva {
 
-InputController::InputController() 
-    : sensor(NULL), keyboard(NULL), mouse(NULL), ctrlMode(NONE), sceneNode(new SceneNode()) {
+void InputController::Init() {
+    sensor = NULL;
+    keyboard = NULL;
+    mouse = NULL;
+    ctrlMode = NONE;
+    flock = NULL;
+    flockFollowTrans = NULL;
+    cm = NULL;
+    mouseCtrlRule = NULL;
+    separationRule = NULL;
+    sceneNode = new SceneNode();
+    mouseCtrlTrans = NULL;
+    debugMesh = NULL;
 }
 
-InputController::InputController(LaserSensor* sensor) 
-    : sensor(sensor), keyboard(NULL), mouse(NULL), ctrlMode(NONE), sceneNode(new SceneNode()) {
+InputController::InputController() {
+    Init();
 }
 
-InputController::InputController(IKeyboard* keyboard) 
-    : sensor(NULL), keyboard(keyboard), mouse(NULL), ctrlMode(NONE), sceneNode(new SceneNode()) {
+InputController::InputController(LaserSensor* sensor) {
+    Init();
+    this->sensor = sensor;
 }
 
-InputController::InputController(IMouse* mouse) 
-    : sensor(NULL), keyboard(NULL), mouse(mouse), ctrlMode(NONE), sceneNode(new SceneNode()){
+InputController::InputController(IKeyboard* keyboard) {
+    Init();
+    this->keyboard = keyboard;
+}
+
+InputController::InputController(IMouse* mouse) {
+    Init();
+    this->mouse = mouse;
 }
 
 InputController::~InputController() {}
@@ -124,10 +142,12 @@ void InputController::Handle(Core::InitializeEventArg arg) {
 
 
         // Visualise laser controlled transformation node.
-        if( debugMesh && flockFollowTrans )
-           flockFollowTrans->AddNode(debugMesh->Clone());
+//         if( debugMesh && flockFollowTrans )
+//            flockFollowTrans->AddNode(debugMesh->Clone());
  
+        
     }
+
 }
 
 void InputController::Handle(Core::ProcessEventArg arg) {
@@ -156,11 +176,13 @@ void InputController::Handle(Core::DeinitializeEventArg arg) {
 
 
 void InputController::HandleMouseInput(){
-    Devices::MouseState arg = mouse->GetState();
-    Vector<3,float> pos = ScreenToSpaceCoordinate(arg.x, arg.y);
-    pos[2] = mouseCtrlTrans->GetPosition()[2];
-    mouseCtrlTrans->SetPosition(pos);
-    //logger.info << "Mouse x,y: " << arg.x << ", " << arg.y << logger.end;
+    if( mouseCtrlTrans ){
+        Devices::MouseState arg = mouse->GetState();
+        Vector<3,float> pos = ScreenToSpaceCoordinate(arg.x, arg.y);
+        pos[2] = mouseCtrlTrans->GetPosition()[2];
+        mouseCtrlTrans->SetPosition(pos);
+        //logger.info << "Mouse x,y: " << arg.x << ", " << arg.y << logger.end;
+    }
 }
 
 
