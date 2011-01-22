@@ -243,14 +243,23 @@ void SetupDevices() {
     mouse = env->GetMouse();
     keyboard = env->GetKeyboard();
 
-    UserDefaults::GetInstance()->map["Mouse"] = mouse;
-    UserDefaults::GetInstance()->map["Keyboard"] = keyboard;
+    // Setup laser sensor device.
+    laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+    engine->InitializeEvent().Attach(*laserSensor);
+    engine->ProcessEvent().Attach(*laserSensor);
+    
+    if( LASER_DEBUG_ENABLED ) {
+        // Setup screen overlay to visualise laser sensor readings.
+        laserDebug = LaserDebug::Create(SCREEN_WIDTH, SCREEN_HEIGHT);
+        laserSensor->SetLaserDebug(laserDebug);
+        setup->GetTextureLoader().Load(laserDebug, Renderers::TextureLoader::RELOAD_IMMEDIATE);
+    }
 
-    // Setup cameras
-    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-    camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
-    camera->LookAt(0,190,-2000);
-    setup->SetCamera(*camera);
+    // Add main user input controller
+    inputCtrl = new InputController();
+    inputCtrl->SetInputDevice(mouse);
+    inputCtrl->SetInputDevice(keyboard);
+    inputCtrl->SetInputDevice(laserSensor);
 
     camSwitch = new CameraSwitcher(setup); // CameraSwitcher adds the current cam from setup
     keyboard->KeyEvent().Attach(*camSwitch);
@@ -264,17 +273,6 @@ void SetupDevices() {
 
     CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
     keyboard->KeyEvent().Attach(*ckh);
-
-    laserDebug = LaserDebug::Create(SCREEN_WIDTH, SCREEN_HEIGHT);
-    setup->GetTextureLoader().Load(laserDebug, Renderers::TextureLoader::RELOAD_IMMEDIATE);
-
-    // Setup laser sensor device.
-    LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
-    laserSensor->SetLaserDebug(laserDebug);
-    engine->InitializeEvent().Attach(*laserSensor);
-    engine->ProcessEvent().Attach(*laserSensor);
-    
-    
 }
 
 
