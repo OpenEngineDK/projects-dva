@@ -15,6 +15,7 @@
 #include <Resources/Texture2D.h>
 #include "../LaserDebug.h"
 #include <string>
+#include <vector>
 
 
 namespace OpenEngine {
@@ -22,9 +23,10 @@ namespace Devices {
 
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Resources;
-    using namespace dva;
+using namespace dva;
 
 class SICKDeviceDriver;
+
 
 /**
  * Short description.
@@ -37,6 +39,8 @@ public:
     ~LaserSensor();
 
     void Connect();    
+    std::vector< Vector<2,float> > GetState();
+
 
     // IModule handlers
     void Handle(Core::InitializeEventArg arg);
@@ -49,7 +53,11 @@ private:
     SICKDeviceDriver* device;
     LaserDebugPtr laserDebug;
 
-    void UpdateCalibrationCanvas(std::list< Math::Vector<2,float> > readings);
+    void UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > readings,
+                                 std::vector< Math::Vector<2,float> > clusters);
+
+    void SetPixel(unsigned int x, unsigned int y, 
+                  Vector<4,unsigned char> color); 
 };
 
 } // NS Devices

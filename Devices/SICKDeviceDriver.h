@@ -14,6 +14,7 @@
 #include <Core/Mutex.h>
 #include <Network/TCPSocket.h>
 #include <Math/Vector.h>
+#include "ClusterAnalyser.h"
 #include <list>
 
 namespace OpenEngine {
@@ -48,25 +49,28 @@ private:
     std::string deviceIp;
     unsigned short devicePort;
 
-    int startAngle, endAngle;
+    float startAngle, endAngle;
     float resolution;
     Math::Vector<2,float> bounds;
  
     Mutex mutex;
-    std::list< Math::Vector<2,float> > curReadings;
+    std::vector< Math::Vector<2,float> > curReadings;
+    std::vector< Math::Vector<2,float> > curClusters;
+
+    ClusterAnalyser* clusterAnalyser;
 
     string reqMsg; // Request measurements from SICK LMS100 sensor.
     string term;   // Termination string used in sensor reply.
 
     // SICK specific data parser
-    std::list< Math::Vector<2,float> > ParseData(string data);
+    std::vector< Math::Vector<2,float> > ParseData(string data);
 
+    // Check bounding condition on readings.
     bool InsideBounds(Math::Vector<2,float> p);
 
 public:
-
     SICKDeviceDriver(string ip, unsigned short port, 
-                     int startAngle, int endAngle, 
+                     float startAngle, float endAngle, 
                      float resolution, Math::Vector<2,float> rectBounds);
     ~SICKDeviceDriver();
 
@@ -74,11 +78,11 @@ public:
     void Close();
     SensorStatus GetStatus();
 
-    std::list< Math::Vector<2,float> > GetReadings();
+    std::vector< Math::Vector<2,float> > GetReadings();
+    std::vector< Math::Vector<2,float> > GetClusters();
 
     // Thread loop
     void Run();
-    
 };
 
 } // NS Devices

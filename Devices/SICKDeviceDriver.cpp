@@ -25,8 +25,20 @@ namespace Devices {
 
 using namespace OpenEngine::Math;
 
-SICKDeviceDriver::SICKDeviceDriver(string ip, unsigned short port, int startAngle, int endAngle, float resolution, Vector<2,float> rectBounds) :
-    status(NOT_CONNECTED), socket(NULL), deviceIp(ip), devicePort(port), startAngle(startAngle), endAngle(endAngle), resolution(resolution), bounds(rectBounds) {
+SICKDeviceDriver::SICKDeviceDriver(string ip, unsigned short port, 
+                                   float startAngle, float endAngle, 
+                                   float resolution, Vector<2,float> rectBounds) :
+    status(NOT_CONNECTED), 
+    socket(NULL), 
+    deviceIp(ip), 
+    devicePort(port), 
+    startAngle(startAngle), 
+    endAngle(endAngle), 
+    resolution(resolution), 
+    bounds(rectBounds) {
+
+    // epsilon, min cluster points
+    clusterAnalyser = new ClusterAnalyser(0.10, 10);
 
     // Create request message.
     stringstream r;
@@ -40,10 +52,11 @@ SICKDeviceDriver::SICKDeviceDriver(string ip, unsigned short port, int startAngl
 }
 
 SICKDeviceDriver::~SICKDeviceDriver() {
+    delete clusterAnalyser;
 }
 
 
-std::list< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
+std::vector< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
     // Split string into n separate measurements.
     stringstream strstr(data);
     // Use stream iterators to copy the stream to the vector as whitespace separated strings
@@ -52,23 +65,22 @@ std::list< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
     vector<string> results(it, end);
 
     // List for final points.
-    list< Vector<2,float> > points;
+    vector< Vector<2,float> > points;
 
     //    logger.info << "Laser sensor num readings: " << results.size() << logger.end;
     if( results.size() > 0 ){
 
-        double curAngle = startAngle;
+        float curAngle = startAngle;
 
         // 
         for(unsigned int i=IDX_OFFSET; i<results.size(); i++ ) {
-            float dist;
+            int dist;
             stringstream ss;
             ss << std::hex << results[i];
             ss >> dist;
             
-            
-            double cosAngle = cos(curAngle);
-            double sinAngle = sin(curAngle);
+            float cosAngle = cos(curAngle);
+            float sinAngle = sin(curAngle);
             float x = cosAngle * dist;
             float y = sinAngle * dist;
 
@@ -129,12 +141,20 @@ SensorStatus SICKDeviceDriver::GetStatus() {
 }
 
 
-std::list< Vector<2,float> > SICKDeviceDriver::GetReadings() {
+std::vector< Vector<2,float> > SICKDeviceDriver::GetReadings() {
     mutex.Lock();
-    std::list< Vector<2,float> > res = curReadings;
+    std::vector< Vector<2,float> > res = curReadings;
     mutex.Unlock();
     return res;
 }
+
+std::vector< Math::Vector<2,float> > SICKDeviceDriver::GetClusters() {
+    mutex.Lock();
+    std::vector< Vector<2,float> > res = curClusters;
+    mutex.Unlock();
+    return res;
+}
+
 
 // Thread loop
 void SICKDeviceDriver::Run(){
@@ -149,23 +169,37 @@ void SICKDeviceDriver::Run(){
     
     // Loop while connection to device is open.
     while( socket->IsOpen() ) {
+        string data;
 
-        // Request measurements from laser sensor.
-        socket->SendLine(reqMsg);
+        try {
+            // Request measurements from laser sensor.
+            socket->SendLine(reqMsg);
+            
+            // Read measurements from laser sensor (ETX terminated).
+            data = socket->ReadLine(term);
+        } catch (...) {
+            logger.error << "[SICKDeviceDriver] socket error." << logger.end;
+        }
 
-        // Read measurements from laser sensor (ETX terminated).
-        string data = socket->ReadLine(term);
 
         // Parse sensor readings.
         if( data.length() > 0 ){
             mutex.Lock();
             curReadings = ParseData(data);
             mutex.Unlock();
+        
+            
+            // Perform cluster analysis.            
+            if( curReadings.size() > 0 ){
+                vector< Vector<2,float> > clusterCenters;
+                clusterCenters = clusterAnalyser->AnalyseDataSet(curReadings);
+
+                mutex.Lock();
+                curClusters = clusterCenters;
+                mutex.Unlock();
+            }
         }
         
-
-        // Perform cluster analysis.
-
         
         
     }
