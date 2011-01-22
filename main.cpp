@@ -9,11 +9,12 @@
 //--------------------------------------------------------------------
 
 // OpenEngine stuff
-#include <Meta/Config.h>
-#include <Logging/Logger.h>
-#include <Logging/StreamLogger.h>
+//#include <Meta/Config.h>
+//#include <Logging/Logger.h>
+//#include <Logging/StreamLogger.h>
 #include <Core/Engine.h>
-#include <Display/Frustum.h>
+//#include <Display/IFrame.h>
+//#include <Display/Frustum.h>
 #include <Display/SDLEnvironment.h>
 #include <Display/PerspectiveViewingVolume.h>
 #include <Devices/IKeyboard.h>
@@ -63,7 +64,7 @@
 #include <Animations/BoxLimitRule.h>
 #include <Animations/BoxRule.h>
 #include <Animations/RandomRule.h>
-#include <Animations/FleeRule.h>
+#include <Animations/FleeSphereRule.h>
 
 #include <Utils/PropertyTree.h>
 
@@ -75,19 +76,14 @@
 // HUD stuff
 #include <Display/OpenGL/BlendCanvas.h>
 #include <Display/OpenGL/TextureCopy.h>
-// #include <Display/CanvasQueue.h>
 #include <Renderers/TextureLoader.h>
-// #include <Display/OpenGL/FadeCanvas.h>
 #include "Utils/Stages.h"
 
 // temporary hack ... remove next two lines when animation branch has been merged with main branch
 #include <Renderers/OpenGL/ShaderLoader.h>
 #include <Renderers/OpenGL/LightRenderer.h>
-
 #include <Scene/ShadowLightPostProcessNode.h>
-
 #include <Renderers/DataBlockBinder.h>
-
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
@@ -131,14 +127,15 @@ public:
 
 
 // Global stuff only used for setup.
-IEngine* engine;
-IEnvironment* env;
-SimpleSetup* setup;
-Camera* camera;
-IMouse* mouse;
-IKeyboard* keyboard;
-RenderStateNode *rsn;
-IRenderer* renderer;
+IEngine* engine            = NULL;
+IEnvironment* env          = NULL;
+SimpleSetup* setup         = NULL;
+Camera* camera             = NULL;
+InputController* inputCtrl = NULL;
+IMouse* mouse              = NULL;
+IKeyboard* keyboard        = NULL;
+RenderStateNode *rsn       = NULL;
+IRenderer* renderer        = NULL;
 
 vector<ISceneNode*> sceneNodes;
 
@@ -154,7 +151,8 @@ TransformationNode* box = NULL;
 
 ISceneNode* sharkAnimRoot = NULL;
 
-LaserDebugPtr laserDebug;
+LaserSensor* laserSensor = NULL;
+LaserDebugPtr laserDebug ;
 
 AnimationNode* animations;
 ISceneNode* animated = NULL;
