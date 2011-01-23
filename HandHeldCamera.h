@@ -54,8 +54,8 @@ public:
         unsigned int elapsed = timer.GetElapsedTimeAndReset().usec;
         float timeInMicros = 10000000.0f;
 
-        progx += ((float)elapsed / timeInMicros);
-        progy += (((float)elapsed*2) / timeInMicros);
+        progx += fmod(((float)elapsed / timeInMicros), 1.0);
+        progy += fmod((((float)elapsed*2) / timeInMicros), 1.0);
 
         //logger.info << "elapsed: " << elapsed << ", " << progx << ", " << progy << logger.end;
         

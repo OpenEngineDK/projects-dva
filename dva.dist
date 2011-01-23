@@ -27,13 +27,11 @@ darcs /extensions/SDL                    	http://openengine.dk/code/extensions/S
 darcs /extensions/SDLImage               	http://openengine.dk/code/extensions/SDLImage
 darcs /extensions/Sockets			http://openengine.dk/code/extensions/Sockets
 darcs /extensions/CairoResource          	http://openengine.dk/code/extensions/CairoResource
-#darcs /extensions/OpenGLRenderer         	http://openengine.dk/code/extensions/OpenGLRenderer
 darcs /extensions/OpenGLPostProcessEffects      http://openengine.dk/code/extensions/OpenGLPostProcessEffects
 darcs /extensions/TGAResource            	http://openengine.dk/code/extensions/TGAResource
 darcs /extensions/OBJResource            	http://openengine.dk/code/extensions/OBJResource
 darcs /extensions/AccelerationStructures 	http://openengine.dk/code/extensions/AccelerationStructures
 darcs /extensions/GenericHandlers 	 	http://openengine.dk/code/extensions/GenericHandlers
-
 
 #dev
 darcs-dev /extensions/AccelerationStructures	fh.daimi.au.dk:/users/cgd/code/extensions/AccelerationStructures

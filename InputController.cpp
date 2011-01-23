@@ -86,7 +86,7 @@ void InputController::Handle(Core::InitializeEventArg arg) {
     if( ctrlMode == NONE ) ctrlMode = MOUSE_CYLINDER_FLEE;
 
     if( mouse ) {
-
+        // Hide the mouse cursor by default.
         mouse->HideCursor();
 
         /*
