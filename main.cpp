@@ -63,6 +63,7 @@
 #include "InputController.h"
 #include "Utils/Stages.h"
 #include "CameraSwitcher.h"
+#include "LightAnimator.h"
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -414,6 +415,9 @@ void SetupScene() {
     lightNode1->constAtt = 1.0;
     scene->AddNode(lightTrans1);
     lightTrans1->AddNode(lightNode1);
+
+    LightAnimator* lightAnim = new LightAnimator(lightNode1);
+    engine->ProcessEvent().Attach(*lightAnim);
 
     rsn = new RenderStateNode();
     rsn->DisableOption(RenderStateNode::BACKFACE);
