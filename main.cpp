@@ -61,6 +61,7 @@
 #include "InputController.h"
 #include "Utils/Stages.h"
 #include "CameraSwitcher.h"
+
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -74,8 +75,7 @@ using namespace OpenEngine::Animations;
 using namespace dva;
 
 
-
-// Global stuff only used for setup.
+// Global variables used for setup.
 IEngine* engine            = NULL;
 IEnvironment* env          = NULL;
 SimpleSetup* setup         = NULL;
@@ -84,36 +84,21 @@ InputController* inputCtrl = NULL;
 IMouse* mouse              = NULL;
 IKeyboard* keyboard        = NULL;
 RenderStateNode *rsn       = NULL;
-IRenderer* renderer        = NULL;
 
 vector<ISceneNode*> sceneNodes;
 
-ISceneNode* postEffects;
-ISceneNode* fog;
-ISceneNode* light;
-
-ISceneNode* fish = NULL;
-TransformationNode* human = NULL;  // Laser input for predator instance.
-TransformationNode* shark = NULL;
+// Model pointers.
+ISceneNode* fish              = NULL;
+TransformationNode* human     = NULL; 
+TransformationNode* shark     = NULL;
 TransformationNode* sharkHead = NULL;
-TransformationNode* box = NULL;
+TransformationNode* box       = NULL;
+ISceneNode* sharkAnimRoot     = NULL;
 
-ISceneNode* sharkAnimRoot = NULL;
-
-LaserSensor* laserSensor = NULL;
-LaserDebugPtr laserDebug ;
-
-AnimationNode* animations;
-ISceneNode* animated = NULL;
-
-Stages* stages = NULL;
-// CanvasQueue* cq = NULL;
-
-Flock* flock = NULL;
-TransformationNode* flockFollow = NULL;
-
+// Custom stuff
+LaserDebugPtr laserDebug;
 CameraSwitcher* camSwitch = NULL;
-OpenEngine::Display::FrameOption frameOption = FRAME_NONE;
+FrameOption frameOption = FRAME_NONE;
 FlockPropertyReloader *rl = NULL;
 
 // Forward declarations
@@ -123,7 +108,7 @@ void SetupDevices();
 void SetupBoids();
 void LoadResources();
 
-
+// Helper function.
 AnimationNode* GetAnimationNode(ISceneNode* node) {
     SearchTool st;
     return st.DescendantAnimationNode(node);
@@ -136,32 +121,34 @@ int main(int argc, char** argv) {
         frameOption = FRAME_FULLSCREEN;
     }
 
-    //
+    // Setup main frame.
     SetupEngine();
 
-    //
+    // Setup mouse, keyboard and sensor input devices.
     SetupDevices();
 
-    //
+    // Load all model resources.
     LoadResources();
 
-    //
+    // Setup scene graph and visual effects.
     SetupScene();
 
-    //
+    // Setup flock behaviour rules.
     SetupBoids();
 
+    
+    // Update data blocks in case they change due to VBO support.
     DataBlockBinder* bob = new DataBlockBinder(setup->GetRenderer(), 
                                                DataBlockBinder::RELOAD_IMMEDIATE);
     bob->Bind(*setup->GetScene());
 
 
-    // Write dot graph    
+    // Generate dot graph representation of the scene.    
     DotVisitor dv;
     ofstream os("graph.dot", ofstream::out);
     dv.Write(*(setup->GetScene()), &os);
 
-    // Start the engine.
+    // Start the engine, loop until quit.
     engine->Start();
 
     // Return when the engine stops.
@@ -176,10 +163,7 @@ void SetupEngine() {
     // Create simple setup
     setup = new SimpleSetup("Det Virtuelle Akvarium", env);
 
-    renderer = &setup->GetRenderer();
-    renderer->SetBackgroundColor(Vector<4, float>(0.4, 0.6, 0.8, 1.0));
-
-    // Get Engine
+     // Get Engine
     engine = &setup->GetEngine();
 }
 
@@ -190,7 +174,7 @@ void SetupDevices() {
     keyboard = env->GetKeyboard();
 
     // Setup laser sensor device.
-    laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+    LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
     engine->InitializeEvent().Attach(*laserSensor);
     engine->ProcessEvent().Attach(*laserSensor);
     
@@ -324,7 +308,7 @@ void SetupScene() {
         b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->InitCanvas(setup->GetCanvas());
 
-    stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), b);
+    Stages* stages = new Stages(setup->GetFrame(), setup->GetTextureLoader(), b);
     engine->InitializeEvent().Attach(*stages);
     engine->DeinitializeEvent().Attach(*stages);
     engine->ProcessEvent().Attach(*stages);
@@ -341,6 +325,9 @@ void SetupScene() {
     ISceneNode* sceneRoot = new SceneNode();
     setup->SetScene(*sceneRoot);
 
+    // Set background color to white
+    setup->GetRenderer().SetBackgroundColor(Vector<4,float>(1.0,1.0,1.0,1.0));
+
     // temporary hack ... remove next line when animation branch has been merged with main branch
     setup->GetShaderLoader()->SetLightRenderer(setup->GetLightRenderer());
 
@@ -352,7 +339,7 @@ void SetupScene() {
     // Create fog post process   
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
-    renderer->InitializeEvent().Attach(*fogNode);
+    setup->GetRenderer().InitializeEvent().Attach(*fogNode);
     scene->AddNode(fogNode); 
     scene = fogNode;
 
@@ -363,8 +350,8 @@ void SetupScene() {
                                        dimension,
                                        //dimension
                                        Vector<2,int>(1024,2048));
-    renderer->InitializeEvent().Attach(*shadowPost);
-    renderer->PreProcessEvent().Attach(*shadowPost);
+    setup->GetRenderer().InitializeEvent().Attach(*shadowPost);
+    setup->GetRenderer().PreProcessEvent().Attach(*shadowPost);
     scene->AddNode(shadowPost); 
     scene = shadowPost;
 
@@ -380,12 +367,11 @@ void SetupScene() {
     camSwitch->AddCamera(cam);    
     shadowPost->SetViewingVolume(cam);
 
-
     // Create caustics post process
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
-    renderer->InitializeEvent().Attach(*causticsNode);
+    setup->GetRenderer().InitializeEvent().Attach(*causticsNode);
     scene->AddNode(causticsNode); 
     scene = causticsNode;
 
@@ -440,7 +426,7 @@ void SetupBoids() {
     engine->DeinitializeEvent().Attach(*ptree);
 
      // Setup flock rules.
-    flock = new Flock();    
+    Flock* flock = new Flock();    
     flock->AddRule(new SeperationRule());
     flock->AddRule(new CohersionRule());
     flock->AddRule(new SpeedRule());
@@ -488,14 +474,14 @@ void SetupBoids() {
     TrackingFollowCamera *tfc = 
         new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     tfc->SetPosition(Vector<3,float>(20,20,20));
-    tfc->Track(flockFollow);
+    //tfc->Track(flockFollow);
     tfc->Follow(flock->GetTransformationNode(0));
     camSwitch->AddCamera(tfc);
 
     // Follow target, look at a fish
     tfc = new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     tfc->SetPosition(Vector<3,float>(20,20,20));
-    tfc->Follow(flockFollow);
+    //tfc->Follow(flockFollow);
     tfc->Track(flock->GetTransformationNode(0));
     camSwitch->AddCamera(tfc);
 

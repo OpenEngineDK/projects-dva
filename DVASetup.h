@@ -33,7 +33,7 @@ namespace dva {
     // Laser Sensor Setup
     const std::string LASER_SENSOR_IP     = "192.168.0.100";
     const int         LASER_SENSOR_PORT   = 2111; // 2111 or 2112
-    const bool        LASER_DEBUG_ENABLED = false;
+    const bool        LASER_DEBUG_ENABLED = true;
 
     // Cluster Analyser
     const float CLUSTER_EPSILON    = 0.10; // Max distance between points in cluster.

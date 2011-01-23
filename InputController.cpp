@@ -142,8 +142,8 @@ void InputController::Handle(Core::InitializeEventArg arg) {
 
 
         // Visualise laser controlled transformation node.
-//         if( debugMesh && flockFollowTrans )
-//            flockFollowTrans->AddNode(debugMesh->Clone());
+        if( debugMesh && flockFollowTrans )
+           flockFollowTrans->AddNode(debugMesh->Clone());
  
         
     }

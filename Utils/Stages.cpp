@@ -63,12 +63,12 @@ void Stages::Handle(Core::DeinitializeEventArg arg) {
 void Stages::Handle(Core::ProcessEventArg arg) {
     progress += arg.approx * 1e-06;
     if (prevTime <= loadTime && loadTime <= progress) {
-        logger.info << "fadeIn" << logger.end;
+        //logger.info << "fadeIn" << logger.end;
         fader->FadeIn(loadStage, 0.5);
     }
 
     if (prevTime <= sceneTime && sceneTime <= progress) {
-        logger.info << "fadeTo" << logger.end;
+        //logger.info << "fadeTo" << logger.end;
         fader->FadeTo(sceneStage, 1.0);
     }
 
