@@ -16,15 +16,7 @@ namespace dva {
 #include <Scene/TransformationNode.h>
 #include <Math/Quaternion.h>
 #include <Utils/Timer.h>
-
-// class MorphableQuaternion 
-// : public Quaternion<float>, IMorpher<Quaternion<float> > {
-
-// public:
-//     MorphableQuaternion() {
-//     }
-//     ~MorphableQuaternion(){}
-// };
+#include <Display/Camera.h>
 
 /**
  * Short description.
@@ -34,7 +26,7 @@ namespace dva {
 class HandHeldCamera : public IModule {
 private:
     Utils::Timer timer;                // Sequence timer.
-    Camera* camera;
+    Display::Camera* camera;
     Vector<3,float> orgCamPos;
     float progx;
     float progy;
