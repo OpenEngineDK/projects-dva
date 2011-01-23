@@ -1,4 +1,3 @@
-
 //
 // -------------------------------------------------------------------
 // Copyright (C) 2007 OpenEngine.dk (See AUTHORS)
@@ -58,6 +57,27 @@ private:
 
     void SetPixel(unsigned int x, unsigned int y, 
                   Vector<4,unsigned char> color); 
+
+
+    // temp
+    int factorial(int n){
+        if( n < 0 ) return 0;
+
+        int res = 1;
+        for(int i=0; i<n; i++){
+            res = n * factorial(n-1);
+        }
+        return res;
+    }
+
+    double binominal(int n, int k){
+        int nominator = factorial(n);
+        int denominator = factorial(k) * factorial(n-k);
+        if( denominator > 0 )
+            return nominator / denominator;
+        else
+            return 0;
+    }
 };
 
 } // NS Devices

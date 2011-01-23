@@ -107,6 +107,8 @@ CameraSwitcher* camSwitch = NULL;
 FrameOption frameOption = FRAME_NONE;
 FlockPropertyReloader *rl = NULL;
 
+PropertyTree* ptree;
+ 
 // Forward declarations
 void SetupEngine();
 void SetupScene();
@@ -164,6 +166,10 @@ int main(int argc, char** argv) {
 
 
 void SetupEngine() {
+    //
+    string confPath = DirectoryManager::FindFileInPath("projects/dva/boids.yaml");
+    ptree = new PropertyTree(confPath);    
+
     // Create SDL environment handling display and input
     env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, frameOption);
 
@@ -181,7 +187,7 @@ void SetupDevices() {
     keyboard = env->GetKeyboard();
 
     // Add main user input controller
-    inputCtrl = new InputController();
+    inputCtrl = new InputController(ptree->GetRootNode());
     inputCtrl->SetInputDevice(mouse);
     inputCtrl->SetInputDevice(keyboard);
 
@@ -444,8 +450,6 @@ void SetupScene() {
 }
 
 void SetupBoids() {
-    string confPath = DirectoryManager::FindFileInPath("boids.yaml");
-    PropertyTree* ptree = new PropertyTree(confPath);    
 
     // engine->InitializeEvent().Attach(*ptree);
     engine->ProcessEvent().Attach(*ptree);

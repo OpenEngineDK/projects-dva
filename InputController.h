@@ -11,6 +11,9 @@
 #define _INPUT_CONTROLLER_H_
 
 #include <Core/IModule.h>
+#include <Utils/PropertyTree.h>
+#include <Utils/PropertyTreeNode.h>
+#include <Utils/Timer.h>
 #include "Devices/LaserSensor.h"
 #include <Devices/IKeyboard.h>
 #include <Devices/IMouse.h>
@@ -46,7 +49,7 @@ using OpenEngine::Animations::IRule;
 using OpenEngine::Animations::SeparationRule;
 using OpenEngine::Scene::ISceneNode;
 using OpenEngine::Scene::TransformationNode;
-
+using OpenEngine::Utils::PropertyTreeNode;
 
 /**
  * Short description.
@@ -55,12 +58,15 @@ using OpenEngine::Scene::TransformationNode;
  */
 class InputController : public IModule {
 private:
+    PropertyTreeNode* pNode;
     LaserSensor* sensor;
     IKeyboard* keyboard;
     IMouse* mouse;
 
     // Defines current controller mode.
     CtrlMode ctrlMode;
+    Utils::Timer timer;
+    int numTracking;
 
     Flock* flock;
     TransformationNode* flockFollowTrans;
@@ -82,7 +88,7 @@ private:
     Vector<3,float> ScreenToSpaceCoordinate(int x, int y);
 
 public:
-    InputController();
+    InputController(PropertyTreeNode* pn);
     InputController(LaserSensor* sensor);
     InputController(IKeyboard* keyboard);
     InputController(IMouse* mouse);

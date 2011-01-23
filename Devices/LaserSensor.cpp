@@ -78,10 +78,10 @@ void LaserSensor::SetLaserDebug(LaserDebugPtr debug){
 void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > readings,
                                           std::vector< Math::Vector<2,float> > clusters) {
     if( laserDebug ){
-        
+
         int width = laserDebug->GetWidth();
         int height = laserDebug->GetHeight();
-
+        
         // Clear canvas
         unsigned char* canvasPtr = laserDebug->GetData();
         std::memset(canvasPtr,0,height*width*4);
@@ -94,13 +94,8 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
             int y = ((reading[1] + 1) / 2.0) * (height - 1);
 
             SetPixel(x,y,Vector<4,unsigned char>(0,255,0,255));
-//             canvasPtr[(y*width + x)*4+0] = 255;
-//             canvasPtr[(y*width + x)*4+1] = 0;
-//             canvasPtr[(y*width + x)*4+2] = 0;
-//             canvasPtr[(y*width + x)*4+3] = 255;
         }
 
-     
         // Calculate all canvas points.
         for(unsigned int i=0; i<clusters.size(); i++){
             Vector<2,float> cc = clusters[i];
@@ -112,7 +107,6 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
                 int cY = (int)(sin(r) * 10) + yPos;
                 SetPixel(cX,cY,Vector<4,unsigned char>(255,0,0,255));
             }
-
             SetPixel(100,100,Vector<4,unsigned char>(255,0,0,255));
         }
 

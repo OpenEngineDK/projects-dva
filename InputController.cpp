@@ -47,7 +47,7 @@ void InputController::Init() {
     debugMesh = NULL;
 }
 
-InputController::InputController() {
+InputController::InputController(PropertyTreeNode* pn) : pNode(pn) {
     Init();
 }
 
@@ -239,81 +239,15 @@ void InputController::HandleLaserSensorInput() {
             distBetweenPoints *= 20.0f;
             separationRule->SetDistance(distBetweenPoints);
             //            logger.info << "Separation Dist: " << distBetweenPoints << logger.end;
-
-
-
         }
-
+    } else if( points.size() == 5 ) {
+        timer.Start();
+        pNode->SetPath("flock1.multigoto.magnitude", 5.0f);
     }
 
-    /*
-    // Adjust number of rules according to number of avatars.
-    if( laserAvatars.size() == points.size() ){
-        for( unsigned int i=0; i<points.size(); i++){
-            TransformationNode* trans = laserAvatars[i]->GetTransformationToFleeFrom();
-            Vector<2,float> point = points[i];
-            Vector<3,float> pos;
-
-            int x = ((point[0]+1)/2.0) * SCREEN_WIDTH;
-            int y = ((point[1]+1)/2.0) * SCREEN_HEIGHT;
-
-            float xRange = 370.0f;
-            float yRange = 160.0f;
-            float yTop = 170.0;
-            
-            pos[0] = (-xRange/2.0f) + ((x / (float)SCREEN_WIDTH) * xRange);
-            pos[1] = yTop - ((y / (float)SCREEN_HEIGHT) * yRange);
-            pos[2] = -300;
-            trans->SetPosition(pos);
-            //            logger.info << "POS: " << pos << logger.end;
-
-        }
-        
-    } else if( laserAvatars.size() > points.size() ) {
-        // Remove flee rule from flock.
-//         SearchTool search;
-//         stringstream ss;
-//         ss << laserAvatars.size();
-//         PropertyNode* p = search.DescendantPropertyNodeWith("id", ss.str(), scene );
-      
-//         if( p ){
-//             p->GetParent()->RemoveNode(p);
-//             //            logger.info << "FOUND" << logger.end;
-//         }
-
-        flock->RemoveRule(laserAvatars.back());
-        laserAvatars.pop_back();
-        
-
-        //        logger.info << "Removed Avatar" << logger.end;
-    } else if( laserAvatars.size() < points.size() ) {
-        // Add flee rule to flock.
-        TransformationNode* trans = new TransformationNode();
-        FleeRule* newAvatar = new FleeSphereRule(trans, 75.0, 20.0);
-        flock->AddRule(newAvatar);
-        laserAvatars.push_back(newAvatar);
-
-//         if( scene ){
-//             trans->AddNode(object->Clone());
-//             PropertyNode* p = new PropertyNode();
-//             p->SetProperty("id", (int)laserAvatars.size());
-//             p->AddNode(trans);
-//             scene->AddNode(p);
-//         }
-
-        //        logger.info << "Added Avatar" << logger.end;
-    }    
-
-
-    //    logger.info << "NumAvatars: " << laserAvatars.size() << logger.end;
-
-//     for( unsigned int i=0; i<points.size(); i++){
-//         logger.info << "LaserPoint: " << points[i] << logger.end;
-    
-//         //    flock->AddRule(new FleeRule(human, 100.0, 1.0));
-
-//     }  
-*/    
+    if( timer.GetElapsedTime().sec > 5 ){
+        pNode->SetPath("flock1.multigoto.magnitude", 0.0f);
+    }
 }
 
 Vector<3,float> InputController::ScreenToSpaceCoordinate(int x, int y) {
