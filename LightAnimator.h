@@ -15,7 +15,7 @@ class LightAnimator : public OpenEngine::Core::IListener<OpenEngine::Core::Proce
  public:
  LightAnimator(OpenEngine::Geometry::Light* light) : light(light) {
         t = 0.0f;
-        disco = true;
+        disco = false;
     }
     void Handle(OpenEngine::Core::ProcessEventArg arg) {
         t += (arg.approx * 1e-6);
