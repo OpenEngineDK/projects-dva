@@ -399,13 +399,13 @@ void SetupScene() {
 //     lightTrans->AddNode(lightNode);
 
     TransformationNode* lightTrans1 = new TransformationNode();
-    lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
-    lightTrans1->SetPosition(Vector<3,float>(0.0, 54.0,0.0));
+    // lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
+    lightTrans1->SetPosition(Vector<3,float>(0.0, 100.0,0.0));
     PointLightNode* lightNode1 = new PointLightNode();
-    lightNode1->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
+    lightNode1->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
     lightNode1->diffuse = Vector<4,float>(1.0,1.0,1.0,1.0);
-    lightNode1->linearAtt = 0.0001;
-    lightNode1->constAtt = 0.7;
+    lightNode1->linearAtt = 0.001;
+    lightNode1->constAtt = 1.0;
     scene->AddNode(lightTrans1);
     lightTrans1->AddNode(lightNode1);
 
