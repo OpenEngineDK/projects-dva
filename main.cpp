@@ -396,7 +396,8 @@ void SetupScene() {
     PointLightNode* lightNode1 = new PointLightNode();
     lightNode1->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
     lightNode1->diffuse = Vector<4,float>(1.0,1.0,1.0,1.0);
-    lightNode1->linearAtt = 0.01;
+    lightNode1->linearAtt = 0.0001;
+    lightNode1->constAtt = 0.7;
     scene->AddNode(lightTrans1);
     lightTrans1->AddNode(lightNode1);
 
