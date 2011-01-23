@@ -101,6 +101,8 @@ CameraSwitcher* camSwitch = NULL;
 FrameOption frameOption = FRAME_NONE;
 FlockPropertyReloader *rl = NULL;
 
+Camera* shadowCam;
+
 // Forward declarations
 void SetupEngine();
 void SetupScene();
