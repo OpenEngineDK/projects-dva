@@ -188,6 +188,9 @@ void InputController::HandleMouseInput(){
 
 void InputController::HandleLaserSensorInput() {
 
+    // If no laser sensor is defined skip handling. 
+    if( !sensor ) return;
+
     // Get laser readings.
     vector< Vector<2,float> > points = sensor->GetState();
     

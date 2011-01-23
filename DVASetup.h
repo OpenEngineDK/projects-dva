@@ -29,7 +29,6 @@ namespace dva {
 
     const CtrlMode INPUT_CTRL_MODE = LASER_FOLLOW_FLOCK_AND_RESIZE;
 
-
     // Laser Sensor Setup
     const std::string LASER_SENSOR_IP     = "192.168.0.100";
     const int         LASER_SENSOR_PORT   = 2111; // 2111 or 2112
