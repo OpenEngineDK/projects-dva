@@ -173,23 +173,29 @@ void SetupDevices() {
     mouse = env->GetMouse();
     keyboard = env->GetKeyboard();
 
-    // Setup laser sensor device.
-    LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
-    engine->InitializeEvent().Attach(*laserSensor);
-    engine->ProcessEvent().Attach(*laserSensor);
-    
-    if( LASER_DEBUG_ENABLED ) {
-        // Setup screen overlay to visualise laser sensor readings.
-        laserDebug = LaserDebug::Create(SCREEN_WIDTH, SCREEN_HEIGHT);
-        laserSensor->SetLaserDebug(laserDebug);
-        setup->GetTextureLoader().Load(laserDebug, Renderers::TextureLoader::RELOAD_IMMEDIATE);
-    }
-
     // Add main user input controller
     inputCtrl = new InputController();
     inputCtrl->SetInputDevice(mouse);
     inputCtrl->SetInputDevice(keyboard);
-    inputCtrl->SetInputDevice(laserSensor);
+
+    // Setup laser sensor device.
+    if( LASER_SENSOR_ENABLED ) {
+        LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+        engine->InitializeEvent().Attach(*laserSensor);
+        engine->ProcessEvent().Attach(*laserSensor);
+        inputCtrl->SetInputDevice(laserSensor);
+        logger.info << "Enabling Laser Sensor Input." << logger.end;
+
+        if( LASER_DEBUG_ENABLED ) {
+            // Setup screen overlay to visualise laser sensor readings.
+            laserDebug = LaserDebug::Create(SCREEN_WIDTH, SCREEN_HEIGHT);
+            laserSensor->SetLaserDebug(laserDebug);
+            setup->GetTextureLoader().Load(laserDebug, Renderers::TextureLoader::RELOAD_IMMEDIATE);
+            logger.info << "Enabling Laser Sensor Input Visualiser." << logger.end;
+        }
+    }
+
+
 
     inputCtrl->SetMode(INPUT_CTRL_MODE);
     engine->InitializeEvent().Attach(*inputCtrl);
@@ -304,7 +310,7 @@ void SetupScene() {
     BlendCanvas* b = new BlendCanvas(new TextureCopy());
     b->AddTexture(setup->GetCanvas()->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
-    if( LASER_DEBUG_ENABLED )
+    if( LASER_SENSOR_ENABLED && LASER_DEBUG_ENABLED )
         b->AddTexture(laserDebug, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     b->InitCanvas(setup->GetCanvas());
 
