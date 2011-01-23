@@ -392,7 +392,7 @@ void SetupScene() {
 
     TransformationNode* lightTrans1 = new TransformationNode();
     lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
-    lightTrans1->SetPosition(Vector<3,float>(0.0,-100.0,0.0));
+    lightTrans1->SetPosition(Vector<3,float>(0.0, 54.0,0.0));
     PointLightNode* lightNode1 = new PointLightNode();
     lightNode1->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
     lightNode1->diffuse = Vector<4,float>(1.0,1.0,1.0,1.0);
@@ -404,7 +404,7 @@ void SetupScene() {
     rsn->DisableOption(RenderStateNode::BACKFACE);
     rsn->EnableOption(RenderStateNode::LIGHTING);
     rsn->EnableOption(RenderStateNode::COLOR_MATERIAL);
-    rsn->DisableOption(RenderStateNode::SHADER);
+    rsn->EnableOption(RenderStateNode::SHADER);
     scene->AddNode(rsn);
     scene = rsn;
 
