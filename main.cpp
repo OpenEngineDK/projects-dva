@@ -371,15 +371,12 @@ void SetupScene() {
 
     // TODO adjust shadow camera...
     IViewingVolume* shadowView = new PerspectiveViewingVolume(100,2000);
-    shadowView->SetDirection(Quaternion<float>(0, 45.0, 0));
-    
-    Camera* cam = new Camera(*(shadowView));
-    cam->SetPosition(Vector<3,float>(0,1000,-330));
-    //    cam->rotate(0, pi/4.0, 0);
-    //    cam->setdirection(vector<3,float>(0,-1,0), vector<3,float>(1,1,0));
-    cam->LookAt(Vector<3,float>(0,0,-400));
-    camSwitch->AddCamera(cam);    
-    shadowPost->SetViewingVolume(cam);
+    shadowCam = new Camera(*(shadowView));
+    shadowCam->SetPosition(Vector<3,float>(0,800,500));
+    shadowCam->LookAt(Vector<3,float>(0,0,-1000));
+    camSwitch->AddCamera(shadowCam);    
+    shadowPost->SetViewingVolume(shadowCam);
+
 
     // Create caustics post process
     IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
