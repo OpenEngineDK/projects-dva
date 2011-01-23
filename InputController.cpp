@@ -16,7 +16,7 @@
 #include <Animations/FollowRule.h>
 #include <Animations/FleeSphereRule.h>
 #include <Animations/FleeCylinderRule.h>
-#include <Animations/SeperationRule.h>
+#include <Animations/SeparationRule.h>
 #include <Logging/Logger.h>
 #include "CylinderNode.h"
 #include "DVASetup.h"
@@ -140,7 +140,7 @@ void InputController::Handle(Core::InitializeEventArg arg) {
             sceneNode->AddNode(flockFollowTrans);
 
             // Find separation rule.
-            separationRule = (SeperationRule*)flock->GetRuleNamed("Separation");
+            separationRule = (SeparationRule*)flock->GetRuleNamed("Separation");
         }
 
 

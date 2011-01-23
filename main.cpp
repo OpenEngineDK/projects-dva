@@ -14,7 +14,8 @@
 #include <Animations/AnimatedTransformation.h>
 #include <Animations/Flock.h>
 #include <Animations/FlockPropertyReloader.h>
-#include <Animations/SeperationRule.h>
+#include <Animations/SeparationRule.h>
+#include <Animations/MultiGotoRule.h>
 #include <Animations/AlignmentRule.h>
 #include <Animations/CohersionRule.h>
 #include <Animations/SpeedRule.h>
@@ -450,8 +451,8 @@ void SetupBoids() {
     // engine->DeinitializeEvent().Attach(*ptree);
 
      // Setup flock rules.
-    Flock* flock = new Flock();    
-    flock->AddRule(new SeperationRule());
+    Flock* flock = new Flock();
+    flock->AddRule(new SeparationRule());
     flock->AddRule(new CohersionRule());
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
@@ -470,14 +471,13 @@ void SetupBoids() {
         sharkHead = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(4)->GetAnimatedNode(); 
     }
     flock->AddRule(new FleeSphereRule(sharkHead, 100.0, 20.0));
+    flock->SetPropertyNode(ptree->GetRootNode()->GetNode("flock1"));
 
     // Set flock in input controller, enabling user interactions.
     inputCtrl->SetFlock(flock);
     inputCtrl->SetDebugMesh(box);
     rsn->AddNode(inputCtrl->GetSceneNode());
 
-    // Set Flock property reloader listening on changes in boid.yaml
-    rl = new FlockPropertyReloader(flock, ptree, "flock1");
 
     vector<ISceneNode*>::iterator itr;
     int size = ptree->GetRootNode()->GetNode("flock1")->GetPath("size", 100);

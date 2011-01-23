@@ -1,6 +1,6 @@
 flock1:
   size: 200
-  seperation:
+  separation:
     dist: 18.0
   speed:
     min: 40.0

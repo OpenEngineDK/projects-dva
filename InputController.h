@@ -26,7 +26,7 @@ namespace OpenEngine {
     namespace Animations {
         class Flock;
         class IRule;
-        class SeperationRule;
+        class SeparationRule;
     }
     namespace Scene {
         class ISceneNode;
@@ -43,7 +43,7 @@ using OpenEngine::Devices::IKeyboard;
 using OpenEngine::Devices::IMouse;
 using OpenEngine::Animations::Flock;
 using OpenEngine::Animations::IRule;
-using OpenEngine::Animations::SeperationRule;
+using OpenEngine::Animations::SeparationRule;
 using OpenEngine::Scene::ISceneNode;
 using OpenEngine::Scene::TransformationNode;
 
@@ -68,7 +68,7 @@ private:
 
     IRule* mouseCtrlRule;
     std::vector<IRule*> laserCtrlRules;
-    SeperationRule* separationRule;
+    SeparationRule* separationRule;
 
     ISceneNode* sceneNode;
     TransformationNode* mouseCtrlTrans;
