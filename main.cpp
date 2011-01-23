@@ -24,6 +24,7 @@
 #include <Animations/RandomRule.h>
 #include <Animations/FleeSphereRule.h>
 
+
 #include <Core/Engine.h>
 
 #include <Display/SDLEnvironment.h>
@@ -457,6 +458,53 @@ void SetupBoids() {
     flock->AddRule(new SpeedRule());
     flock->AddRule(new AlignmentRule());
     flock->AddRule(new RandomRule());
+        {
+        MultiGotoRule* mgr = new MultiGotoRule();
+        // Lets generate a logo || OpenEngine
+        // int array[] = {0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        //                1,0,0,0,1,0,1,1,0,0,1,1,1,0,1,0,1,0,2,0,0,0,1,0,1,0,1,1,1,0,0,1,0,0,1,0,1,0,1,1,1,
+        //                1,0,0,0,1,0,1,0,1,0,1,0,0,0,2,0,1,0,2,1,1,0,2,0,1,0,1,0,0,0,0,0,0,0,2,0,1,0,1,0,0,
+        //                1,0,0,0,1,0,1,1,0,0,1,1,1,0,1,1,1,0,2,1,1,0,1,1,1,0,1,1,0,0,0,1,0,0,1,1,1,0,1,1,1,
+        //                1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,2,0,2,0,0,0,1,0,2,0,1,0,1,0,0,1,0,0,1,0,2,0,1,0,0,
+        //                0,1,1,1,0,0,1,0,0,0,1,1,1,0,1,0,1,0,2,2,2,0,1,0,1,0,1,1,1,0,0,1,0,0,1,0,1,0,1,1,1
+        // };
+        int array[] = {0,1,1,1,0,0,2,2,2,2,
+                       1,0,0,0,1,0,2,0,0,0,
+                       1,0,0,0,1,0,2,1,1,1,
+                       1,0,0,0,1,0,2,1,1,1,
+                       1,0,0,0,1,0,2,0,0,0,
+                       0,1,1,1,0,0,2,2,2,2
+        };
+
+        int elms = sizeof(array)/sizeof(int);
+        int h = 6;
+        int w = elms/h;
+        float maxW = 200;
+        float maxH = 200;
+        logger.error << h << " " << w << " = " << elms << logger.end;
+        Vector<3,float> startP(-80,maxH-30,-300);
+        //Vector<3,float> delta(maxW/w,maxH/h,0);
+        //Vector<3,float> delta(maxw/h,maxH/h,0);
+        int min = std::min(maxW/w, maxH/h);
+        Vector<3,float> delta(min,min,0);
+        
+        //Vector<3,float> delta(40,40,0);
+        for (int i=0; i<h; i++) {
+            for (int j=0; j<w; j++) {
+                int idx = i*w+j;
+                int v = array[idx];
+                Vector<3,float> p = startP;
+                p[0] += delta[0]*j;
+                p[1] -= delta[1]*i;
+                for (int k=0; k<v; k++)
+                    mgr->AddPosition(p);
+                
+            }
+        }
+
+
+        flock->AddRule(mgr);
+    }// done
     flock->AddRule(new BoxLimitRule(Vector<3,float>(-400,30,-400), 
                                     Vector<3,float>(400,400,400)));
     flock->AddRule(new BoxRule(Vector<3,float>(-400,30,-400),  // The two corners
