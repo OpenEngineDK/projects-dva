@@ -9,6 +9,7 @@
 
 #include "ClusterAnalyser.h"
 #include <iostream>
+#include <cstring>
 
 namespace OpenEngine {
 namespace Devices {
