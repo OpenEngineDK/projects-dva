@@ -247,6 +247,8 @@ void InputController::HandleLaserSensorInput() {
 
     if( timer.GetElapsedTime().sec > 5 ){
         pNode->SetPath("flock1.multigoto.magnitude", 0.0f);
+        timer.Stop();
+        timer.Reset();
     }
 }
 
