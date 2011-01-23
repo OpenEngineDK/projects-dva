@@ -52,7 +52,7 @@ public:
 
     void Handle(Core::ProcessEventArg arg) {
         unsigned int elapsed = timer.GetElapsedTimeAndReset().usec;
-        float timeInMicros = 10000000.0f;
+        float timeInMicros = 20000000.0f;
 
         progx += fmod(((float)elapsed / timeInMicros), 1.0);
         progy += fmod((((float)elapsed*2) / timeInMicros), 1.0);
@@ -62,7 +62,7 @@ public:
         float radX = 2 * PI * progx;
         float radY = 2 * PI * progy;
 
-        float radius = 2.0f;
+        float radius = 1.0f;
         Vector<3,float> pos = orgCamPos;
         pos[0] += sin(radX) * radius * 4;
         pos[1] += sin(radY) * radius;

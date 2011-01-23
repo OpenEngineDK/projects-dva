@@ -63,6 +63,7 @@
 #include "InputController.h"
 #include "Utils/Stages.h"
 #include "CameraSwitcher.h"
+#include "HandHeldCamera.h"
 #include "LightAnimator.h"
 
 using namespace OpenEngine::Logging;
@@ -104,8 +105,6 @@ CameraSwitcher* camSwitch = NULL;
 FrameOption frameOption = FRAME_NONE;
 FlockPropertyReloader *rl = NULL;
 
-Camera* shadowCam;
-
 // Forward declarations
 void SetupEngine();
 void SetupScene();
@@ -118,6 +117,7 @@ AnimationNode* GetAnimationNode(ISceneNode* node) {
     SearchTool st;
     return st.DescendantAnimationNode(node);
 }
+
 
 int main(int argc, char** argv) {
 
@@ -209,9 +209,14 @@ void SetupDevices() {
     
     // Static default view
     Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-    stc->SetPosition(Vector<3, float>(0, 54, 0));
+    stc->SetPosition(Vector<3, float>(0, 56, 0));
     stc->LookAt(0,190,-2000);
     setup->SetCamera(*stc);
+
+    // TEST Hand-held camera.
+    HandHeldCamera* hhc = new HandHeldCamera(stc);
+    engine->InitializeEvent().Attach(*hhc);
+    engine->ProcessEvent().Attach(*hhc);
 
     // CameraSwitcher adds the current cam from setup
     camSwitch = new CameraSwitcher(setup); 
@@ -334,14 +339,12 @@ void SetupScene() {
     engine->InitializeEvent().Attach(*stages);
     engine->DeinitializeEvent().Attach(*stages);
     engine->ProcessEvent().Attach(*stages);
-    
-    // Setup HUD stuff
-    // hud = new BlendCanvas(new TextureCopy());
-    // ITexture2DPtr img = ResourceManager<ITextureResource>::Create("projects/dva/data/small.jpg");
-    // setup->GetTextureLoader().Load(img);
-    // hud->AddTexture(setup->GetCanvas(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
-    // hud->AddTexture(img, 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
-    // hud->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));
+
+    // Apply Heads Up Display
+//     string path = DirectoryManager::FindFileInPath("textures/hud/hud_default.tga");
+//     ITexture2DPtr hud = ResourceManager<ITextureResource>::Create(path);
+//     setup->GetTextureLoader().Load(hud);
+//     b->AddTexture(hud, 0, 0, Vector<4,float>(1.0,1.0,1.0,0.5));
     
     // Start by setting the root node in the scene graph.
     ISceneNode* sceneRoot = new SceneNode();
@@ -354,7 +357,6 @@ void SetupScene() {
     ISceneNode* scene = sceneRoot;
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
  
-
     // Create fog post process   
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
@@ -368,7 +370,7 @@ void SetupScene() {
         new ShadowLightPostProcessNode(shadow, 
                                        dimension,
                                        //dimension
-                                       Vector<2,int>(1024,2048));
+                                       Vector<2,int>(1024,1024));
     setup->GetRenderer().InitializeEvent().Attach(*shadowPost);
 
     scene->AddNode(shadowPost); 
@@ -376,7 +378,7 @@ void SetupScene() {
 
     // TODO adjust shadow camera...
     IViewingVolume* shadowView = new PerspectiveViewingVolume(100,2000);
-    shadowCam = new Camera(*(shadowView));
+    Camera* shadowCam = new Camera(*(shadowView));
     shadowCam->SetPosition(Vector<3,float>(0,800,500));
     shadowCam->LookAt(Vector<3,float>(0,0,-1000));
     camSwitch->AddCamera(shadowCam);    
@@ -491,19 +493,16 @@ void SetupBoids() {
     // Add flock to the scene.
     rsn->AddNode(flock->GetRootNode());
 
-
     // Follow a fish, look at target
     TrackingFollowCamera *tfc = 
         new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     tfc->SetPosition(Vector<3,float>(20,20,20));
-    //tfc->Track(flockFollow);
     tfc->Follow(flock->GetTransformationNode(0));
     camSwitch->AddCamera(tfc);
 
     // Follow target, look at a fish
     tfc = new TrackingFollowCamera(*(new InterpolatedViewingVolume(*(new PerspectiveViewingVolume(1,8000)))));
     tfc->SetPosition(Vector<3,float>(20,20,20));
-    //tfc->Follow(flockFollow);
     tfc->Track(flock->GetTransformationNode(0));
     camSwitch->AddCamera(tfc);
 
@@ -526,7 +525,6 @@ void SetupBoids() {
     fcs->SetPosition(Vector<3,float>(-150,-80,0));
     fcs->Follow(shark);
     camSwitch->AddCamera(fcs);
-
 
     // Shark mouth cam
     FollowCamera* fcsm = new FollowCamera(*(new PerspectiveViewingVolume(1,8000)));
