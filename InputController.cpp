@@ -86,6 +86,9 @@ void InputController::Handle(Core::InitializeEventArg arg) {
     if( ctrlMode == NONE ) ctrlMode = MOUSE_CYLINDER_FLEE;
 
     if( mouse ) {
+
+        mouse->HideCursor();
+
         /*
          * In this mode the flock is following a point moved in circles
          * and the mouse is controlling a cylinder flee rule.
