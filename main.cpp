@@ -328,9 +328,6 @@ void SetupScene() {
     // Set background color to white
     setup->GetRenderer().SetBackgroundColor(Vector<4,float>(1.0,1.0,1.0,1.0));
 
-    // temporary hack ... remove next line when animation branch has been merged with main branch
-    setup->GetShaderLoader()->SetLightRenderer(setup->GetLightRenderer());
-
     // scene represents where to insert next node.
     ISceneNode* scene = sceneRoot;
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
