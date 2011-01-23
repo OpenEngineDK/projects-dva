@@ -32,7 +32,7 @@ private:
     float progy;
 
 public:
-    HandHeldCamera(Camera* c) : camera(c), progx(0.0), progy(0.0) {
+    HandHeldCamera(Display::Camera* c) : camera(c), progx(0.0), progy(0.0) {
         orgCamPos = camera->GetPosition();
     }
     ~HandHeldCamera() {}
