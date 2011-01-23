@@ -369,7 +369,7 @@ void SetupScene() {
                                        //dimension
                                        Vector<2,int>(1024,2048));
     setup->GetRenderer().InitializeEvent().Attach(*shadowPost);
-    setup->GetRenderer().PreProcessEvent().Attach(*shadowPost);
+
     scene->AddNode(shadowPost); 
     scene = shadowPost;
 
