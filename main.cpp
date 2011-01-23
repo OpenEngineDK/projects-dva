@@ -50,6 +50,8 @@
 #include <Scene/ShadowLightPostProcessNode.h>
 
 #include <Utils/PropertyTree.h>
+#include <Utils/PropertyTreeNode.h>
+
 #include <Utils/MoveHandler.h>
 
 // DVA stuff
@@ -435,9 +437,9 @@ void SetupBoids() {
     string confPath = DirectoryManager::FindFileInPath("boids.yaml");
     PropertyTree* ptree = new PropertyTree(confPath);    
 
-    engine->InitializeEvent().Attach(*ptree);
+    // engine->InitializeEvent().Attach(*ptree);
     engine->ProcessEvent().Attach(*ptree);
-    engine->DeinitializeEvent().Attach(*ptree);
+    // engine->DeinitializeEvent().Attach(*ptree);
 
      // Setup flock rules.
     Flock* flock = new Flock();    
@@ -470,7 +472,7 @@ void SetupBoids() {
     rl = new FlockPropertyReloader(flock, ptree, "flock1");
 
     vector<ISceneNode*>::iterator itr;
-    int size = ptree->GetNode("flock1").GetPath<int>("size", 100);
+    int size = ptree->GetRootNode()->GetNode("flock1")->GetPath("size", 100);
     RandomGenerator random;
     Vector<3,float> offset(100, 0, -300);
     for (int i=0;i<size;i++) {
