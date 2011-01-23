@@ -289,12 +289,23 @@ void LoadResources() {
     model->Load();
     ISceneNode* fishModel = model->GetSceneNode();
     fishModel->SetInfo("Finn the fish model\n[ISceneNode]");
+
+    SearchTool st;
+    TransformationNode* hest = st.DescendantTransformationNode(fishModel);
+    while (hest->GetNumberOfNodes() > 0) {
+        ISceneNode* n = hest->GetNode(0);
+        hest->RemoveNode(n);
+        fishModel->AddNode(n);
+    }
+    fishModel->RemoveNode(hest);
+
     AnimationNode* animations = GetAnimationNode(fishModel);
-     if( animations ){
+    if( animations ){
         Animator* animator = new Animator(animations);
         UserDefaults::GetInstance()->map["Animator"] = animator;
         if( animator->GetSceneNode() ){
-            TransformationNode* fishTrans = new TransformationNode();
+            //TransformationNode* fishTrans = new TransformationNode();
+            TransformationNode* fishTrans = hest;
             fishTrans->AddNode(animator->GetSceneNode());
             fish = fishTrans;
         }
