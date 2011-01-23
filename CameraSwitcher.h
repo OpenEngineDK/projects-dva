@@ -8,20 +8,27 @@
 //--------------------------------------------------------------------
 
 
+#include <Devices/IKeyboard.h>
+#include <Core/IListener.h>
+#include <Utils/SimpleSetup.h>
+#include <Display/Camera.h>
+
 namespace dva {
 
-class CameraSwitcher : public IListener<KeyboardEventArg> {
-    SimpleSetup* setup;
-    vector<Camera*> cams;
+    using namespace OpenEngine::Devices;
+
+class CameraSwitcher : public OpenEngine::Core::IListener<KeyboardEventArg> {
+    OpenEngine::Utils::SimpleSetup* setup;
+    vector<OpenEngine::Display::Camera*> cams;
     unsigned int idx;
     
 public:
-    CameraSwitcher(SimpleSetup* setup)
+    CameraSwitcher(OpenEngine::Utils::SimpleSetup* setup)
         : setup(setup), idx(0) {
         cams.push_back(setup->GetCamera());
     }
 
-    void AddCamera(Camera* c) {
+    void AddCamera(OpenEngine::Display::Camera* c) {
         cams.push_back(c);
     }
 
