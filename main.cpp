@@ -207,7 +207,7 @@ void SetupSound() {
 
         // setup the music player
         musicplayer->AddSound("jaws.ogg");
-        musicplayer->SetGain(0.3);
+        musicplayer->SetGain(1.0);
         musicplayer->Shuffle(true);
         musicplayer->Next();
         musicplayer->Play();
