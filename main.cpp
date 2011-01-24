@@ -203,13 +203,16 @@ void SetupSound() {
         // setup the sound system
         soundsystem->SetMasterGain(1.0);
         engine->InitializeEvent().Attach(*soundsystem);
+        engine->ProcessEvent().Attach(*soundsystem);
         engine->DeinitializeEvent().Attach(*soundsystem);
 
         // setup the music player
-        musicplayer->AddSound("jaws.ogg");
         musicplayer->SetGain(1.0);
+        
+        musicplayer->AddSound("jaws.ogg");
+
         musicplayer->Shuffle(true);
-        musicplayer->Next();
+        //musicplayer->Next();
         musicplayer->Play();
         engine->ProcessEvent().Attach(*musicplayer);
 
