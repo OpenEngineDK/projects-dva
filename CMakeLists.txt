@@ -43,4 +43,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   Extensions_AnimationFramework
   Extensions_Boids
   Extensions_Sockets
+  Extensions_VorbisResource
+  Extensions_OpenALSoundSystem
+  Extensions_MusicPlayer
 )

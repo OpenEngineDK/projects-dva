@@ -49,6 +49,13 @@ darcs-dev /extensions/OBJResource            	fh.daimi.au.dk:/users/cgd/code/ext
 darcs-dev /extensions/OpenGLPostProcessEffects 	fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLPostProcessEffects
 darcs-dev /extensions/GenericHandlers 	 	fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
 
+#sound
+darcs /extensions/OpenALSoundSystem http://openengine.dk/code/extensions/OpenALSoundSystem
+darcs /extensions/VorbisResource    http://openengine.dk/code/extensions/VorbisResource
+darcs /extensions/MusicPlayer       http://openengine.dk/code/extensions/MusicPlayer
+darcs-dev /extensions/OpenALSoundSystem fh.daimi.au.dk:/users/cgd/code/extensions/OpenALSoundSystem
+darcs-dev /extensions/VorbisResource    fh.daimi.au.dk:/users/cgd/code/extensions/VorbisResource
+darcs-dev /extensions/MusicPlayer       fh.daimi.au.dk:/users/cgd/code/extensions/MusicPlayer
 
 # windows libraries
 win32 /libraries http://openengine.dk/data/libraries/boost-win32.zip
@@ -66,3 +73,4 @@ darwin /libraries http://openengine.dk/data/libraries/pcrecpp-osx-i32.zip
 any /resources http://openengine.dk/data/animation_models.zip
 any /resources http://openengine.dk/data/projects/dva/causticTexs.tgz
 any /projects/dva/data http://openengine.dk/data/images/logo/small.jpg
+any /resources http://openengine.dk/data/sound/jaws.ogg

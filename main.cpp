@@ -68,6 +68,12 @@
 #include "HandHeldCamera.h"
 #include "LightAnimator.h"
 
+// sound 
+#include <Sound/OpenALSoundSystem.h>
+#include <Sound/MusicPlayer.h>
+#include <Resources/VorbisResource.h>
+
+
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -78,6 +84,7 @@ using namespace OpenEngine::Resources;
 using namespace OpenEngine::Renderers;
 using namespace OpenEngine::Renderers::OpenGL;
 using namespace OpenEngine::Animations;
+using namespace OpenEngine::Sound;
 using namespace dva;
 
 
@@ -90,6 +97,8 @@ InputController* inputCtrl = NULL;
 IMouse* mouse              = NULL;
 IKeyboard* keyboard        = NULL;
 RenderStateNode *rsn       = NULL;
+ISoundSystem* soundsystem  = NULL;
+MusicPlayer* musicplayer   = NULL;
 
 vector<ISceneNode*> sceneNodes;
 
@@ -115,6 +124,8 @@ void SetupScene();
 void SetupDevices();
 void SetupBoids();
 void LoadResources();
+void SetupSound();
+
 
 // Helper function.
 AnimationNode* GetAnimationNode(ISceneNode* node) {
@@ -138,6 +149,9 @@ int main(int argc, char** argv) {
 
     // Load all model resources.
     LoadResources();
+
+    // Load sound system
+    SetupSound();
 
     // Setup scene graph and visual effects.
     SetupScene();
@@ -180,6 +194,28 @@ void SetupEngine() {
     engine = &setup->GetEngine();
 }
 
+void SetupSound() {
+    soundsystem = new OpenALSoundSystem();
+    soundsystem->SetDevice(0);
+    musicplayer = new MusicPlayer(NULL, soundsystem);
+    bool enableSound = true;
+    if (enableSound) {
+        // setup the sound system
+        soundsystem->SetMasterGain(1.0);
+        engine->InitializeEvent().Attach(*soundsystem);
+        engine->DeinitializeEvent().Attach(*soundsystem);
+
+        // setup the music player
+        musicplayer->AddSound("jaws.ogg");
+        musicplayer->SetGain(0.3);
+        musicplayer->Shuffle(true);
+        musicplayer->Next();
+        musicplayer->Play();
+        engine->ProcessEvent().Attach(*musicplayer);
+
+        setup->GetRenderer().PreProcessEvent().Attach(*soundsystem);
+    }
+}
 
 void SetupDevices() {
    // Setup move handlers
@@ -248,6 +284,8 @@ void SetupDevices() {
 
 void LoadResources() {
     ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
+    // ResourceManager<ISoundResource>::AddPlugin(new VorbisResourcePlugin());
+    ResourceManager<IStreamingSoundResource>::AddPlugin(new StreamingVorbisResourcePlugin());
     DirectoryManager::AppendPath("resources/");
     DirectoryManager::AppendPath("projects/dva/");
     string path;
