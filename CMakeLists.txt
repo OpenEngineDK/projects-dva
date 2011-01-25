@@ -6,8 +6,9 @@ SET( PROJECT_NAME "dva")
 SET( PROJECT_SOURCES
   # Add all the cpp source files here
   main.cpp
-#  Predator.cpp
   InputController.cpp
+  ScreenplayController.cpp
+  RelayBox.cpp
   Scene/GridNode.cpp
   Utils/Stages.cpp
   Devices/LaserSensor.cpp

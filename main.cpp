@@ -24,7 +24,6 @@
 #include <Animations/RandomRule.h>
 #include <Animations/FleeSphereRule.h>
 
-
 #include <Core/Engine.h>
 
 #include <Display/SDLEnvironment.h>
@@ -61,12 +60,15 @@
 #include "Utils/UserDefaults.h"
 #include "Utils/CustomKeyHandler.h"
 #include "Devices/LaserSensor.h"
+#include "RelayBox.h"
 #include "LaserDebug.h"
 #include "InputController.h"
 #include "Utils/Stages.h"
 #include "CameraSwitcher.h"
 #include "HandHeldCamera.h"
 #include "LightAnimator.h"
+#include "ScreenplayController.h"
+
 
 // sound 
 #include <Sound/OpenALSoundSystem.h>
@@ -108,6 +110,7 @@ TransformationNode* human     = NULL;
 TransformationNode* shark     = NULL;
 TransformationNode* sharkHead = NULL;
 TransformationNode* box       = NULL;
+TransformationNode* seaweed   = NULL;
 ISceneNode* sharkAnimRoot     = NULL;
 
 // Custom stuff
@@ -117,7 +120,10 @@ FrameOption frameOption = FRAME_NONE;
 FlockPropertyReloader *rl = NULL;
 
 PropertyTree* ptree;
- 
+
+// Setup Screenplay controller handling the sequence of events.
+ScreenplayController* screenplayCtrl;
+
 // Forward declarations
 void SetupEngine();
 void SetupScene();
@@ -194,31 +200,7 @@ void SetupEngine() {
     engine = &setup->GetEngine();
 }
 
-void SetupSound() {
-    soundsystem = new OpenALSoundSystem();
-    soundsystem->SetDevice(0);
-    musicplayer = new MusicPlayer(NULL, soundsystem);
-    bool enableSound = true;
-    if (enableSound) {
-        // setup the sound system
-        soundsystem->SetMasterGain(1.0);
-        engine->InitializeEvent().Attach(*soundsystem);
-        engine->ProcessEvent().Attach(*soundsystem);
-        engine->DeinitializeEvent().Attach(*soundsystem);
 
-        // setup the music player
-        musicplayer->SetGain(1.0);
-        
-        musicplayer->AddSound("jaws.ogg");
-
-        musicplayer->Shuffle(true);
-        //musicplayer->Next();
-        musicplayer->Play();
-        engine->ProcessEvent().Attach(*musicplayer);
-
-        setup->GetRenderer().PreProcessEvent().Attach(*soundsystem);
-    }
-}
 
 void SetupDevices() {
    // Setup move handlers
@@ -229,6 +211,11 @@ void SetupDevices() {
     inputCtrl = new InputController(ptree->GetRootNode());
     inputCtrl->SetInputDevice(mouse);
     inputCtrl->SetInputDevice(keyboard);
+
+    // 
+    screenplayCtrl = new ScreenplayController();
+    engine->InitializeEvent().Attach(*screenplayCtrl);
+    engine->ProcessEvent().Attach(*screenplayCtrl);
 
     // Setup laser sensor device.
     if( LASER_SENSOR_ENABLED ) {
@@ -248,15 +235,21 @@ void SetupDevices() {
     }
 
 
-
     inputCtrl->SetMode(INPUT_CTRL_MODE);
     engine->InitializeEvent().Attach(*inputCtrl);
     engine->ProcessEvent().Attach(*inputCtrl);
     engine->DeinitializeEvent().Attach(*inputCtrl);
-    
+
+    // Configure Relay box controlling wind, water and room light.
+    if( RELAY_BOX_ENABLED ) {
+        RelayBox* relayBox = new RelayBox(RELAY_BOX_IP, RELAY_BOX_PORT);
+        relayBox->Start();
+        screenplayCtrl->SetRelayBox(relayBox);
+    }
+
     // Static default view
     Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-    stc->SetPosition(Vector<3, float>(0, 56, 0));
+    stc->SetPosition(Vector<3, float>(0, 54, 0));
     stc->LookAt(0,190,-2000);
     setup->SetCamera(*stc);
 
@@ -270,15 +263,15 @@ void SetupDevices() {
     keyboard->KeyEvent().Attach(*camSwitch);
 
     // Add movable camera
-//     camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
-//     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
-//     camera->LookAt(0,190,-2000);
-//     camSwitch->AddCamera(camera);
-//     MoveHandler* move = new MoveHandler(*camera, *mouse);
-//     move->SetMoveScale(0.001);
-//     engine->InitializeEvent().Attach(*move);
-//     engine->ProcessEvent().Attach(*move);
-//     keyboard->KeyEvent().Attach(*move);
+    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+    camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
+    camera->LookAt(0,190,-2000);
+    camSwitch->AddCamera(camera);
+    MoveHandler* move = new MoveHandler(*camera, *mouse);
+    move->SetMoveScale(0.001);
+    engine->InitializeEvent().Attach(*move);
+    engine->ProcessEvent().Attach(*move);
+    keyboard->KeyEvent().Attach(*move);
 
     CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
     keyboard->KeyEvent().Attach(*ckh);
@@ -310,15 +303,38 @@ void LoadResources() {
     human->AddNode(humanModel->GetSceneNode());
 
     // Load environment.
-    path = DirectoryManager::FindFileInPath("models/environment/Environment03.DAE");
+    path = DirectoryManager::FindFileInPath("models/environment/Environment04.DAE");
     IModelResourcePtr envModel = ResourceManager<IModelResource>::Create(path);
     envModel->Load();
     ISceneNode* env = envModel->GetSceneNode();
     env->SetInfo("Environment Model\n[ISceneNode]");
     TransformationNode* envTrans = new TransformationNode();
-    envTrans->SetPosition(Vector<3,float>(0, 0, 0));
     envTrans->AddNode(env);
     sceneNodes.push_back(envTrans);
+
+    // Load Seaweed
+    path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
+    IModelResourcePtr seaweedModel = ResourceManager<IModelResource>::Create(path);
+    seaweedModel->Load();
+    ISceneNode* weed = seaweedModel->GetSceneNode();
+    weed->SetInfo("Seaweed Model\n[ISceneNode]");
+    //    sceneNodes.push_back(weed);
+
+    AnimationNode* weedAnim = GetAnimationNode(weed);
+    if( weedAnim ){
+        Animator* animator = new Animator(weedAnim);
+        UserDefaults::GetInstance()->map["WeedAnimator"] = animator;
+        if( animator->GetSceneNode() ){
+            TransformationNode* weedTrans = new TransformationNode();
+            weedTrans->AddNode(animator->GetSceneNode());
+            weedTrans->SetPosition(Vector<3,float>(0,0,0));
+            sceneNodes.push_back(weedTrans);
+        }
+        setup->GetEngine().ProcessEvent().Attach(*animator);
+        animator->SetActiveAnimation(0);
+        //animator->SetSpeed(1.0);
+        animator->Play();
+     }
 
     // Load shark.
     path = DirectoryManager::FindFileInPath("models/sharky/Sharky09.DAE");
@@ -328,19 +344,33 @@ void LoadResources() {
     sharky->SetInfo("Sharky the not so friendly shark\n[ISceneNode]");
     AnimationNode* sharkAnim = GetAnimationNode(sharky);
     if( sharkAnim ){
-        Animator* animator = new Animator(sharkAnim);
-        UserDefaults::GetInstance()->map["SharkAnimator"] = animator;
-        if( animator->GetSceneNode() ){
+        Animator* sharkAnimator = new Animator(sharkAnim);
+        UserDefaults::GetInstance()->map["SharkAnimator"] = sharkAnimator;
+        if( sharkAnimator->GetSceneNode() ){
             sharkAnimRoot = sharkAnim;
             TransformationNode* sharkTrans = new TransformationNode();
             sharkTrans->SetInfo("SHARK TRANSFORMATION");
-            sharkTrans->AddNode(animator->GetSceneNode());
+            sharkTrans->AddNode(sharkAnimator->GetSceneNode());
             sceneNodes.push_back(sharkTrans);
+
+            // Locate shark transformation node and add a flee rule to the boid system.
+            SearchTool search;
+            std::list<AnimationNode*> animNodeRes;
+            animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
+            if( animNodeRes.size() > 0 ){
+                shark     = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
+                sharkHead = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(4)->GetAnimatedNode(); 
+            }
+
         }
-        setup->GetEngine().ProcessEvent().Attach(*animator);
-        animator->SetActiveAnimation(0);
-        //animator->Play();
+        setup->GetEngine().ProcessEvent().Attach(*sharkAnimator);
+        sharkAnimator->SetActiveAnimation(0);
+        sharkAnimator->LoopAnimation(false);
+        //sharkAnimator->Play();
+
+        screenplayCtrl->SetSharkAnimator(sharkAnimator);
     }
+
     
     // Load fish
     path = DirectoryManager::FindFileInPath("models/finn/Finn08_org.DAE");
@@ -349,22 +379,12 @@ void LoadResources() {
     ISceneNode* fishModel = model->GetSceneNode();
     fishModel->SetInfo("Finn the fish model\n[ISceneNode]");
 
-    // SearchTool st;
-    // TransformationNode* hest = st.DescendantTransformationNode(fishModel);
-    // while (hest->GetNumberOfNodes() > 0) {
-    //     ISceneNode* n = hest->GetNode(0);
-    //     hest->RemoveNode(n);
-    //     fishModel->AddNode(n);
-    // }
-    // fishModel->RemoveNode(hest);
-
     AnimationNode* animations = GetAnimationNode(fishModel);
     if( animations ){
         Animator* animator = new Animator(animations);
         UserDefaults::GetInstance()->map["Animator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* fishTrans = new TransformationNode();
-            //TransformationNode* fishTrans = hest;
             fishTrans->AddNode(animator->GetSceneNode());
             fish = fishTrans;
         }
@@ -375,7 +395,37 @@ void LoadResources() {
 }
 
 
+void SetupSound() {
+    soundsystem = new OpenALSoundSystem();
+    soundsystem->SetDevice(0);
+    musicplayer = new MusicPlayer(NULL, soundsystem);
+    bool enableSound = true;
+    if (enableSound) {
+        // setup the sound system
+        soundsystem->SetMasterGain(1.0);
+        engine->InitializeEvent().Attach(*soundsystem);
+        engine->ProcessEvent().Attach(*soundsystem);
+        engine->DeinitializeEvent().Attach(*soundsystem);
+
+        // setup the music player
+        musicplayer->SetGain(1.0);
+        
+        musicplayer->AddSound("jaws.ogg");
+
+        musicplayer->Shuffle(true);
+        //musicplayer->Next();
+        musicplayer->Play();
+        engine->ProcessEvent().Attach(*musicplayer);
+
+        setup->GetRenderer().PreProcessEvent().Attach(*soundsystem);
+    }
+}
+
+
 void SetupScene() {
+    // Hook Screenplay controller into engine.
+    engine->ProcessEvent().Attach(*screenplayCtrl);
+
     // Setup stage fading Stuff
     BlendCanvas* b = new BlendCanvas(new TextureCopy());
     b->AddTexture(setup->GetCanvas()->GetTexture(), 0, 0, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
@@ -442,6 +492,20 @@ void SetupScene() {
     scene->AddNode(causticsNode); 
     scene = causticsNode;
 
+
+    // Create blur post process
+//     IShaderResourcePtr blurV = ResourceManager<IShaderResource>::Create("projects/dva/effects/VerticalBoxBlur.glsl");
+//     PostProcessNode* blurNode = new PostProcessNode(blurV, dimension); 
+//     setup->GetRenderer().InitializeEvent().Attach(*blurNode);
+//     scene->AddNode(blurNode); 
+//     scene = blurNode;
+
+//     IShaderResourcePtr blurH = ResourceManager<IShaderResource>::Create("projects/dva/effects/HorizontalBoxBlur.glsl");
+//     PostProcessNode* blurNode2 = new PostProcessNode(blurH, dimension); 
+//     setup->GetRenderer().InitializeEvent().Attach(*blurNode2);
+//     scene->AddNode(blurNode2); 
+//     scene = blurNode2;
+
     // Create point light
 //     TransformationNode* lightTrans = new TransformationNode();
 //     PointLightNode* lightNode = new PointLightNode();
@@ -484,6 +548,7 @@ void SetupScene() {
         ISceneNode* node = *itr;
         scene->AddNode(node);
     }
+
 
     // Just for debug
 //     GridNode* grid = new GridNode(100, 10, Vector<3,float>(0.5, 0.5, 0.5));
@@ -555,14 +620,6 @@ void SetupBoids() {
     flock->AddRule(new BoxRule(Vector<3,float>(-400,30,-400),  // The two corners
                                Vector<3,float>(400,400,400))); // - must be axis aligned
     
-    // Locate shark transformation node and add a flee rule to the boid system.
-    SearchTool search;
-    std::list<AnimationNode*> animNodeRes;
-    animNodeRes = search.DescendantAnimationNodes(sharkAnimRoot);
-    if( animNodeRes.size() > 0 ){
-        shark     = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(0)->GetAnimatedNode();
-        sharkHead = animNodeRes.front()->GetAnimation()->GetAnimatedTransformation(4)->GetAnimatedNode(); 
-    }
     flock->AddRule(new FleeSphereRule(sharkHead, 100.0, 20.0));
     flock->SetPropertyNode(ptree->GetRootNode()->GetNode("flock1"));
 

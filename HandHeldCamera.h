@@ -31,8 +31,10 @@ private:
     float progx;
     float progy;
 
+    Time timeStamp;
+
 public:
-    HandHeldCamera(Display::Camera* c) : camera(c), progx(0.0), progy(0.0) {
+    HandHeldCamera(Display::Camera* c) : camera(c), progx(0.0), progy(0.0), timeStamp(0) {
         orgCamPos = camera->GetPosition();
     }
     ~HandHeldCamera() {}
@@ -43,7 +45,10 @@ public:
     }
 
     void Handle(Core::ProcessEventArg arg) {
-        unsigned int elapsed = timer.GetElapsedTimeAndReset().usec;
+        unsigned int elapsed = arg.approx;
+            //timer.GetElapsedTime().usec - timeStamp;
+            //timeStamp = timer.GetElapsedTime().usec;
+
         float timeInMicros = 20000000.0f;
 
         progx += fmod(((float)elapsed / timeInMicros), 1.0);

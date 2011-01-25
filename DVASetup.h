@@ -35,6 +35,11 @@ namespace dva {
     const int         LASER_SENSOR_PORT    = 2111; // 2111 or 2112
     const bool        LASER_DEBUG_ENABLED  = true;
 
+    // Relay Box Setup
+    const bool        RELAY_BOX_ENABLED    = true;
+    const std::string RELAY_BOX_IP         = "192.168.0.101";
+    const int         RELAY_BOX_PORT       = 12302;
+
     // Cluster Analyser
     const float CLUSTER_EPSILON    = 0.10; // Max distance between points in cluster.
     const int   CLUSTER_MIN_POINTS = 5;    // Minimum number of points to form a cluster.

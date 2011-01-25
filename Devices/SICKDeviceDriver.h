@@ -13,6 +13,7 @@
 #include <Core/Thread.h>
 #include <Core/Mutex.h>
 #include <Network/TCPSocket.h>
+#include <Network/TCPTypes.h>
 #include <Math/Vector.h>
 #include "ClusterAnalyser.h"
 #include <list>
@@ -29,22 +30,14 @@ const unsigned int ETX = 0x03;
 const unsigned int IDX_OFFSET = 26;
 
 
-    enum SensorStatus {
-        NOT_CONNECTED,   // Idle and not connected yet.
-        CONNECTING,      // Connection in progress.
-        CONNECTED,       // Connected successfully and receiving data.
-        CONNECTION_ERR,  // Could not connect.
-        DATA_ERR,        // Connected but cannot parse input data.
-    };
-
 /**
- * Short description.
+ * Device driver for the SICK LMS-100 Laser Sensor.
  *
  * @class SICKDeviceDriver SICKDeviceDriver.h s/dva/Devices/SICKDeviceDriver.h
  */
 class SICKDeviceDriver : public Thread {
 private:
-    SensorStatus status;
+    NetStat status;
     TCPSocket* socket;
     std::string deviceIp;
     unsigned short devicePort;
@@ -76,7 +69,7 @@ public:
 
     bool Connect(string ip, int port);
     void Close();
-    SensorStatus GetStatus();
+    NetStat GetStatus();
 
     std::vector< Math::Vector<2,float> > GetReadings();
     std::vector< Math::Vector<2,float> > GetClusters();

@@ -136,7 +136,7 @@ void SICKDeviceDriver::Close() {
     status = NOT_CONNECTED;
 }
 
-SensorStatus SICKDeviceDriver::GetStatus() {
+NetStat SICKDeviceDriver::GetStatus() {
     return status;
 }
 

@@ -62,6 +62,11 @@ void LaserSensor::Handle(Core::ProcessEventArg arg) {
     // Get analysed data from device driver.
     std::vector< Math::Vector<2,float> > clusters = device->GetClusters();
 
+    // If the laser has found any clusters, notify listeners.
+    if( clusters.size() > 0 ){
+        laserInputEvent.Notify(LaserInputEventArg());
+    }
+
     // Just for debugging purpose.
     UpdateCalibrationCanvas(readings, clusters);
 }
@@ -75,6 +80,12 @@ void LaserSensor::SetLaserDebug(LaserDebugPtr debug){
     this->laserDebug = debug;
 }
     
+
+Core::IEvent<LaserInputEventArg>& LaserSensor::LaserInputEvent() {
+    return this->laserInputEvent;
+
+}
+
 void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > readings,
                                           std::vector< Math::Vector<2,float> > clusters) {
     if( laserDebug ){

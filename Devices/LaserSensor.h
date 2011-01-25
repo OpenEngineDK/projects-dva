@@ -27,6 +27,9 @@ using namespace dva;
 class SICKDeviceDriver;
 
 
+struct LaserInputEventArg {
+};
+
 /**
  * Short description.
  *
@@ -40,17 +43,22 @@ public:
     void Connect();    
     std::vector< Vector<2,float> > GetState();
 
-
     // IModule handlers
     void Handle(Core::InitializeEventArg arg);
     void Handle(Core::ProcessEventArg arg);
     void Handle(Core::DeinitializeEventArg arg);
 
     void SetLaserDebug(LaserDebugPtr debug);
+
+    Core::IEvent<LaserInputEventArg>& LaserInputEvent();
    
 private:
     SICKDeviceDriver* device;
     LaserDebugPtr laserDebug;
+
+    // LaserInputEvent notifies listeners when clusters are detected.
+    Core::Event<LaserInputEventArg> laserInputEvent;
+
 
     void UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > readings,
                                  std::vector< Math::Vector<2,float> > clusters);

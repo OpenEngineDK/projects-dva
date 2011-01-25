@@ -1,5 +1,14 @@
-#ifndef __LIGHT_ANIMATOR__
-#define __LIGHT_ANIMATOR__
+// 
+// -------------------------------------------------------------------
+// Copyright (C) 2007 OpenEngine.dk (See AUTHORS)
+//
+// This program is free software; It is covered by the GNU General
+// Public License version 2 or any later version.
+// See the GNU General Public License for more details (see LICENSE).
+//--------------------------------------------------------------------
+
+#ifndef _LIGHT_ANIMATOR_H_
+#define _LIGHT_ANIMATOR_H_
 
 #include <Geometry/Light.h>
 #include <Core/EngineEvents.h>
@@ -12,11 +21,17 @@ class LightAnimator : public OpenEngine::Core::IListener<OpenEngine::Core::Proce
     OpenEngine::Geometry::Light* light;
     float t;
     bool disco;
- public:
+ 
+public:
  LightAnimator(OpenEngine::Geometry::Light* light) : light(light) {
         t = 0.0f;
         disco = false;
     }
+
+    void SetDisco(bool ena){
+        disco = ena;
+    }
+
     void Handle(OpenEngine::Core::ProcessEventArg arg) {
         t += (arg.approx * 1e-6);
         if (!disco) {
