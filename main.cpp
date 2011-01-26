@@ -44,6 +44,7 @@
 #include <Scene/SearchTool.h>
 #include <Scene/AnimationNode.h>
 #include <Scene/SceneNode.h>
+#include <Scene/BlendingNode.h>
 #include <Scene/DotVisitor.h>
 #include <Scene/DirectionalLightNode.h>
 #include <Scene/PointLightNode.h>
@@ -326,7 +327,9 @@ void LoadResources() {
         UserDefaults::GetInstance()->map["WeedAnimator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* weedTrans = new TransformationNode();
-            weedTrans->AddNode(animator->GetSceneNode());
+            BlendingNode* weedBlend = new BlendingNode();
+            weedTrans->AddNode(weedBlend);
+            weedBlend->AddNode(animator->GetSceneNode());
             weedTrans->SetPosition(Vector<3,float>(0,0,0));
             sceneNodes.push_back(weedTrans);
         }
