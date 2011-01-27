@@ -3,8 +3,7 @@
 
 # main repository
 darcs / http://openengine.dk/code/openengine
-darcs / http://openengine.dk/code/branches/animation-main
-darcs-dev / fh.daimi.au.dk:/users/cgd/code/branches/animation-main
+darcs-dev / fh.daimi.au.dk:/users/cgd/code/openengine
 
 # project repository
 # (uncomment the following two lines after uploading your project)
@@ -12,14 +11,12 @@ darcs /projects/dva http://openengine.dk/code/projects/dva
 darcs-dev /projects/dva fh.daimi.au.dk:/users/cgd/code/projects/dva
 
 # dist dependencies
-# dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/extensions/Assimp/Assimp.dist
-dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/branches/animation-Assimp/Assimp.dist
+dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/extensions/Assimp/Assimp.dist
 dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/HeightMap/HeightMap.dist
 dist /extensions/Boids/Boids.dist http://openengine.dk/code/extensions/Boids/Boids.dist
-dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/branches/animation-OpenGLRenderer/OpenGLRenderer.dist
+dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/extensions/OpenGLRenderer/OpenGLRenderer.dist
 
 # required extensions
-darcs /extensions/Assimp			http://openengine.dk/code/branches/animation-Assimp
 darcs /extensions/AnimationFramework		http://openengine.dk/code/extensions/AnimationFramework
 darcs /extensions/SetupHelpers           	http://openengine.dk/code/extensions/SetupHelpers
 darcs /extensions/HUD                    	http://openengine.dk/code/extensions/HUD
@@ -35,7 +32,6 @@ darcs /extensions/GenericHandlers 	 	http://openengine.dk/code/extensions/Generi
 
 #dev
 darcs-dev /extensions/AccelerationStructures	fh.daimi.au.dk:/users/cgd/code/extensions/AccelerationStructures
-darcs-dev /extensions/Assimp			fh.daimi.au.dk:/users/cgd/code/branches/animation-Assimp
 darcs-dev /extensions/AnimationFramework     	fh.daimi.au.dk:/users/cgd/code/extensions/AnimationFramework
 darcs-dev /extensions/CairoResource          	fh.daimi.au.dk:/users/cgd/code/extensions/CairoResource
 darcs-dev /extensions/HUD                    	fh.daimi.au.dk:/users/cgd/code/extensions/HUD
