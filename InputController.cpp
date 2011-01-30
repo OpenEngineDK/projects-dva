@@ -18,6 +18,7 @@
 #include <Animations/FleeCylinderRule.h>
 #include <Animations/SeparationRule.h>
 #include <Logging/Logger.h>
+#include <Utils/PropertyBinder.h>
 #include "CylinderNode.h"
 #include "DVASetup.h"
 #include "RuleHandlers/FleeRuleHandler.h"
@@ -32,6 +33,7 @@ namespace dva {
 
 
 void InputController::Init() {
+    ptNode = NULL;
     laser = NULL;
     keyboard = NULL;
     mouse = NULL;
@@ -44,8 +46,9 @@ void InputController::Init() {
 
 }
 
-InputController::InputController() {
+InputController::InputController(PropertyTreeNode* ptNode) {
     Init();
+    this->ptNode = ptNode;
 }
 
 
@@ -87,13 +90,20 @@ void InputController::Handle(Core::InitializeEventArg arg) {
     // Add flock follow rule.
     TransformationNode* followTrans = new TransformationNode();
     followTrans->SetPosition(Vector<3,float>(0,100,-300));
-    followCircleRule = new FlockFollowCircleRuleHandler(flock, followTrans, Vector<2,float>(120,50),0.7); 
+    followCircleRule = new FlockFollowCircleRuleHandler(flock, followTrans, Vector<3,float>(120,0,20),0.7);
+    new Utils::PropertyBinder<FlockFollowCircleRuleHandler,Vector<3,float> >
+        (ptNode->GetNodePath("input.circle"), 
+        *(FlockFollowCircleRuleHandler*)followCircleRule,
+        &FlockFollowCircleRuleHandler::SetCircle,
+        Vector<3,float>(120,0,20));
+
     followCircleRule->GetRule()->SetEnabled(false);
     ruleHandlers.push_back(followCircleRule);
 
     // Add flee rule, disabled by default.
     TransformationNode* fleeTrans = new TransformationNode();
     fleeTrans->SetPosition(Vector<3,float>(0,0,-300));
+    
     fleeRule = new FleeRuleHandler(new FleeSphereRule(fleeTrans, 100.0, 10.0), flock);
     fleeRule->GetRule()->SetEnabled(false);
     ruleHandlers.push_back(fleeRule);
@@ -181,7 +191,7 @@ void InputController::HandleLaserInput() {
 
 Vector<3,float> InputController::ScreenToSceneCoordinates(int x, int y) {
     float xRange = 370.0f;
-    float yRange = 110.0f;
+    float yRange = 180.0f;
     float yTop = 170.0;
 
     Vector<3,float> pos;
@@ -193,7 +203,7 @@ Vector<3,float> InputController::ScreenToSceneCoordinates(int x, int y) {
 Vector<2,int> InputController::LaserPointToScreenCoordinates(Vector<2,float> p) {
     Vector<2,int> point;
     point[0] = ((p[0]+1)/2.0) * SCREEN_WIDTH;
-    point[1] = SCREEN_HEIGHT - ((p[1]+1)/2.0) * SCREEN_HEIGHT;
+    point[1] = SCREEN_HEIGHT - (p[1] * SCREEN_HEIGHT);
     return point;
 }
 

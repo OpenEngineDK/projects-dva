@@ -63,3 +63,5 @@ meta:
 screen:
   height: 768
   width: 1024
+screenplay:
+  interactionSecs: 10

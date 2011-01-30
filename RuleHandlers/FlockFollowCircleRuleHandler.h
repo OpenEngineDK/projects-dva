@@ -25,13 +25,13 @@ private:
     TransformationNode* trans;
     float pos;
     Vector<3,float> offset;
-    Vector<2,float> circle;
+    Vector<3,float> circle;
     float speed;
     
 public:
     FlockFollowCircleRuleHandler(Flock* flock, 
                            TransformationNode* t,
-                           Vector<2,float> c=(Vector<2,float>(10,100)),
+                                 Vector<3,float> c=(Vector<3,float>(10,0,100)),
                            float s=2)
         : IRuleHandler(new FollowRule(t), flock)
         , trans(t)
@@ -50,6 +50,10 @@ public:
         logger.info << "[FlockFollowCircleRuleHandler] deleted" << logger.end;
     }
 
+    void SetCircle(Vector<3,float> circle){
+        this->circle = circle;
+    } 
+
     void HandleInput(std::vector< Vector<2,int> >& screenPoints) {
     }
 
@@ -58,7 +62,7 @@ public:
         pos += delta;
         trans->SetPosition(Vector<3,float>(offset[0]+circle[0]*sin(pos*speed),
                                            offset[1],
-                                           offset[2]+circle[1]*cos(pos*speed)));
+                                           offset[2]+circle[2]*cos(pos*speed)));
     }
  
 };

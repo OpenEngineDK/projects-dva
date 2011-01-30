@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
 void SetupEngine() {
     //
     string confPath = DirectoryManager::FindFileInPath("projects/dva/boids.yaml");
-    ptree = new PropertyTree(confPath);    
+    ptree = new PropertyTree(confPath);  
 
     PropertyTreeNode* screenConf = ptree->GetRootNode()->GetNode("screen");
     SCREEN_WIDTH = screenConf->GetPath("width",SCREEN_WIDTH);
@@ -261,20 +261,20 @@ void SetupEngine() {
 
 void SetupDevices() {
    // Setup move handlers
-
     mouse = env->GetMouse();
     keyboard = env->GetKeyboard();
 
     // Add main user input controller
-    inputCtrl = new InputController();
+    inputCtrl = new InputController(ptree->GetRootNode());
     inputCtrl->SetInputDevice(mouse);
     inputCtrl->SetInputDevice(keyboard);
+
     engine->InitializeEvent().Attach(*inputCtrl);
     engine->ProcessEvent().Attach(*inputCtrl);
     engine->DeinitializeEvent().Attach(*inputCtrl);
 
     // 
-    screenplayCtrl = new ScreenplayController();
+    screenplayCtrl = new ScreenplayController(ptree->GetRootNode()->GetNode("screenplay"));
     engine->InitializeEvent().Attach(*screenplayCtrl);
     engine->ProcessEvent().Attach(*screenplayCtrl);
 
@@ -284,6 +284,7 @@ void SetupDevices() {
         engine->InitializeEvent().Attach(*laserSensor);
         engine->ProcessEvent().Attach(*laserSensor);
         inputCtrl->SetInputDevice(laserSensor);
+        laserSensor->LaserInputEvent().Attach(*screenplayCtrl);
         logger.info << "Enabling Laser Sensor Input." << logger.end;
 
         if( LASER_DEBUG_ENABLED ) {
@@ -362,6 +363,9 @@ void LoadResources() {
     boxTrans->AddNode(boxModel->GetSceneNode());
     box = boxTrans;
 
+    //inputCtrl->fleeTrans->AddNode(box);
+    //sceneNodes.push_back(inputCtrl->fleeTrans);
+
     // Load model representing human interaction.
     path = DirectoryManager::FindFileInPath("models/box/box.dae");
     IModelResourcePtr humanModel = ResourceManager<IModelResource>::Create(path);
@@ -382,32 +386,35 @@ void LoadResources() {
     // Load Seaweed
     path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
 
- //    Animator* seaweed0 = LoadAnimatedModel(path);
-//     Animator* seaweed1 = LoadAnimatedModel(path);
-//     Animator* seaweed2 = LoadAnimatedModel(path);
+    Animator* seaweed0 = LoadAnimatedModel(path);
+    Animator* seaweed1 = LoadAnimatedModel(path);
+    Animator* seaweed2 = LoadAnimatedModel(path);
+    Animator* seaweed3 = LoadAnimatedModel(path);
 
-//    seawee0->SetSpeed(0.8);
+    seaweed0->SetSpeed(0.8);
+    seaweed1->SetSpeed(0.9);
+    seaweed2->SetSpeed(1.0);
+    seaweed3->SetSpeed(1.1);
 
-    IModelResourcePtr seaweedModel = ResourceManager<IModelResource>::Create(path);
-    seaweedModel->Load();
-    ISceneNode* weed = seaweedModel->GetSceneNode();
-    weed->SetInfo("Seaweed Model\n[ISceneNode]");
+    TransformationNode* weedTrans0 = new TransformationNode();
+    weedTrans0->AddNode(seaweed0->GetSceneNode());
+    weedTrans0->SetPosition(Vector<3,float>(-20,0,-100));
+    sceneNodes.push_back(weedTrans0);
 
-    AnimationNode* weedAnim = GetAnimationNode(weed);
-    if( weedAnim ){
-        Animator* animator = new Animator(weedAnim);
-        UserDefaults::GetInstance()->map["WeedAnimator"] = animator;
-        if( animator->GetSceneNode() ){
-            TransformationNode* weedTrans = new TransformationNode();
-            weedTrans->AddNode(animator->GetSceneNode());
-            weedTrans->SetPosition(Vector<3,float>(0,0,0));
-            sceneNodes.push_back(weedTrans);
-        }
-        setup->GetEngine().ProcessEvent().Attach(*animator);
-        animator->SetActiveAnimation(0);
-        //animator->SetSpeed(1.0);
-        animator->Play();
-     }
+    TransformationNode* weedTrans1 = new TransformationNode();
+    weedTrans1->AddNode(seaweed1->GetSceneNode());
+    weedTrans1->SetPosition(Vector<3,float>(-10,0,-100));
+    sceneNodes.push_back(weedTrans1);
+
+    TransformationNode* weedTrans2 = new TransformationNode();
+    weedTrans2->AddNode(seaweed2->GetSceneNode());
+    weedTrans2->SetPosition(Vector<3,float>(10,0,-100));
+    sceneNodes.push_back(weedTrans2);
+
+    TransformationNode* weedTrans3 = new TransformationNode();
+    weedTrans3->AddNode(seaweed3->GetSceneNode());
+    weedTrans3->SetPosition(Vector<3,float>(20,0,-100));
+    sceneNodes.push_back(weedTrans3);
 
     // Load shark.
     path = DirectoryManager::FindFileInPath("models/sharky/Sharky09.DAE");

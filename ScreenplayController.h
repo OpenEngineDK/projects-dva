@@ -13,13 +13,18 @@
 
 #include <Core/IModule.h>
 #include <Core/IListener.h>
+#include <Utils/PropertyTree.h>
 #include <Utils/Timer.h>
+
 #include "Devices/LaserSensor.h"
 
 
 namespace OpenEngine {
     namespace Animations {
         class Animator;
+    }
+    namespace Scene {
+        class TransformationNode;
     }
     namespace Utils {
         class Timer;
@@ -33,28 +38,47 @@ class RelayBox;
 using OpenEngine::Core::IModule;
 using OpenEngine::Core::IListener;
 using OpenEngine::Utils::Timer;
+using OpenEngine::Utils::PropertiesChangedEventArg;
 using OpenEngine::Devices::LaserInputEventArg;
 using OpenEngine::Animations::Animator;
+using OpenEngine::Scene::TransformationNode;
+
+
+typedef enum {
+    IDLE,
+    FLOCK_INTERACTION,
+    SHARK_ANIMATION_DID_START,
+    SHARK_ANIMATION_DID_END,
+    CLEAN_UP_SCENE
+} ScreenplayState;
+
 
 /**
  * Short description.
  *
  * @class ScreenplayController ScreenplayController.h ts/dva/ScreenplayController.h
  */
-class ScreenplayController : public IModule, public IListener<LaserInputEventArg> {
+class ScreenplayController : public IModule, 
+                             public IListener<LaserInputEventArg>,
+                             public IListener<PropertiesChangedEventArg> {
 private:
+    Utils::PropertyTreeNode* ptNode;
     Animator* sharkAnimator;
+    TransformationNode* sharkTrans;
     RelayBox* relayBox;
 
+    ScreenplayState state; 
     Timer timer;
-    
-    double elapsed;
+    float interactionSecs;
+
+    void ReloadProperties();
 
 public:
-    ScreenplayController();
+    ScreenplayController(Utils::PropertyTreeNode* ptNode);
     virtual ~ScreenplayController();
 
     void Handle(LaserInputEventArg arg);
+    void Handle(PropertiesChangedEventArg arg);
     void Handle(Core::InitializeEventArg arg);
     void Handle(Core::ProcessEventArg arg);
     void Handle(Core::DeinitializeEventArg arg);

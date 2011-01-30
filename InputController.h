@@ -60,6 +60,7 @@ class IRuleHandler;
  */
 class InputController : public IModule {
 private:
+    PropertyTreeNode* ptNode;
     LaserSensor* laser;
     IKeyboard* keyboard;
     IMouse* mouse;
@@ -79,6 +80,7 @@ private:
     IRuleHandler* fleeRule;
     IRuleHandler* separationRule;
 
+
     void Init();
 
     void HandleMouseInput();
@@ -88,7 +90,7 @@ private:
     void UpdateRules(Core::ProcessEventArg arg);
 
 public:
-    InputController();
+    InputController(PropertyTreeNode* ptNode);
     InputController(LaserSensor* sensor);
     InputController(IKeyboard* keyboard);
     InputController(IMouse* mouse);
@@ -106,6 +108,8 @@ public:
 
     static Vector<3,float> ScreenToSceneCoordinates(int x, int y);
     static Vector<2,int>   LaserPointToScreenCoordinates(Vector<2,float> p);
+
+    TransformationNode* debugMesh;
    
 };
 
