@@ -44,6 +44,11 @@ flock1:
     max: 70.0
     min: 40.0
 meta:
+  display:
+    fov:
+      min: 0.0
+      max: 3.14
+      step: 0.01
   flock1:
     alignment:
       magnitude:
