@@ -83,7 +83,6 @@ void LaserSensor::SetLaserDebug(LaserDebugPtr debug){
 
 Core::IEvent<LaserInputEventArg>& LaserSensor::LaserInputEvent() {
     return this->laserInputEvent;
-
 }
 
 void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > readings,
@@ -105,7 +104,9 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
             //int y = ((reading[1] + 1) / 2.0) * (height - 1);
             int y = reading[1] * (height - 1);
 
-            SetPixel(x,y,Vector<4,unsigned char>(0,255,0,255));
+            if( x >= 0 && x<width && y >= 0 && y<height ){
+                SetPixel(x,y,Vector<4,unsigned char>(0,255,0,255));
+            }
         }
 
         // Calculate all canvas points.
@@ -117,11 +118,12 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
             for(float r=0; r<2*PI; r+=PI/180){
                 int cX = (int)(cos(r) * 10) + xPos;
                 int cY = (int)(sin(r) * 10) + yPos;
-                SetPixel(cX,cY,Vector<4,unsigned char>(255,0,0,255));
-            }
-            SetPixel(100,100,Vector<4,unsigned char>(255,0,0,255));
+                if( cX >= 0 && cX < width && cY >= 0 && cY<height ){
+                   SetPixel(cX,cY,Vector<4,unsigned char>(255,0,0,255));
+                }
+                SetPixel(100,100,Vector<4,unsigned char>(255,0,0,255));
+             }
         }
-
         //std::cout << "NumClusters: " << clusters.size() << endl;
         //
         laserDebug->UpdateTexture();
