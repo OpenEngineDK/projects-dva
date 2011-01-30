@@ -54,7 +54,10 @@
 #include <Utils/PropertyTree.h>
 #include <Utils/PropertyTreeNode.h>
 
-#include <Utils/MoveHandler.h>
+#include <Utils/BetterMoveHandler.h>
+
+#include <Display/AntTweakBar.h>
+#include <Utils/PropertyBar.h>
 
 // DVA stuff
 #include "DVASetup.h"
@@ -121,6 +124,8 @@ FrameOption frameOption = FRAME_NONE;
 FlockPropertyReloader *rl = NULL;
 
 PropertyTree* ptree;
+AntTweakBar *atb;
+
 
 // Setup Screenplay controller handling the sequence of events.
 ScreenplayController* screenplayCtrl;
@@ -132,6 +137,22 @@ void SetupDevices();
 void SetupBoids();
 void LoadResources();
 void SetupSound();
+
+class DebugKeyHandler : public IListener<KeyboardEventArg> {
+    AntTweakBar* bar;
+public:
+    DebugKeyHandler(AntTweakBar* bar, bool enabled=true) : bar(bar) {
+        if (!enabled)
+            bar->ToggleEnabled();
+    }
+    void Handle(KeyboardEventArg arg) {
+        if (arg.type != EVENT_RELEASE)
+            return;
+        
+        if (arg.sym == KEY_F5)
+            bar->ToggleEnabled();
+    }
+};
 
 
 // Helper function.
@@ -165,7 +186,6 @@ int main(int argc, char** argv) {
 
     // Setup flock behaviour rules.
     SetupBoids();
-
     
     // Update data blocks in case they change due to VBO support.
     DataBlockBinder* bob = new DataBlockBinder(setup->GetRenderer(), 
@@ -199,12 +219,27 @@ void SetupEngine() {
 
      // Get Engine
     engine = &setup->GetEngine();
+
+    atb = new AntTweakBar();
+    mouse = env->GetMouse();
+    keyboard = env->GetKeyboard();
+
+    DebugKeyHandler *dbg = new DebugKeyHandler(atb, false);
+    keyboard->KeyEvent().Attach(*dbg);
+
+    keyboard->KeyEvent().Attach(*atb);
+    mouse->MouseMovedEvent().Attach(*atb);
+    mouse->MouseButtonEvent().Attach(*atb);
+    atb->AttachTo(setup->GetRenderer());
+    atb->AddBar(new PropertyBar("ptree",ptree, ptree->GetRootNode()->GetNode("meta")));
+
 }
 
 
 
 void SetupDevices() {
    // Setup move handlers
+
     mouse = env->GetMouse();
     keyboard = env->GetKeyboard();
 
@@ -268,7 +303,9 @@ void SetupDevices() {
     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
     camera->LookAt(0,190,-2000);
     camSwitch->AddCamera(camera);
-    MoveHandler* move = new MoveHandler(*camera, *mouse);
+    BetterMoveHandler* move = new BetterMoveHandler(*camera, *mouse, true);
+    atb->MouseButtonEvent().Attach(*move);
+    atb->MouseMovedEvent().Attach(*move);
     move->SetMoveScale(0.001);
     engine->InitializeEvent().Attach(*move);
     engine->ProcessEvent().Attach(*move);
@@ -595,7 +632,7 @@ void SetupBoids() {
         int w = elms/h;
         float maxW = 200;
         float maxH = 200;
-        logger.error << h << " " << w << " = " << elms << logger.end;
+
         Vector<3,float> startP(-80,maxH-30,-300);
         //Vector<3,float> delta(maxW/w,maxH/h,0);
         //Vector<3,float> delta(maxw/h,maxH/h,0);
@@ -625,6 +662,7 @@ void SetupBoids() {
                                Vector<3,float>(400,400,400))); // - must be axis aligned
     
     flock->AddRule(new FleeSphereRule(sharkHead, 100.0, 20.0));
+    
     flock->SetPropertyNode(ptree->GetRootNode()->GetNode("flock1"));
 
     // Set flock in input controller, enabling user interactions.

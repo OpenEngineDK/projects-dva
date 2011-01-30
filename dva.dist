@@ -11,6 +11,7 @@ darcs /projects/dva http://openengine.dk/code/projects/dva
 darcs-dev /projects/dva fh.daimi.au.dk:/users/cgd/code/projects/dva
 
 # dist dependencies
+dist /extensions/PropertyBar/PropertyBar.dist http://openengine.dk/code/extensions/PropertyBar/PropertyBar.dist
 dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/extensions/Assimp/Assimp.dist
 dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/HeightMap/HeightMap.dist
 dist /extensions/Boids/Boids.dist http://openengine.dk/code/extensions/Boids/Boids.dist

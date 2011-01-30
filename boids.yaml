@@ -23,3 +23,16 @@ flock1:
   box:
     speed: 5.0
     dist: 25.0
+meta:
+  flock1:
+    follow:
+      magnitude:
+        step: 0.01
+        min: 0.0
+        max: 1.0
+    alignment:
+      magnitude:
+        step: 0.01
+        min: 0.0
+        max: 1.0
+
