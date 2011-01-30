@@ -62,7 +62,7 @@
 
 // Sound 
 #include <Sound/OpenALSoundSystem.h>
-#include <Sound/MusicPlayer.h>
+//#include <Sound/MusicPlayer.h>
 #include <Resources/VorbisResource.h>
 
 // DVA stuff
@@ -104,7 +104,7 @@ IMouse* mouse              = NULL;
 IKeyboard* keyboard        = NULL;
 RenderStateNode *rsn       = NULL;
 ISoundSystem* soundsystem  = NULL;
-MusicPlayer* musicplayer   = NULL;
+//MusicPlayer* musicplayer   = NULL;
 
 vector<ISceneNode*> sceneNodes;
 
@@ -115,6 +115,7 @@ TransformationNode* shark     = NULL;
 TransformationNode* sharkHead = NULL;
 TransformationNode* box       = NULL;
 ISceneNode* sharkAnimRoot     = NULL;
+CustomKeyHandler* ckh         = NULL;
 
 // Custom stuff
 LaserDebugPtr laserDebug;
@@ -338,7 +339,7 @@ void SetupDevices() {
     engine->ProcessEvent().Attach(*move);
     keyboard->KeyEvent().Attach(*move);
 
-    CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
+    ckh = new CustomKeyHandler(*setup);
     atb->KeyEvent().Attach(*ckh);
     //keyboard->KeyEvent().Attach(*ckh);
 }
@@ -465,28 +466,67 @@ void LoadResources() {
     }
 }
 
+ISound* CreateSound(std::string filename) {
+    IStreamingSoundResourcePtr resource = 
+        ResourceManager<IStreamingSoundResource>::Create(filename);
+	ISound* sound = soundsystem->CreateSound(resource);
+    if (sound->IsStereoSound()) {
+        IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
+        left->SetRelativePosition(true);
+        left->SetPosition(Vector<3,float>(-10.0,0.0,0.0));
+        
+        IMonoSound* right = ((IStereoSound*)sound)->GetRight();
+        right->SetRelativePosition(true);
+        right->SetPosition(Vector<3,float>(10.0,0.0,0.0));
+    }
+    else if (sound->IsMonoSound()) {
+        IMonoSound* mono = ((IMonoSound*)sound);
+        mono->SetRelativePosition(true);
+        mono->SetPosition(Vector<3,float>(0.0,0.0,0.0));
+    }
+    sound->SetGain(1.0);
+    return sound;
+}
 
 void SetupSound() {
     soundsystem = new OpenALSoundSystem();
     soundsystem->SetDevice(0);
-    musicplayer = new MusicPlayer(NULL, soundsystem);
-    bool enableSound = false;
+    //musicplayer = new MusicPlayer(NULL, soundsystem);
+    bool enableSound = true;
     if (enableSound) {
         // setup the sound system
         soundsystem->SetMasterGain(1.0);
         engine->InitializeEvent().Attach(*soundsystem);
         engine->ProcessEvent().Attach(*soundsystem);
         engine->DeinitializeEvent().Attach(*soundsystem);
+        DirectoryManager::AppendPath("resources/sounds/");
+        setup->GetRenderer().ProcessEvent().Attach(*soundsystem);
 
-        // setup the music player
-        musicplayer->SetGain(1.0);
-        
-        musicplayer->AddSound("jaws.ogg");
+        // static background sounds
+        ISound* sound1 = CreateSound("Baggrund.ogg");
+        ISound* sound2 = CreateSound("Baggrundbolger.ogg");
+        ISound* sound3 = CreateSound("BaggrundsBobler.ogg");
+        ISound* sound4 = CreateSound("BaggrundVariation.ogg");
+        ckh->AddSound(sound1, "sound1");
+        ckh->AddSound(sound2, "sound2");
+        ckh->AddSound(sound3, "sound3");
+        ckh->AddSound(sound4, "sound4");
 
-        musicplayer->Shuffle(true);
-        //musicplayer->Next();
-        musicplayer->Play();
-        engine->ProcessEvent().Attach(*musicplayer);
+        // sound with dynamic position
+        IStreamingSoundResourcePtr resource = 
+            ResourceManager<IStreamingSoundResource>::Create("Sharksound01_Master.ogg");
+        ISound* sound = soundsystem->CreateSound(resource);
+        sound->SetGain(1.0);
+        ckh->AddSound(sound, "sound5");
+        if (sound->IsStereoSound()) {
+            IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
+            IMonoSound* right = ((IStereoSound*)sound)->GetRight();
+            sharkHead->AddNode(new SoundNode(left));
+            sharkHead->AddNode(new SoundNode(right));
+        } else {
+            IMonoSound* mono = ((IMonoSound*)sound);
+            sharkHead->AddNode(new SoundNode(mono));
+        }
 
         setup->GetRenderer().PreProcessEvent().Attach(*soundsystem);
     }

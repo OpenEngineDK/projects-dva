@@ -70,4 +70,9 @@ darwin /libraries http://openengine.dk/data/libraries/pcrecpp-osx-i32.zip
 any /resources http://openengine.dk/data/animation_models.zip
 any /resources http://openengine.dk/data/projects/dva/causticTexs.tgz
 any /projects/dva/data http://openengine.dk/data/images/logo/small.jpg
-any /resources http://openengine.dk/data/sound/jaws.ogg
+
+any /resources/sounds http://openengine.dk/data/projects/dva/Baggrund.ogg
+any /resources/sounds http://openengine.dk/data/projects/dva/Baggrundbolger.ogg
+any /resources/sounds http://openengine.dk/data/projects/dva/BaggrundsBobler.ogg
+any /resources/sounds http://openengine.dk/data/projects/dva/BaggrundVariation.ogg
+any /resources/sounds http://openengine.dk/data/projects/dva/Sharksound01_Master.ogg

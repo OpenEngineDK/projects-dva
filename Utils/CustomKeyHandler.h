@@ -3,8 +3,10 @@
 #include <Utils/SimpleSetup.h>
 #include <Scene/ISceneNodeVisitor.h>
 #include <Animations/Animator.h>
+#include <Sound/ISound.h>
 
 using namespace OpenEngine::Scene;
+using namespace OpenEngine::Sound;
 using namespace OpenEngine::Animations;
 
 namespace OpenEngine{
@@ -14,6 +16,7 @@ class CustomKeyHandler : public IListener<KeyboardEventArg> {
 private:
     SimpleSetup& setup;
     RenderStateNode* rsn;
+    std::map<std::string,ISound*> sounds;
 
 public:
     CustomKeyHandler(SimpleSetup& setup) : setup(setup), rsn(NULL)  {
@@ -47,8 +50,7 @@ public:
             case KEY_7: rsn->ToggleOption(RenderStateNode::HARD_NORMAL); break;
             case KEY_8: rsn->ToggleOption(RenderStateNode::BACKFACE); break;
 
-
-            case KEY_f : setup.ShowFPS(); break;
+            case KEY_e : setup.ShowFPS(); break;
 
             case KEY_SPACE: {
                 Animator* anim = (Animator*)UserDefaults::GetInstance()->map["SharkAnimator"];
@@ -62,6 +64,77 @@ public:
                 break;
 
 
+            case KEY_f: 
+                {
+                    ISound* sound = sounds["sound1"];
+                    if (sound != NULL)
+                        sound->Play(); 
+                    break;
+                }
+            case KEY_c: 
+                {
+                    ISound* sound = sounds["sound1"];
+                    if (sound != NULL)
+                        sound->Stop(); 
+                    break;
+                }
+            case KEY_g: 
+                {
+                    ISound* sound = sounds["sound2"];
+                    if (sound != NULL)
+                        sound->Play(); 
+                    break;
+                }
+            case KEY_v: 
+                {
+                    ISound* sound = sounds["sound2"];
+                    if (sound != NULL)
+                        sound->Stop(); 
+                    break;
+                }
+            case KEY_h: 
+                {
+                    ISound* sound = sounds["sound3"];
+                    if (sound != NULL)
+                        sound->Play(); 
+                    break;
+                }
+            case KEY_b: 
+                {
+                    ISound* sound = sounds["sound3"];
+                    if (sound != NULL)
+                        sound->Stop(); 
+                    break;
+                }
+            case KEY_j: 
+                {
+                    ISound* sound = sounds["sound4"];
+                    if (sound != NULL)
+                        sound->Play(); 
+                    break;
+                }
+            case KEY_n: 
+                {
+                    ISound* sound = sounds["sound4"];
+                    if (sound != NULL)
+                        sound->Stop(); 
+                    break;
+                }
+            case KEY_k: 
+                {
+                    ISound* sound = sounds["sound5"];
+                    if (sound != NULL)
+                        sound->Play(); 
+                    break;
+                }
+            case KEY_m: 
+                {
+                    ISound* sound = sounds["sound5"];
+                    if (sound != NULL)
+                        sound->Stop(); 
+                    break;
+                }
+
 
             default:break;
             
@@ -71,6 +144,11 @@ public:
                 logger.info << rsn->ToString() << logger.end;
             }
         }
+    }
+
+    void AddSound(ISound* sound, std::string str) {
+        logger.error << "adding sound: " << str << logger.end;
+        sounds[str] = sound;
     }
 };
 
