@@ -45,6 +45,7 @@ private:
     float startAngle, endAngle;
     float resolution;
     Math::Vector<2,float> bounds;
+    Math::Vector<2,float> boundsOffset;
  
     Mutex mutex;
     std::vector< Math::Vector<2,float> > curReadings;

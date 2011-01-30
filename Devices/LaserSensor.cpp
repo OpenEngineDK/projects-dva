@@ -102,7 +102,8 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
         for(itr=readings.begin(); itr!=readings.end(); itr++){
             Vector<2,float> reading = *itr;
             int x = ((reading[0] + 1) / 2.0) * (width - 1);
-            int y = ((reading[1] + 1) / 2.0) * (height - 1);
+            //int y = ((reading[1] + 1) / 2.0) * (height - 1);
+            int y = reading[1] * (height - 1);
 
             SetPixel(x,y,Vector<4,unsigned char>(0,255,0,255));
         }
@@ -111,7 +112,7 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
         for(unsigned int i=0; i<clusters.size(); i++){
             Vector<2,float> cc = clusters[i];
             int xPos = ((cc[0] + 1) / 2.0) * (width - 1);
-            int yPos = ((cc[1] + 1) / 2.0) * (height - 1);
+            int yPos = cc[1] * (height - 1);
             
             for(float r=0; r<2*PI; r+=PI/180){
                 int cX = (int)(cos(r) * 10) + xPos;

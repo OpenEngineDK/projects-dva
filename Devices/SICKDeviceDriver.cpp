@@ -106,7 +106,8 @@ std::vector< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
 }
 
 bool SICKDeviceDriver::InsideBounds(Vector<2,float> p) {
-    return (-bounds[0] < p[0]) && (p[0] < bounds[0]) &&
+    return p[1] > 0 && // Ignore negative y
+           (-bounds[0] < p[0]) && (p[0] < bounds[0]) &&
            (-bounds[1] < p[1]) && (p[1] < bounds[1]);
 }
 
