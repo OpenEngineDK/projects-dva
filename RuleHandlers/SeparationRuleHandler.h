@@ -20,7 +20,7 @@ namespace dva {
 
 using OpenEngine::Animations::SeparationRule;
 
-const float SEPARATION_FACTOR = 0.01f;
+const float SEPARATION_FACTOR = 0.1f;
 
 /*
  * NOTE: this rule handler removes the two points which are furthest from

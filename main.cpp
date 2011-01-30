@@ -78,8 +78,6 @@
 #include "ScreenplayController.h"
 
 
-
-
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
 using namespace OpenEngine::Utils;
@@ -539,20 +537,6 @@ void SetupScene() {
     setup->GetRenderer().InitializeEvent().Attach(*causticsNode);
     scene->AddNode(causticsNode); 
     scene = causticsNode;
-
-
-    // Create blur post process
-//     IShaderResourcePtr blurV = ResourceManager<IShaderResource>::Create("projects/dva/effects/VerticalBoxBlur.glsl");
-//     PostProcessNode* blurNode = new PostProcessNode(blurV, dimension); 
-//     setup->GetRenderer().InitializeEvent().Attach(*blurNode);
-//     scene->AddNode(blurNode); 
-//     scene = blurNode;
-
-//     IShaderResourcePtr blurH = ResourceManager<IShaderResource>::Create("projects/dva/effects/HorizontalBoxBlur.glsl");
-//     PostProcessNode* blurNode2 = new PostProcessNode(blurH, dimension); 
-//     setup->GetRenderer().InitializeEvent().Attach(*blurNode2);
-//     scene->AddNode(blurNode2); 
-//     scene = blurNode2;
 
 //    Create point light
 //     TransformationNode* lightTrans = new TransformationNode();

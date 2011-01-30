@@ -102,7 +102,7 @@ void InputController::Handle(Core::ProcessEventArg arg) {
     // Handle input
     if( mouse ) HandleMouseInput();
     if( laser ) HandleLaserInput();
-    //    logger.info << "LASER POINTS: " << laserPoints.size() << logger.end;
+    //logger.info << "LASER POINTS: " << laserPoints.size() << logger.end;
 
     unsigned int numTrackingPoints = laserPoints.size();
 
@@ -187,7 +187,6 @@ void InputController::Handle(Core::DeinitializeEventArg arg) {
 void InputController::HandleMouseInput(){
     Devices::MouseState arg = mouse->GetState();
     mousePoints.push_back(Vector<2,int>(arg.x, arg.y));
-    laserPoints.push_back(Vector<2,int>(arg.x, arg.y));
 }
 
 
