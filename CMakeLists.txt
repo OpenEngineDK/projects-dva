@@ -6,6 +6,7 @@ SET( PROJECT_NAME "dva")
 SET( PROJECT_SOURCES
   # Add all the cpp source files here
   main.cpp
+  DVASetup.cpp
   InputController.cpp
   ScreenplayController.cpp
   RelayBox.cpp

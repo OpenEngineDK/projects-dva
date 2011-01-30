@@ -124,6 +124,7 @@ PropertyTree* ptree;
 AntTweakBar *atb;
 
 
+
 // Setup Screenplay controller handling the sequence of events.
 ScreenplayController* screenplayCtrl;
 
@@ -221,6 +222,11 @@ void SetupEngine() {
     //
     string confPath = DirectoryManager::FindFileInPath("projects/dva/boids.yaml");
     ptree = new PropertyTree(confPath);    
+
+    PropertyTreeNode* screenConf = ptree->GetRootNode()->GetNode("screen");
+    SCREEN_WIDTH = screenConf->GetPath("width",SCREEN_WIDTH);
+    SCREEN_HEIGHT = screenConf->GetPath("height",SCREEN_HEIGHT);
+    
 
     // Create SDL environment handling display and input
     env = new SDLEnvironment(SCREEN_WIDTH, SCREEN_HEIGHT, 32, frameOption);
@@ -495,7 +501,7 @@ void SetupScene() {
     ISceneNode* sceneRoot = new SceneNode();
     setup->SetScene(*sceneRoot);
 
-    // Set background color to white
+    // Set background color to "white"
     setup->GetRenderer().SetBackgroundColor(Vector<4,float>(8.0, 1.0, 0.8, 1.0));
 
     // scene represents where to insert next node.

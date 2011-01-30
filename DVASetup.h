@@ -24,8 +24,8 @@ typedef enum {
 
 
 namespace dva {
-    const unsigned int SCREEN_WIDTH  = 1280;
-    const unsigned int SCREEN_HEIGHT = 800; 
+    extern unsigned int SCREEN_WIDTH;
+    extern unsigned int SCREEN_HEIGHT;
 
     const CtrlMode INPUT_CTRL_MODE = MOUSE_FLOCK_FOLLOW;
     //const CtrlMode INPUT_CTRL_MODE = LASER_FOLLOW_FLOCK_AND_RESIZE;
