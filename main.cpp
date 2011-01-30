@@ -135,7 +135,7 @@ void LoadResources();
 void SetupSound();
 void SetupScene();
 void SetupBoids();
-TransformationNode* LoadAnimatedModel(string filename);
+Animator* LoadAnimatedModel(string filename);
 
 class DebugKeyHandler : public IListener<KeyboardEventArg> {
     AntTweakBar* bar;
@@ -368,6 +368,13 @@ void LoadResources() {
 
     // Load Seaweed
     path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
+
+ //    Animator* seaweed0 = LoadAnimatedModel(path);
+//     Animator* seaweed1 = LoadAnimatedModel(path);
+//     Animator* seaweed2 = LoadAnimatedModel(path);
+
+//    seawee0->SetSpeed(0.8);
+
     IModelResourcePtr seaweedModel = ResourceManager<IModelResource>::Create(path);
     seaweedModel->Load();
     ISceneNode* weed = seaweedModel->GetSceneNode();
@@ -724,3 +731,17 @@ void SetupBoids() {
     camSwitch->AddCamera(fcsm);
 }
 
+
+Animator* LoadAnimatedModel(string path){
+    IModelResourcePtr model = ResourceManager<IModelResource>::Create(path);
+    model->Load();
+    AnimationNode* animNode = GetAnimationNode(model->GetSceneNode());
+    Animator* animator = NULL;
+    if( animNode ){
+        animator = new Animator(animNode);
+        setup->GetEngine().ProcessEvent().Attach(*animator);
+        animator->SetActiveAnimation(0);
+        animator->Play();
+     }
+    return animator;
+}
