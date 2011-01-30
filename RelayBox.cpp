@@ -91,7 +91,7 @@ void RelayBox::Run() {
         if( GetStatus() == NOT_CONNECTED ){
             if( !Connect(deviceIp, devicePort) ) {
                 logger.error << "[RelayBox] waiting 10 sec before reconnecting...." << logger.end;
-                Thread::Sleep(10000);
+                Thread::Sleep(2000000);
             }
         }
 
@@ -120,6 +120,7 @@ void RelayBox::Run() {
                 logger.error << "[RelayBox] socket error." << logger.end;
             }
         }
+        Thread::Sleep(10000);
     }
 }
 
