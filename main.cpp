@@ -384,37 +384,37 @@ void LoadResources() {
     sceneNodes.push_back(envTrans);
 
     // Load Seaweed
-    path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
+//     path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
 
-    Animator* seaweed0 = LoadAnimatedModel(path);
-    Animator* seaweed1 = LoadAnimatedModel(path);
-    Animator* seaweed2 = LoadAnimatedModel(path);
-    Animator* seaweed3 = LoadAnimatedModel(path);
+//     Animator* seaweed0 = LoadAnimatedModel(path);
+//     Animator* seaweed1 = LoadAnimatedModel(path);
+//     Animator* seaweed2 = LoadAnimatedModel(path);
+//     Animator* seaweed3 = LoadAnimatedModel(path);
 
-    seaweed0->SetSpeed(0.8);
-    seaweed1->SetSpeed(0.9);
-    seaweed2->SetSpeed(1.0);
-    seaweed3->SetSpeed(1.1);
+//     seaweed0->SetSpeed(0.8);
+//     seaweed1->SetSpeed(0.9);
+//     seaweed2->SetSpeed(1.0);
+//     seaweed3->SetSpeed(1.1);
 
-    TransformationNode* weedTrans0 = new TransformationNode();
-    weedTrans0->AddNode(seaweed0->GetSceneNode());
-    weedTrans0->SetPosition(Vector<3,float>(-20,0,-100));
-    sceneNodes.push_back(weedTrans0);
+//     TransformationNode* weedTrans0 = new TransformationNode();
+//     weedTrans0->AddNode(seaweed0->GetSceneNode());
+//     weedTrans0->SetPosition(Vector<3,float>(-20,0,-100));
+//     sceneNodes.push_back(weedTrans0);
 
-    TransformationNode* weedTrans1 = new TransformationNode();
-    weedTrans1->AddNode(seaweed1->GetSceneNode());
-    weedTrans1->SetPosition(Vector<3,float>(-10,0,-100));
-    sceneNodes.push_back(weedTrans1);
+//     TransformationNode* weedTrans1 = new TransformationNode();
+//     weedTrans1->AddNode(seaweed1->GetSceneNode());
+//     weedTrans1->SetPosition(Vector<3,float>(-10,0,-100));
+//     sceneNodes.push_back(weedTrans1);
 
-    TransformationNode* weedTrans2 = new TransformationNode();
-    weedTrans2->AddNode(seaweed2->GetSceneNode());
-    weedTrans2->SetPosition(Vector<3,float>(10,0,-100));
-    sceneNodes.push_back(weedTrans2);
+//     TransformationNode* weedTrans2 = new TransformationNode();
+//     weedTrans2->AddNode(seaweed2->GetSceneNode());
+//     weedTrans2->SetPosition(Vector<3,float>(10,0,-100));
+//     sceneNodes.push_back(weedTrans2);
 
-    TransformationNode* weedTrans3 = new TransformationNode();
-    weedTrans3->AddNode(seaweed3->GetSceneNode());
-    weedTrans3->SetPosition(Vector<3,float>(20,0,-100));
-    sceneNodes.push_back(weedTrans3);
+//     TransformationNode* weedTrans3 = new TransformationNode();
+//     weedTrans3->AddNode(seaweed3->GetSceneNode());
+//     weedTrans3->SetPosition(Vector<3,float>(20,0,-100));
+//     sceneNodes.push_back(weedTrans3);
 
     // Load shark.
     path = DirectoryManager::FindFileInPath("models/sharky/Sharky09.DAE");
