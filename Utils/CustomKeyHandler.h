@@ -147,7 +147,6 @@ public:
     }
 
     void AddSound(ISound* sound, std::string str) {
-        logger.error << "adding sound: " << str << logger.end;
         sounds[str] = sound;
     }
 };

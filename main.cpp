@@ -486,6 +486,7 @@ ISound* CreateSound(std::string filename) {
         mono->SetRelativePosition(true);
         mono->SetPosition(Vector<3,float>(0.0,0.0,0.0));
     }
+    sound->SetLooping(true);
     sound->SetGain(1.0);
     return sound;
 }
