@@ -58,6 +58,7 @@
 #include <Display/AntTweakBar.h>
 #include <Utils/PropertyBar.h>
 #include <Utils/PropertyBinder.h>
+#include <Math/RGBAColor.h>
 
 // Sound 
 #include <Sound/OpenALSoundSystem.h>
@@ -301,10 +302,11 @@ void SetupDevices() {
     // Static default view
     PerspectiveViewingVolume* persp = new PerspectiveViewingVolume(1, 8000);
     PropertyTreeNode* dn = ptree->GetRootNode()->GetNode("display");
-    PropertyBinder<PerspectiveViewingVolume,float> *bn 
-        = new PropertyBinder<PerspectiveViewingVolume,float>(dn->GetNode("fov"),
-                                                             *persp,
-                                                             &PerspectiveViewingVolume::SetFOV,PI/4.0 );
+
+    new PropertyBinder<PerspectiveViewingVolume,float>
+        (dn->GetNode("fov"),
+         *persp,
+         &PerspectiveViewingVolume::SetFOV, PI/4.0 );
    
     Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
     stc->SetPosition(Vector<3, float>(0, 54, 0));
@@ -337,7 +339,8 @@ void SetupDevices() {
     keyboard->KeyEvent().Attach(*move);
 
     CustomKeyHandler* ckh = new CustomKeyHandler(*setup);
-    keyboard->KeyEvent().Attach(*ckh);
+    atb->KeyEvent().Attach(*ckh);
+    //keyboard->KeyEvent().Attach(*ckh);
 }
 
 
@@ -588,8 +591,24 @@ void SetupScene() {
     scene->AddNode(lightTrans1);
     lightTrans1->AddNode(lightNode1);
 
+    PropertyTreeNode* lpn = ptree->GetRootNode()->GetNode("light");
+
+    new PropertyBinder<TransformationNode, Vector<3,float> >
+        (lpn->GetNode("position"), *lightTrans1, 
+         &TransformationNode::SetPosition, Vector<3,float>(0,100,0));
+
+    new PropertyBinder<PointLightNode, RGBAColor >
+        (lpn->GetNode("diffuse"), *lightNode1, 
+         &PointLightNode::SetDiffuse, RGBAColor(0.7, 0.8, 0.7, 1.0));
+
+
     LightAnimator* lightAnim = new LightAnimator(lightNode1);
     engine->ProcessEvent().Attach(*lightAnim);
+    new PropertyBinder<LightAnimator, bool >
+        (lpn->GetNode("disco"), *lightAnim, 
+         &LightAnimator::SetDisco, false);
+
+    
 
     rsn = new RenderStateNode();
     rsn->DisableOption(RenderStateNode::BACKFACE);
