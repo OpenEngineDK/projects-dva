@@ -54,10 +54,7 @@
 #include <Utils/PropertyTree.h>
 #include <Utils/PropertyTreeNode.h>
 
-#include <Utils/BetterMoveHandler.h>
-
-#include <Display/AntTweakBar.h>
-#include <Utils/PropertyBar.h>
+#include <Utils/MoveHandler.h>
 
 // DVA stuff
 #include "DVASetup.h"
@@ -114,7 +111,6 @@ TransformationNode* human     = NULL;
 TransformationNode* shark     = NULL;
 TransformationNode* sharkHead = NULL;
 TransformationNode* box       = NULL;
-TransformationNode* seaweed   = NULL;
 ISceneNode* sharkAnimRoot     = NULL;
 
 // Custom stuff
@@ -132,11 +128,12 @@ ScreenplayController* screenplayCtrl;
 
 // Forward declarations
 void SetupEngine();
-void SetupScene();
 void SetupDevices();
-void SetupBoids();
 void LoadResources();
 void SetupSound();
+void SetupScene();
+void SetupBoids();
+TransformationNode* LoadAnimatedModel(string filename);
 
 class DebugKeyHandler : public IListener<KeyboardEventArg> {
     AntTweakBar* bar;
@@ -160,6 +157,19 @@ AnimationNode* GetAnimationNode(ISceneNode* node) {
     SearchTool st;
     return st.DescendantAnimationNode(node);
 }
+
+class LightNodeChanged : public IListener<PropertiesChangedEventArg> {
+private:
+    PointLightNode* lightNode;
+public:
+    LightNodeChanged(PointLightNode* pln) : lightNode(pln) {}
+    ~LightNodeChanged() {}
+
+    void Handle(PropertiesChangedEventArg arg){
+        //        float val = arg.GetNode()->Get(0.0f);
+        logger.info << "Properties changed event" << logger.end;
+    }
+};
 
 
 int main(int argc, char** argv) {
@@ -244,9 +254,12 @@ void SetupDevices() {
     keyboard = env->GetKeyboard();
 
     // Add main user input controller
-    inputCtrl = new InputController(ptree->GetRootNode());
+    inputCtrl = new InputController();
     inputCtrl->SetInputDevice(mouse);
     inputCtrl->SetInputDevice(keyboard);
+    engine->InitializeEvent().Attach(*inputCtrl);
+    engine->ProcessEvent().Attach(*inputCtrl);
+    engine->DeinitializeEvent().Attach(*inputCtrl);
 
     // 
     screenplayCtrl = new ScreenplayController();
@@ -269,12 +282,6 @@ void SetupDevices() {
             logger.info << "Enabling Laser Sensor Input Visualiser." << logger.end;
         }
     }
-
-
-    inputCtrl->SetMode(INPUT_CTRL_MODE);
-    engine->InitializeEvent().Attach(*inputCtrl);
-    engine->ProcessEvent().Attach(*inputCtrl);
-    engine->DeinitializeEvent().Attach(*inputCtrl);
 
     // Configure Relay box controlling wind, water and room light.
     if( RELAY_BOX_ENABLED ) {
@@ -303,10 +310,10 @@ void SetupDevices() {
     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
     camera->LookAt(0,190,-2000);
     camSwitch->AddCamera(camera);
-    BetterMoveHandler* move = new BetterMoveHandler(*camera, *mouse, true);
-    atb->MouseButtonEvent().Attach(*move);
-    atb->MouseMovedEvent().Attach(*move);
+    MoveHandler* move = new MoveHandler(*camera, *mouse);
     move->SetMoveScale(0.001);
+    mouse->MouseMovedEvent().Attach(*move);
+    mouse->MouseButtonEvent().Attach(*move);
     engine->InitializeEvent().Attach(*move);
     engine->ProcessEvent().Attach(*move);
     keyboard->KeyEvent().Attach(*move);
@@ -408,7 +415,6 @@ void LoadResources() {
         sharkAnimator->SetActiveAnimation(0);
         sharkAnimator->LoopAnimation(false);
         //sharkAnimator->Play();
-
         screenplayCtrl->SetSharkAnimator(sharkAnimator);
     }
 
@@ -440,7 +446,7 @@ void SetupSound() {
     soundsystem = new OpenALSoundSystem();
     soundsystem->SetDevice(0);
     musicplayer = new MusicPlayer(NULL, soundsystem);
-    bool enableSound = true;
+    bool enableSound = false;
     if (enableSound) {
         // setup the sound system
         soundsystem->SetMasterGain(1.0);
@@ -491,7 +497,7 @@ void SetupScene() {
     setup->SetScene(*sceneRoot);
 
     // Set background color to white
-    setup->GetRenderer().SetBackgroundColor(Vector<4,float>(1.0,1.0,1.0,1.0));
+    setup->GetRenderer().SetBackgroundColor(Vector<4,float>(8.0, 1.0, 0.8, 1.0));
 
     // scene represents where to insert next node.
     ISceneNode* scene = sceneRoot;
@@ -516,7 +522,7 @@ void SetupScene() {
     scene->AddNode(shadowPost); 
     scene = shadowPost;
 
-    // TODO adjust shadow camera...
+    // Setup shadow perspective
     IViewingVolume* shadowView = new PerspectiveViewingVolume(100,2000);
     Camera* shadowCam = new Camera(*(shadowView));
     shadowCam->SetPosition(Vector<3,float>(0,800,500));
@@ -547,26 +553,29 @@ void SetupScene() {
 //     scene->AddNode(blurNode2); 
 //     scene = blurNode2;
 
-    // Create point light
+//    Create point light
 //     TransformationNode* lightTrans = new TransformationNode();
 //     PointLightNode* lightNode = new PointLightNode();
 //     lightTrans->SetPosition(Vector<3,float>(0.0,100.0,0.0));
-//     lightNode->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
-//     lightNode->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
-//     lightNode->diffuse = Vector<4,float>(0.0,1.0,0.0,1.0);
-//     lightNode->specular = Vector<4,float>(.2,.2,.2,1.0);
+//     lightNode->ambient  = Vector<4,float>(0.6, 0.5, 0.5, 1.0);
+//     lightNode->ambient  = Vector<4,float>(0.4, 0.4, 0.4, 1.0);
+//     lightNode->diffuse  = Vector<4,float>(0.0, 0.3, 0.0, 1.0);
+//     lightNode->specular = Vector<4,float>(0.2, 0.2, 0.2, 1.0);
 //     lightNode->linearAtt = 0.01;
 //     scene->AddNode(lightTrans);
 //     lightTrans->AddNode(lightNode);
+
+//     LightNodeChanged* lnc = new LightNodeChanged(lightNode);
+//     ptree->PropertiesChangedEvent().Attach(*lnc);
 
     TransformationNode* lightTrans1 = new TransformationNode();
     // lightTrans1->SetRotation(Quaternion<float>(Math::PI, Vector<3,float>(1.0,0.0,0.0)));
     lightTrans1->SetPosition(Vector<3,float>(0.0, 100.0,0.0));
     PointLightNode* lightNode1 = new PointLightNode();
     // lightNode1->ambient = Vector<4,float>(0.6,0.8,0.5,1.0);
-    lightNode1->ambient = Vector<4,float>(0.4,0.4,0.4,1.0);
-    lightNode1->diffuse = Vector<4,float>(0.7,0.7,0.7,1.0);
-    lightNode1->specular = Vector<4,float>(0.5,0.5,0.5,1.0);
+    lightNode1->ambient  = Vector<4,float>(0.4, 0.9, 0.4, 1.0);
+    lightNode1->diffuse  = Vector<4,float>(0.7, 0.8, 0.7, 1.0);
+    lightNode1->specular = Vector<4,float>(0.5, 0.6, 0.5, 1.0);
     lightNode1->linearAtt = 0.001;
     lightNode1->constAtt = 1.0;
     scene->AddNode(lightTrans1);
@@ -658,6 +667,7 @@ void SetupBoids() {
     }// done
     flock->AddRule(new BoxLimitRule(Vector<3,float>(-400,30,-400), 
                                     Vector<3,float>(400,400,400)));
+
     flock->AddRule(new BoxRule(Vector<3,float>(-400,30,-400),  // The two corners
                                Vector<3,float>(400,400,400))); // - must be axis aligned
     
@@ -667,9 +677,6 @@ void SetupBoids() {
 
     // Set flock in input controller, enabling user interactions.
     inputCtrl->SetFlock(flock);
-    inputCtrl->SetDebugMesh(box);
-    rsn->AddNode(inputCtrl->GetSceneNode());
-
 
     vector<ISceneNode*>::iterator itr;
     int size = ptree->GetRootNode()->GetNode("flock1")->GetPath("size", 100);
@@ -726,3 +733,4 @@ void SetupBoids() {
     fcsm->Follow(sharkHead);
     camSwitch->AddCamera(fcsm);
 }
+

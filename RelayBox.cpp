@@ -111,10 +111,10 @@ void RelayBox::Run() {
                 
                 // If we got the expected response remove command from queue.
                 string res = socket->ReadLine("\r"); 
-                
-                if( exp != res.append("\r") ){
-                    logger.error << "[RelayBox] error: command '" << req << "', returned '" <<  res << "' but we expcted '" << exp << "'" << logger.end;
-                }
+                   
+//                 if( exp != res ){
+//                     logger.error << "[RelayBox] error: command '" << req << "', returned '" <<  res << "' but we expcted '" << exp << "'" << logger.end;
+//                 }
                 
             } catch (...) {
                 logger.error << "[RelayBox] socket error." << logger.end;

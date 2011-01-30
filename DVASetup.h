@@ -24,16 +24,18 @@ typedef enum {
 
 
 namespace dva {
-    const unsigned int SCREEN_WIDTH  = 1024;
-    const unsigned int SCREEN_HEIGHT = 768; 
+    const unsigned int SCREEN_WIDTH  = 1280;
+    const unsigned int SCREEN_HEIGHT = 800; 
 
-    const CtrlMode INPUT_CTRL_MODE = LASER_FOLLOW_FLOCK_AND_RESIZE;
+    const CtrlMode INPUT_CTRL_MODE = MOUSE_FLOCK_FOLLOW;
+    //const CtrlMode INPUT_CTRL_MODE = LASER_FOLLOW_FLOCK_AND_RESIZE;
+
 
     // Laser Sensor Setup
-    const bool        LASER_SENSOR_ENABLED = false;
+    const bool        LASER_SENSOR_ENABLED = true;
     const std::string LASER_SENSOR_IP      = "192.168.0.100";
     const int         LASER_SENSOR_PORT    = 2111; // 2111 or 2112
-    const bool        LASER_DEBUG_ENABLED  = true;
+    const bool        LASER_DEBUG_ENABLED  = false;
 
     // Relay Box Setup
     const bool        RELAY_BOX_ENABLED    = true;
@@ -44,7 +46,9 @@ namespace dva {
     const float CLUSTER_EPSILON    = 0.10; // Max distance between points in cluster.
     const int   CLUSTER_MIN_POINTS = 5;    // Minimum number of points to form a cluster.
 
-    
+
+    // 
+    const unsigned int NUM_SEAWEED_ANIMATORS = 3;
 
     
 } // NS dva

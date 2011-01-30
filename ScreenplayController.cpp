@@ -40,13 +40,13 @@ void ScreenplayController::Handle(Core::ProcessEventArg arg) {
     //    elapsed += ((float)arg.approx / 1000.0f);
 
 
-    static bool state = true;
+    //    static bool state = true;
 
-    if( timer.GetElapsedTime().sec > 5 ){
-        relayBox->SetRelayState(1,state);
-        state = !state;
-        timer.Reset();
-    }
+//     if( timer.GetElapsedTime().sec > 5 ){
+//         relayBox->SetRelayState(1,state);
+//         state = !state;
+//         timer.Reset();
+//     }
     
 }
 
