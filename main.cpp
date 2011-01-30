@@ -445,7 +445,7 @@ void LoadResources() {
         }
         setup->GetEngine().ProcessEvent().Attach(*sharkAnimator);
         sharkAnimator->SetActiveAnimation(0);
-        sharkAnimator->LoopAnimation(false);
+        sharkAnimator->LoopAnimation(true);
         //sharkAnimator->Play();
         screenplayCtrl->SetSharkAnimator(sharkAnimator);
     }

@@ -30,7 +30,6 @@ namespace dva {
     const CtrlMode INPUT_CTRL_MODE = MOUSE_FLOCK_FOLLOW;
     //const CtrlMode INPUT_CTRL_MODE = LASER_FOLLOW_FLOCK_AND_RESIZE;
 
-
     // Laser Sensor Setup
     const bool        LASER_SENSOR_ENABLED = true;
     const std::string LASER_SENSOR_IP      = "192.168.0.100";
