@@ -56,7 +56,7 @@ public:
                 itr1 = points.begin();
                 bool add = true;
                 for (; itr1 != points.end(); ++itr1) {
-                    if ((point - (*itr1).second).GetLength() < 0.10) {
+                    if ((point - (*itr1).second).GetLength() < 0.02) {
                         add = false;
                         break;
                     }
