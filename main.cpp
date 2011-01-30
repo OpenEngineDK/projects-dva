@@ -49,6 +49,7 @@
 #include <Scene/PointLightNode.h>
 #include <Scene/RenderStateNode.h>
 #include <Scene/ShadowLightPostProcessNode.h>
+#include <Scene/PointWaveNode.h>
 
 #include <Utils/PropertyTree.h>
 #include <Utils/PropertyTreeNode.h>
@@ -78,7 +79,7 @@
 #include "HandHeldCamera.h"
 #include "LightAnimator.h"
 #include "ScreenplayController.h"
-
+#include "Scene/LaserWaveNode.h"
 
 using namespace OpenEngine::Logging;
 using namespace OpenEngine::Core;
@@ -127,6 +128,7 @@ PropertyTree* ptree;
 AntTweakBar *atb;
 
 
+LaserSensor* laserSensor;
 
 // Setup Screenplay controller handling the sequence of events.
 ScreenplayController* screenplayCtrl;
@@ -278,7 +280,7 @@ void SetupDevices() {
 
     // Setup laser sensor device.
     if( LASER_SENSOR_ENABLED ) {
-        LaserSensor* laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+        laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
         engine->InitializeEvent().Attach(*laserSensor);
         engine->ProcessEvent().Attach(*laserSensor);
         inputCtrl->SetInputDevice(laserSensor);
@@ -567,6 +569,20 @@ void SetupScene() {
     ISceneNode* scene = sceneRoot;
     Vector<2, int> dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
  
+
+    // wave effect
+    PointWaveNode* waves;
+    if (LASER_SENSOR_ENABLED) 
+        waves = new LaserWaveNode(laserSensor, dimension[0], dimension[1], 10);
+    else {
+        waves = new PointWaveNode(dimension[0], dimension[1], 10); 
+        setup->GetMouse().MouseMovedEvent().Attach(*waves);
+        setup->GetMouse().MouseButtonEvent().Attach(*waves);
+    }
+    setup->GetRenderer().InitializeEvent().Attach(*waves);
+    scene->AddNode(waves); 
+    scene = waves;
+
     // Create fog post process   
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
@@ -602,6 +618,7 @@ void SetupScene() {
     setup->GetRenderer().InitializeEvent().Attach(*causticsNode);
     scene->AddNode(causticsNode); 
     scene = causticsNode;
+
 
 //    Create point light
 //     TransformationNode* lightTrans = new TransformationNode();
