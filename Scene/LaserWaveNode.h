@@ -40,7 +40,6 @@ public:
 
     void Handle(Devices::LaserInputEventArg arg) {
         if (++count > 4) {
-            logger.info << "hesthest" << logger.end;
             count = 0;
         
             std::vector< Vector<2,float> > ps =  l->GetState();
@@ -57,13 +56,13 @@ public:
                 itr1 = points.begin();
                 bool add = true;
                 for (; itr1 != points.end(); ++itr1) {
-                    if ((point - (*itr1).second).GetLength() < 0.01) {
+                    if ((point - (*itr1).second).GetLength() < 0.05) {
                         add = false;
                         break;
                     }
                 }
                 if (add) {
-                    logger.info << "add point: " << point << logger.end;
+                    // logger.info << "add point: " << point << logger.end;
                     AddPoint(point);
                 }
             }
