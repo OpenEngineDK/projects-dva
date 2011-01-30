@@ -349,8 +349,6 @@ void SetupDevices() {
 
 void LoadResources() {
     ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
-    // ResourceManager<ISoundResource>::AddPlugin(new VorbisResourcePlugin());
-    ResourceManager<IStreamingSoundResource>::AddPlugin(new StreamingVorbisResourcePlugin());
     DirectoryManager::AppendPath("resources/");
     DirectoryManager::AppendPath("projects/dva/");
     string path;
@@ -469,8 +467,10 @@ void LoadResources() {
 }
 
 ISound* CreateSound(std::string filename) {
-    IStreamingSoundResourcePtr resource = 
-        ResourceManager<IStreamingSoundResource>::Create(filename);
+    //IStreamingSoundResourcePtr resource = 
+        //ResourceManager<IStreamingSoundResource>::Create(filename);
+    ISoundResourcePtr resource = 
+        ResourceManager<ISoundResource>::Create(filename);
 	ISound* sound = soundsystem->CreateSound(resource);
     if (sound->IsStereoSound()) {
         IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
@@ -503,6 +503,8 @@ void SetupSound() {
         engine->ProcessEvent().Attach(*soundsystem);
         engine->DeinitializeEvent().Attach(*soundsystem);
         DirectoryManager::AppendPath("resources/sounds/");
+        ResourceManager<ISoundResource>::AddPlugin(new VorbisResourcePlugin());
+        ResourceManager<IStreamingSoundResource>::AddPlugin(new StreamingVorbisResourcePlugin());
         setup->GetRenderer().ProcessEvent().Attach(*soundsystem);
 
         // static background sounds
