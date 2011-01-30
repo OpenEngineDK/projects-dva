@@ -44,7 +44,6 @@
 #include <Scene/SearchTool.h>
 #include <Scene/AnimationNode.h>
 #include <Scene/SceneNode.h>
-// #include <Scene/BlendingNode.h>
 #include <Scene/DotVisitor.h>
 #include <Scene/DirectionalLightNode.h>
 #include <Scene/PointLightNode.h>
@@ -54,7 +53,15 @@
 #include <Utils/PropertyTree.h>
 #include <Utils/PropertyTreeNode.h>
 
-#include <Utils/MoveHandler.h>
+#include <Utils/BetterMoveHandler.h>
+
+#include <Display/AntTweakBar.h>
+#include <Utils/PropertyBar.h>
+
+// Sound 
+#include <Sound/OpenALSoundSystem.h>
+#include <Sound/MusicPlayer.h>
+#include <Resources/VorbisResource.h>
 
 // DVA stuff
 #include "DVASetup.h"
@@ -71,10 +78,6 @@
 #include "ScreenplayController.h"
 
 
-// sound 
-#include <Sound/OpenALSoundSystem.h>
-#include <Sound/MusicPlayer.h>
-#include <Resources/VorbisResource.h>
 
 
 using namespace OpenEngine::Logging;
@@ -310,10 +313,12 @@ void SetupDevices() {
     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
     camera->LookAt(0,190,-2000);
     camSwitch->AddCamera(camera);
-    MoveHandler* move = new MoveHandler(*camera, *mouse);
+
+    BetterMoveHandler* move = new BetterMoveHandler(*camera, *mouse, true);
+    move->SetInverted(true);
     move->SetMoveScale(0.001);
-    mouse->MouseMovedEvent().Attach(*move);
-    mouse->MouseButtonEvent().Attach(*move);
+    atb->MouseMovedEvent().Attach(*move);
+    atb->MouseButtonEvent().Attach(*move);
     engine->InitializeEvent().Attach(*move);
     engine->ProcessEvent().Attach(*move);
     keyboard->KeyEvent().Attach(*move);
@@ -363,7 +368,6 @@ void LoadResources() {
     seaweedModel->Load();
     ISceneNode* weed = seaweedModel->GetSceneNode();
     weed->SetInfo("Seaweed Model\n[ISceneNode]");
-    //    sceneNodes.push_back(weed);
 
     AnimationNode* weedAnim = GetAnimationNode(weed);
     if( weedAnim ){
@@ -371,9 +375,6 @@ void LoadResources() {
         UserDefaults::GetInstance()->map["WeedAnimator"] = animator;
         if( animator->GetSceneNode() ){
             TransformationNode* weedTrans = new TransformationNode();
-            // BlendingNode* weedBlend = new BlendingNode();
-            // weedTrans->AddNode(weedBlend);
-            // weedBlend->AddNode(animator->GetSceneNode());
             weedTrans->AddNode(animator->GetSceneNode());
             weedTrans->SetPosition(Vector<3,float>(0,0,0));
             sceneNodes.push_back(weedTrans);
