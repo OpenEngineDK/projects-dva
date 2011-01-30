@@ -23,13 +23,7 @@
 #include "RuleHandlers/FleeRuleHandler.h"
 #include "RuleHandlers/SeparationRuleHandler.h"
 #include "RuleHandlers/FlockFollowCircleRuleHandler.h"
-
 #include <vector>
-
-Vector<3,float> cylinderP0(0,54,0);
-Vector<3,float> cylinderP1(0,190,-8000);
-float CYLINDER_RADIUS = 25.0f;
-float SCARE_FACTOR = 10.0f;
 
 using namespace OpenEngine::Animations;
 using namespace std;
@@ -44,6 +38,10 @@ void InputController::Init() {
     numMousePoints = 0;
     numLaserPoints = 0;
     flock = NULL;
+    followCircleRule = NULL;
+    fleeRule = NULL;
+    separationRule = NULL;
+
 }
 
 InputController::InputController() {
@@ -87,14 +85,26 @@ void InputController::SetFlock(Flock* flock) {
 // Initialize devices
 void InputController::Handle(Core::InitializeEventArg arg) {
     // Add flock follow rule.
-    TransformationNode* trans = new TransformationNode();
-    trans->SetPosition(Vector<3,float>(0,100,-300));
-    followCircle = new FlockFollowCircleRuleHandler(flock, trans, Vector<2,float>(120,50),0.7); 
-    flock->AddRule(followCircle->GetRule());
+    TransformationNode* followTrans = new TransformationNode();
+    followTrans->SetPosition(Vector<3,float>(0,100,-300));
+    followCircleRule = new FlockFollowCircleRuleHandler(flock, followTrans, Vector<2,float>(120,50),0.7); 
+    followCircleRule->GetRule()->SetEnabled(false);
+    ruleHandlers.push_back(followCircleRule);
+
+    // Add flee rule, disabled by default.
+    TransformationNode* fleeTrans = new TransformationNode();
+    fleeTrans->SetPosition(Vector<3,float>(0,0,-300));
+    fleeRule = new FleeRuleHandler(new FleeSphereRule(fleeTrans, 100.0, 10.0), flock);
+    fleeRule->GetRule()->SetEnabled(false);
+    ruleHandlers.push_back(fleeRule);
+
+    // Add separation rule, disabled by default.
+    separationRule = new SeparationRuleHandler(flock);
+    separationRule->GetRule()->SetEnabled(false);
+    ruleHandlers.push_back(separationRule);
 }
 
 void InputController::Handle(Core::ProcessEventArg arg) {
-
     // Clear list of tracking points.
     mousePoints.clear();
     laserPoints.clear();
@@ -104,78 +114,49 @@ void InputController::Handle(Core::ProcessEventArg arg) {
     if( laser ) HandleLaserInput();
     //logger.info << "LASER POINTS: " << laserPoints.size() << logger.end;
 
-    unsigned int numTrackingPoints = laserPoints.size();
-
-    // Check if number of tracking points have changed since last processing.
-    if( numLaserPoints != numTrackingPoints ){
-        // Remove all existing laser controlled rules.
-        vector<IRuleHandler*>::iterator itr;
-        for(itr=ruleHandlers.begin(); itr!=ruleHandlers.end(); itr++){
-            delete *itr;
-        }
-        ruleHandlers.clear();
-
-        
-        // Add new set of rules according to number of tracking points.
-        if( numTrackingPoints > 0 ){
-            SetupRules();
-        }
-        
-        // Set current number of tracking points.
-        numLaserPoints = laserPoints.size();
-    }
-
-
-    if( numTrackingPoints > 0 ){
-        UpdateRules();
-    }
-
-    // Update flock follow rule.
-    followCircle->Handle(arg);
+    SetupRules();
+    
+    UpdateRules(arg);
 }
 
 
 void InputController::SetupRules() {
+    // By default disable all rules.
+    vector<IRuleHandler*>::iterator itr;
+    for(itr=ruleHandlers.begin(); itr!=ruleHandlers.end(); itr++){
+        (*itr)->GetRule()->SetEnabled(false);
+    }    
+    // Always enable circle follower.
+    followCircleRule->GetRule()->SetEnabled(true);
+
     // Setup rules based on number of laser tracking points.
     switch( laserPoints.size() ) {
-    case 1:
-        {
-            TransformationNode* trans = new TransformationNode();
-            trans->SetPosition(Vector<3,float>(0,0,-300));
-            IRuleHandler* flee = new FleeRuleHandler(new FleeSphereRule(trans, 100.0, 10.0), flock);
-            ruleHandlers.push_back(flee);
-        }
+
+    case 1: 
+        fleeRule->GetRule()->SetEnabled(true); 
         break;
 
-    case 2:
-        {
-            IRuleHandler* separation = new SeparationRuleHandler(flock);
-            ruleHandlers.push_back(separation);
-        }
+    case 2: 
+        separationRule->GetRule()->SetEnabled(true); 
         break;
 
-    case 3:
-        {
-            IRuleHandler* separation = new SeparationRuleHandler(flock);
-            ruleHandlers.push_back(separation);
-
-            TransformationNode* trans = new TransformationNode();
-            trans->SetPosition(Vector<3,float>(0,0,-300));
-            IRuleHandler* flee = new FleeRuleHandler(new FleeSphereRule(trans, 100.0, 10.0), flock);
-            ruleHandlers.push_back(flee);
-        }
+    case 3: 
+        separationRule->GetRule()->SetEnabled(true);
+        fleeRule->GetRule()->SetEnabled(true);
         break;
 
     default:
-         break;
+        break;
     }
 }
 
 
-void InputController::UpdateRules() {
-    // Remove all existing laser controlled rules.
+void InputController::UpdateRules(Core::ProcessEventArg arg) {
     vector<IRuleHandler*>::iterator itr;
     for(itr=ruleHandlers.begin(); itr!=ruleHandlers.end(); itr++){
+        // Handle time propagation.
+        (*itr)->Handle(arg);
+        // Handle input.
         (*itr)->HandleInput(laserPoints);
     }
 }

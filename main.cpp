@@ -653,7 +653,6 @@ void SetupBoids() {
             }
         }
 
-
         flock->AddRule(mgr);
     }// done
     flock->AddRule(new BoxLimitRule(Vector<3,float>(-400,30,-400), 

@@ -75,7 +75,9 @@ private:
     // List of all laser controlled flock rules.
     std::vector<IRuleHandler*> ruleHandlers;
     // The flock will always follow a point controlled by this rule. 
-    IRuleHandler* followCircle;
+    IRuleHandler* followCircleRule;
+    IRuleHandler* fleeRule;
+    IRuleHandler* separationRule;
 
     void Init();
 
@@ -83,7 +85,7 @@ private:
     void HandleLaserInput();
 
     void SetupRules();
-    void UpdateRules();
+    void UpdateRules(Core::ProcessEventArg arg);
 
 public:
     InputController();

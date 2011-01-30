@@ -1,43 +1,60 @@
+---
 flock1:
-  size: 200
-  separation:
-    dist: 18.0
-  speed:
-    min: 40.0
-    max: 70.0
-  goto:
-    home: [0,0,0]
-    random: 100.0
-    magnitude: 0.01
   alignment:
+    enabled: 1
     magnitude: 0.01
+  box:
+    dist: 25.0
+    enabled: 1
+    end: [400, 400, 400]
+    speed: 5.0
+    start: [-400, 40, -400]
+  boxlimit:
+    enabled: 1
+    end: [400, 400, 400]
+    start: [-400, 30, -400]
   cohersion:
+    enabled: 1
     magnitude: 0.01
-  follow:
-    magnitude: 0.08
-  random:
-    magnitude: 8.0
   flee:
+    enabled: 1
     radius: 120.0
     scare: 20.0
-  box:
-    start: [-400,40,-400]
-    end: [400,400,400]
-    speed: 5.0
-    dist: 25.0
-  boxlimit:
-    start: [-400,30,-400]
-    end: [400,400,400]
-
+  follow:
+    magnitude: 0.08  # Never read
+  goto:
+    home:
+      - 0  # Never read
+      - 0  # Never read
+      - 0  # Never read
+    magnitude: 0.01  # Never read
+    random: 100.0  # Never read
+  multigoto:
+    enabled: 1
+    magnitude: 0
+  random:
+    enabled: 1
+    magnitude: 8.0
+  separation:
+    dist: 18.0
+    enabled: 1
+  size: 200
+  speed:
+    enabled: 1
+    max: 70.0
+    min: 40.0
 meta:
   flock1:
-    follow:
-      magnitude:
-        step: 0.01
-        min: 0.0
-        max: 1.0
     alignment:
       magnitude:
-        step: 0.01
-        min: 0.0
         max: 1.0
+        min: 0.0
+        step: 0.01
+    follow:
+      magnitude:
+        max: 1.0
+        min: 0.0
+        step: 0.01
+screen:
+  height: 768
+  width: 1024

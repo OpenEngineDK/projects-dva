@@ -71,6 +71,7 @@ public:
      
             maxDist *= SEPARATION_FACTOR;
             ((SeparationRule*)rule)->SetDistance(maxDist);
+            //logger.info << "dist: " << maxDist << logger.end;
         }
 
     }

@@ -28,7 +28,6 @@ private:
     Vector<2,float> circle;
     float speed;
     
-
 public:
     FlockFollowCircleRuleHandler(Flock* flock, 
                            TransformationNode* t,

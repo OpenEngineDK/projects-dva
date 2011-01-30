@@ -45,7 +45,10 @@ protected:
     }
 
 public:
-    IRuleHandler(IRule* rule, Flock* flock) : rule(rule), flock(flock), loaded(false) {
+    IRuleHandler(IRule* rule, Flock* flock) 
+        : rule(rule)
+        , flock(flock)
+        , loaded(false) {
         Load();
     }
     
@@ -61,8 +64,8 @@ public:
         return rule;
     }
 
-    virtual void HandleInput(std::vector< Vector<2,int> >& screenPoints) = 0;
     virtual void Handle(Core::ProcessEventArg arg) {}
+    virtual void HandleInput(std::vector< Vector<2,int> >& screenPoints) = 0;
 };
 
 } // NS dva
