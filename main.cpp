@@ -57,6 +57,7 @@
 
 #include <Display/AntTweakBar.h>
 #include <Utils/PropertyBar.h>
+#include <Utils/PropertyBinder.h>
 
 // Sound 
 #include <Sound/OpenALSoundSystem.h>
@@ -298,10 +299,18 @@ void SetupDevices() {
     }
 
     // Static default view
+    PerspectiveViewingVolume* persp = new PerspectiveViewingVolume(1, 8000);
+    PropertyTreeNode* dn = ptree->GetRootNode()->GetNode("display");
+    PropertyBinder<PerspectiveViewingVolume,float> *bn 
+        = new PropertyBinder<PerspectiveViewingVolume,float>(dn->GetNode("fov"),
+                                                             *persp,
+                                                             &PerspectiveViewingVolume::SetFOV,PI/4.0 );
+   
     Camera* stc  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
     stc->SetPosition(Vector<3, float>(0, 54, 0));
     stc->LookAt(0,190,-2000);
     setup->SetCamera(*stc);
+
 
     // TEST Hand-held camera.
     HandHeldCamera* hhc = new HandHeldCamera(stc);
@@ -313,7 +322,7 @@ void SetupDevices() {
     keyboard->KeyEvent().Attach(*camSwitch);
 
     // Add movable camera
-    camera  = new Camera(*(new PerspectiveViewingVolume(1, 8000)));
+    camera  = new Camera(*persp);
     camera->SetPosition(Vector<3, float>(0.0, 54.0, 0.0));
     camera->LookAt(0,190,-2000);
     camSwitch->AddCamera(camera);
