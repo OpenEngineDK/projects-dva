@@ -17,8 +17,8 @@
 #include "Devices/LaserSensor.h"
 #include <Devices/IKeyboard.h>
 #include <Devices/IMouse.h>
-#include "CircleMover.h"
 #include "DVASetup.h"
+#include <vector>
 
 namespace OpenEngine {
     namespace Devices {
@@ -51,6 +51,8 @@ using OpenEngine::Scene::ISceneNode;
 using OpenEngine::Scene::TransformationNode;
 using OpenEngine::Utils::PropertyTreeNode;
 
+class IRuleHandler;
+
 /**
  * Short description.
  *
@@ -58,37 +60,33 @@ using OpenEngine::Utils::PropertyTreeNode;
  */
 class InputController : public IModule {
 private:
-    PropertyTreeNode* pNode;
-    LaserSensor* sensor;
+    LaserSensor* laser;
     IKeyboard* keyboard;
     IMouse* mouse;
-
-    // Defines current controller mode.
-    CtrlMode ctrlMode;
-    Utils::Timer timer;
-    int numTracking;
-
+    unsigned int numMousePoints;
+    unsigned int numLaserPoints;
     Flock* flock;
-    TransformationNode* flockFollowTrans;
-    CircleMover* cm;
 
-    IRule* mouseCtrlRule;
-    std::vector<IRule*> laserCtrlRules;
-    SeparationRule* separationRule;
-
-    ISceneNode* sceneNode;
-    TransformationNode* mouseCtrlTrans;
-    TransformationNode* debugMesh;
+    Utils::Timer timer;
+    // List of all mouse tracking points in screen coordinates.
+    std::vector< Vector<2,int> > mousePoints;
+    // List of all laser tracking points in screen coordinates.
+    std::vector< Vector<2,int> > laserPoints;
+    // List of all laser controlled flock rules.
+    std::vector<IRuleHandler*> ruleHandlers;
+    // The flock will always follow a point controlled by this rule. 
+    IRuleHandler* followCircle;
 
     void Init();
 
     void HandleMouseInput();
-    void HandleLaserSensorInput();
+    void HandleLaserInput();
 
-    Vector<3,float> ScreenToSpaceCoordinate(int x, int y);
+    void SetupRules();
+    void UpdateRules();
 
 public:
-    InputController(PropertyTreeNode* pn);
+    InputController();
     InputController(LaserSensor* sensor);
     InputController(IKeyboard* keyboard);
     InputController(IMouse* mouse);
@@ -97,19 +95,15 @@ public:
     void SetInputDevice(LaserSensor* sensor);
     void SetInputDevice(IKeyboard* keyboard);
     void SetInputDevice(IMouse* mouse);
-    
+
+    void SetFlock(Flock* flock);
 
     void Handle(Core::InitializeEventArg arg);
     void Handle(Core::ProcessEventArg arg);
     void Handle(Core::DeinitializeEventArg arg);
 
-
-    
-    void SetFlock(Flock* flock);
-    void SetMode(CtrlMode mode);
-    void SetDebugMesh(TransformationNode* debugMesh);
-
-    ISceneNode* GetSceneNode();
+    static Vector<3,float> ScreenToSceneCoordinates(int x, int y);
+    static Vector<2,int>   LaserPointToScreenCoordinates(Vector<2,float> p);
    
 };
 

@@ -20,6 +20,10 @@
 #include <Logging/Logger.h>
 #include "CylinderNode.h"
 #include "DVASetup.h"
+#include "RuleHandlers/FleeRuleHandler.h"
+#include "RuleHandlers/SeparationRuleHandler.h"
+#include "RuleHandlers/FlockFollowCircleRuleHandler.h"
+
 #include <vector>
 
 Vector<3,float> cylinderP0(0,54,0);
@@ -32,28 +36,24 @@ using namespace std;
 
 namespace dva {
 
+
 void InputController::Init() {
-    sensor = NULL;
+    laser = NULL;
     keyboard = NULL;
     mouse = NULL;
-    ctrlMode = NONE;
+    numMousePoints = 0;
+    numLaserPoints = 0;
     flock = NULL;
-    flockFollowTrans = NULL;
-    cm = NULL;
-    mouseCtrlRule = NULL;
-    separationRule = NULL;
-    sceneNode = new SceneNode();
-    mouseCtrlTrans = NULL;
-    debugMesh = NULL;
 }
 
-InputController::InputController(PropertyTreeNode* pn) : pNode(pn) {
+InputController::InputController() {
     Init();
 }
+
 
 InputController::InputController(LaserSensor* sensor) {
     Init();
-    this->sensor = sensor;
+    this->laser = sensor;
 }
 
 InputController::InputController(IKeyboard* keyboard) {
@@ -69,7 +69,7 @@ InputController::InputController(IMouse* mouse) {
 InputController::~InputController() {}
 
 void InputController::SetInputDevice(LaserSensor* sensor) {
-    this->sensor = sensor;
+    this->laser = sensor;
 }
 
 void InputController::SetInputDevice(IKeyboard* keyboard) {
@@ -80,98 +80,104 @@ void InputController::SetInputDevice(IMouse* mouse) {
     this->mouse = mouse;
 }
 
+void InputController::SetFlock(Flock* flock) {
+    this->flock = flock;
+}
+
 // Initialize devices
 void InputController::Handle(Core::InitializeEventArg arg) {
-    // Set default controller mode.
-    if( ctrlMode == NONE ) ctrlMode = MOUSE_CYLINDER_FLEE;
-
-    if( mouse ) {
-        // Hide the mouse cursor by default.
-        mouse->HideCursor();
-
-        /*
-         * In this mode the flock is following a point moved in circles
-         * and the mouse is controlling a cylinder flee rule.
-         */
-        if( ctrlMode == MOUSE_CYLINDER_FLEE ) {
-            // Initialize mouse controlled cylinder flee.
-            mouseCtrlTrans = new TransformationNode();
-            mouseCtrlRule = new FleeCylinderRule(mouseCtrlTrans, 
-                                                 cylinderP0, cylinderP1, 
-                                                 CYLINDER_RADIUS, SCARE_FACTOR);
-            flock->AddRule(mouseCtrlRule);
-            
-            flockFollowTrans = new TransformationNode();
-            flockFollowTrans->SetPosition(Vector<3,float>(0,100,-300));
-            cm = new CircleMover(flockFollowTrans,Vector<2,float>(100,10),0.7);
-            flock->AddRule(new FollowRule(flockFollowTrans));
-            sceneNode->AddNode(mouseCtrlTrans);
-        }
-
-        /*
-         * In this mode the flock is following a point controlled 
-         * by the mouse.
-         */
-        else if( ctrlMode == MOUSE_FLOCK_FOLLOW ) {
-            mouseCtrlTrans = new TransformationNode();
-            mouseCtrlRule = new FollowRule(mouseCtrlTrans);
-            mouseCtrlTrans->SetPosition(Vector<3,float>(0,100,-300));
-            flock->AddRule(mouseCtrlRule);
-            sceneNode->AddNode(mouseCtrlTrans);
-        }
-
-        
-        // Visualise mouse controlled transformation node.
-        if( debugMesh && mouseCtrlTrans )
-            mouseCtrlTrans->AddNode(debugMesh->Clone());
-    }
-
-
-    if( sensor ) {
-        /*
-         * In this mode a single tracking point controls the flock follow
-         * rule, while two tracing points controls the flock separation parameter.
-         */
-        if( ctrlMode == LASER_FOLLOW_FLOCK_AND_RESIZE ) {
-            // Add flock follow rule since this should always be there.
-            flockFollowTrans = new TransformationNode();
-            flockFollowTrans->SetPosition(Vector<3,float>(0,100,-300));
-            flock->AddRule(new FollowRule(flockFollowTrans));
-            sceneNode->AddNode(flockFollowTrans);
-
-            // Find separation rule.
-            separationRule = (SeparationRule*)flock->GetRuleNamed("Separation");
-        }
-
-
-        // Visualise laser controlled transformation node.
-        if( debugMesh && flockFollowTrans )
-           flockFollowTrans->AddNode(debugMesh->Clone());
- 
-        
-    }
-
+    // Add flock follow rule.
+    TransformationNode* trans = new TransformationNode();
+    trans->SetPosition(Vector<3,float>(0,100,-300));
+    followCircle = new FlockFollowCircleRuleHandler(flock, trans, Vector<2,float>(120,50),0.7); 
+    flock->AddRule(followCircle->GetRule());
 }
 
 void InputController::Handle(Core::ProcessEventArg arg) {
 
-    switch( ctrlMode ) {
-    case MOUSE_CYLINDER_FLEE:
-        HandleMouseInput();
-        break;
-    case MOUSE_FLOCK_FOLLOW:
-        HandleMouseInput();
-        break;
-    case LASER_FOLLOW_FLOCK_AND_RESIZE:
-        HandleLaserSensorInput();
-        break;
+    // Clear list of tracking points.
+    mousePoints.clear();
+    laserPoints.clear();
 
+    // Handle input
+    if( mouse ) HandleMouseInput();
+    if( laser ) HandleLaserInput();
+    //    logger.info << "LASER POINTS: " << laserPoints.size() << logger.end;
 
-    default: break;
+    unsigned int numTrackingPoints = laserPoints.size();
+
+    // Check if number of tracking points have changed since last processing.
+    if( numLaserPoints != numTrackingPoints ){
+        // Remove all existing laser controlled rules.
+        vector<IRuleHandler*>::iterator itr;
+        for(itr=ruleHandlers.begin(); itr!=ruleHandlers.end(); itr++){
+            delete *itr;
+        }
+        ruleHandlers.clear();
+
+        
+        // Add new set of rules according to number of tracking points.
+        if( numTrackingPoints > 0 ){
+            SetupRules();
+        }
+        
+        // Set current number of tracking points.
+        numLaserPoints = laserPoints.size();
     }
 
-    // If circle mover is defined, process it.
-    if( cm ) cm->Handle(arg);
+
+    if( numTrackingPoints > 0 ){
+        UpdateRules();
+    }
+
+    // Update flock follow rule.
+    followCircle->Handle(arg);
+}
+
+
+void InputController::SetupRules() {
+    // Setup rules based on number of laser tracking points.
+    switch( laserPoints.size() ) {
+    case 1:
+        {
+            TransformationNode* trans = new TransformationNode();
+            trans->SetPosition(Vector<3,float>(0,0,-300));
+            IRuleHandler* flee = new FleeRuleHandler(new FleeSphereRule(trans, 100.0, 10.0), flock);
+            ruleHandlers.push_back(flee);
+        }
+        break;
+
+    case 2:
+        {
+            IRuleHandler* separation = new SeparationRuleHandler(flock);
+            ruleHandlers.push_back(separation);
+        }
+        break;
+
+    case 3:
+        {
+            IRuleHandler* separation = new SeparationRuleHandler(flock);
+            ruleHandlers.push_back(separation);
+
+            TransformationNode* trans = new TransformationNode();
+            trans->SetPosition(Vector<3,float>(0,0,-300));
+            IRuleHandler* flee = new FleeRuleHandler(new FleeSphereRule(trans, 100.0, 10.0), flock);
+            ruleHandlers.push_back(flee);
+        }
+        break;
+
+    default:
+         break;
+    }
+}
+
+
+void InputController::UpdateRules() {
+    // Remove all existing laser controlled rules.
+    vector<IRuleHandler*>::iterator itr;
+    for(itr=ruleHandlers.begin(); itr!=ruleHandlers.end(); itr++){
+        (*itr)->HandleInput(laserPoints);
+    }
 }
 
 void InputController::Handle(Core::DeinitializeEventArg arg) {
@@ -179,82 +185,23 @@ void InputController::Handle(Core::DeinitializeEventArg arg) {
 
 
 void InputController::HandleMouseInput(){
-    if( mouseCtrlTrans ){
-        Devices::MouseState arg = mouse->GetState();
-        Vector<3,float> pos = ScreenToSpaceCoordinate(arg.x, arg.y);
-        pos[2] = mouseCtrlTrans->GetPosition()[2];
-        mouseCtrlTrans->SetPosition(pos);
-        //logger.info << "Mouse x,y: " << arg.x << ", " << arg.y << logger.end;
-    }
+    Devices::MouseState arg = mouse->GetState();
+    mousePoints.push_back(Vector<2,int>(arg.x, arg.y));
+    laserPoints.push_back(Vector<2,int>(arg.x, arg.y));
 }
 
 
-void InputController::HandleLaserSensorInput() {
-
-    // If no laser sensor is defined skip handling. 
-    if( !sensor ) return;
-
+void InputController::HandleLaserInput() {
     // Get laser readings.
-    vector< Vector<2,float> > points = sensor->GetState();
-    
-    // Determine tracking mode
-    if( points.size() == 1 ){
-        // Single tracking mode.
-        Vector<2,float> point = points[0];
-
-        int x = ((point[0]+1)/2.0) * SCREEN_WIDTH;
-        int y = SCREEN_HEIGHT - ((point[1]+1)/2.0) * SCREEN_HEIGHT;
-
-        Vector<3,float> pos = ScreenToSpaceCoordinate(x, y);
-        pos[2] = flockFollowTrans->GetPosition()[2];
-
-        //logger.info << "Laser x,y: " << x << ", " << y << logger.end;
-        flockFollowTrans->SetPosition(pos);
-        
-
-    } else if( points.size() == 2 ){
-        // Multi tracking mode.
-        if( separationRule ){
-            // Find center of the two points
-            Vector<2,float> point0 = points[0];
-            int x0 = ((point0[0]+1)/2.0) * SCREEN_WIDTH;
-            int y0 = SCREEN_HEIGHT - ((point0[1]+1)/2.0) * SCREEN_HEIGHT;
-
-            Vector<2,float> point1 = points[1];
-            int x1 = ((point1[0]+1)/2.0) * SCREEN_WIDTH;
-            int y1 = SCREEN_HEIGHT - ((point1[1]+1)/2.0) * SCREEN_HEIGHT;
-
-            Vector<2,float> center((x0+x1)/2.0, (y0+y1)/2.0);
-
-            Vector<3,float> pos = ScreenToSpaceCoordinate(center[0], center[1]);
-            pos[2] = flockFollowTrans->GetPosition()[2];
-
-            //logger.info << "Laser x,y: " << x << ", " << y << logger.end;
-            flockFollowTrans->SetPosition(pos);
-
-            // Distance between points defines separation distance on the flock.
-            float distBetweenPoints = (point0-point1).GetLength();
-            //logger.info << "Separation Dist: " << distBetweenPoints << logger.end;
-
-            distBetweenPoints *= 20.0f;
-            separationRule->SetDistance(distBetweenPoints);
-            //            logger.info << "Separation Dist: " << distBetweenPoints << logger.end;
-        }
-    } else if( points.size() == 5 ) {
-        timer.Start();
-        pNode->SetPath("flock1.multigoto.magnitude", 5.0f);
-    }
-
-    if( timer.GetElapsedTime().sec > 5 ){
-        pNode->SetPath("flock1.multigoto.magnitude", 0.0f);
-        timer.Stop();
-        timer.Reset();
+    vector< Vector<2,float> > trackingPoints = laser->GetState();
+    for( unsigned int i=0 ; i<trackingPoints.size(); i++ ){
+        laserPoints.push_back(LaserPointToScreenCoordinates(trackingPoints[i]));
     }
 }
 
-Vector<3,float> InputController::ScreenToSpaceCoordinate(int x, int y) {
+Vector<3,float> InputController::ScreenToSceneCoordinates(int x, int y) {
     float xRange = 370.0f;
-    float yRange = 300.0f;
+    float yRange = 110.0f;
     float yTop = 170.0;
 
     Vector<3,float> pos;
@@ -263,31 +210,13 @@ Vector<3,float> InputController::ScreenToSpaceCoordinate(int x, int y) {
     return pos;
 }
 
-
-void InputController::SetFlock(Flock* flock) {
-    this->flock = flock;
+Vector<2,int> InputController::LaserPointToScreenCoordinates(Vector<2,float> p) {
+    Vector<2,int> point;
+    point[0] = ((p[0]+1)/2.0) * SCREEN_WIDTH;
+    point[1] = SCREEN_HEIGHT - ((p[1]+1)/2.0) * SCREEN_HEIGHT;
+    return point;
 }
 
-void InputController::SetMode(CtrlMode mode) {
-    if( mode == ctrlMode ) {
-        logger.info << "[InputController] Mode " << mode << " is already set." << logger.end;
-        return;
-    }
-
-//     if( mouse && mouseCtrlTrans && flock ){
-//         flock->RemoveRule(mouseCtrlRule);
-//     }
-
-    ctrlMode = mode;
-}
-
-void InputController::SetDebugMesh(TransformationNode* mesh){
-    debugMesh = mesh;
-}
-
-ISceneNode* InputController::GetSceneNode() {
-    return sceneNode;
-}
 
 } // NS dva
 
