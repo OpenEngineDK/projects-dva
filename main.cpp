@@ -264,6 +264,7 @@ void SetupDevices() {
     mouse = env->GetMouse();
     keyboard = env->GetKeyboard();
 
+
     // Add main user input controller
     inputCtrl = new InputController(ptree->GetRootNode());
     inputCtrl->SetInputDevice(mouse);

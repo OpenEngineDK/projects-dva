@@ -87,6 +87,9 @@ void InputController::SetFlock(Flock* flock) {
 
 // Initialize devices
 void InputController::Handle(Core::InitializeEventArg arg) {
+    // Hide the mouse cursor.
+    if( mouse )  mouse->HideCursor();
+
     // Add flock follow rule.
     TransformationNode* followTrans = new TransformationNode();
     followTrans->SetPosition(Vector<3,float>(0,100,-300));
