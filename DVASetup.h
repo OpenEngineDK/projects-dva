@@ -42,7 +42,7 @@ namespace dva {
     const int         RELAY_BOX_PORT       = 12302;
 
     // Cluster Analyser
-    const float CLUSTER_EPSILON    = 0.10; // Max distance between points in cluster.
+    const float CLUSTER_EPSILON    = 0.02; // Max distance between points in cluster.
     const int   CLUSTER_MIN_POINTS = 5;    // Minimum number of points to form a cluster.
 
 

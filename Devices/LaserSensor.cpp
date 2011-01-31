@@ -124,7 +124,6 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
                 SetPixel(100,100,Vector<4,unsigned char>(255,0,0,255));
              }
         }
-        //std::cout << "NumClusters: " << clusters.size() << endl;
         //
         laserDebug->UpdateTexture();
     }

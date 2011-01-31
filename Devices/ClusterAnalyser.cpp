@@ -31,7 +31,6 @@ vector<unsigned int> ClusterAnalyser::GetNeighbours(vector< Vector<2,float> > po
     
     for(unsigned int i=0; i<points.size(); i++){
         float dist = (points[i] - point).GetLength();
-        //        std::cout << "WHAT: " << dist << std::endl;
         
         if( dist < epsilon )
             neighbours.push_back(i);

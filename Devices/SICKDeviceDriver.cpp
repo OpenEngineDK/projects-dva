@@ -10,6 +10,7 @@
 #include "SICKDeviceDriver.h"
 #include <Math/Vector.h>
 #include <Logging/Logger.h>
+#include "../DVASetup.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -38,7 +39,7 @@ SICKDeviceDriver::SICKDeviceDriver(string ip, unsigned short port,
     bounds(rectBounds) {
 
     // epsilon, min cluster points
-    clusterAnalyser = new ClusterAnalyser(0.10, 10);
+    clusterAnalyser = new ClusterAnalyser(dva::CLUSTER_EPSILON, dva::CLUSTER_MIN_POINTS);
 
     // Create request message.
     stringstream r;
@@ -84,7 +85,7 @@ std::vector< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
             float x = cosAngle * dist;
             float y = sinAngle * dist;
 
-            //            logger.info << "[" << i << "]" << results[i] << ", dist: " << dist << ", (x,y): " << x << ", " << y << logger.end;
+            //logger.info << "[" << i << "]" << results[i] << ", dist: " << dist << ", (x,y): " << x << ", " << y << logger.end;
 
             Vector<2,float> point(x,y); 
 
@@ -182,6 +183,9 @@ void SICKDeviceDriver::Run(){
             logger.error << "[SICKDeviceDriver] socket error." << logger.end;
         }
 
+        // Clear previous measurements.
+        curReadings.clear();
+        curClusters.clear();
 
         // Parse sensor readings.
         if( data.length() > 0 ){
@@ -200,8 +204,6 @@ void SICKDeviceDriver::Run(){
                 mutex.Unlock();
             }
         }
-        
-        
         
     }
     // We lost the connection for some reason.
