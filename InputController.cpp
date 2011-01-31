@@ -105,8 +105,7 @@ void InputController::Handle(Core::InitializeEventArg arg) {
 
     // Add flee rule, disabled by default.
     TransformationNode* fleeTrans = new TransformationNode();
-    fleeTrans->SetPosition(Vector<3,float>(0,0,-300));
-    
+    fleeTrans->SetPosition(Vector<3,float>(0,0,-300));    
     fleeRule = new FleeRuleHandler(new FleeSphereRule(fleeTrans, 100.0, 10.0), flock);
     fleeRule->GetRule()->SetEnabled(false);
     ruleHandlers.push_back(fleeRule);
@@ -187,6 +186,36 @@ void InputController::HandleMouseInput(){
 void InputController::HandleLaserInput() {
     // Get laser readings.
     vector< Vector<2,float> > trackingPoints = laser->GetState();
+
+    if( trackingPoints.size() == 2 ){
+        cacheP0 += trackingPoints[0];
+        cacheP0 /= 2.0;
+        cacheP1 += trackingPoints[1];
+        cacheP1 /= 2.0;
+        if( countTendency < 10 ) countTendency++;
+    }else{
+        countTendency--;
+    }
+
+    if( trackingPoints.size() == 1 && countTendency > 0 ){
+        float dist0 = (cacheP0 - trackingPoints[0]).GetLength();
+        float dist1 = (cacheP1 - trackingPoints[0]).GetLength();
+
+        if( dist0 > dist1 ){
+            trackingPoints.push_back(cacheP0);
+        }else{
+            trackingPoints.push_back(cacheP1);
+        }
+    }
+
+    if( countTendency <= 0 ){
+        cacheP0 *= 0;
+        cacheP1 *= 0;
+        countTendency = 0;
+    }
+    logger.info << "numTracking: "<<trackingPoints.size() << ", tendency: " << countTendency << logger.end;
+
+
     for( unsigned int i=0 ; i<trackingPoints.size(); i++ ){
         laserPoints.push_back(LaserPointToScreenCoordinates(trackingPoints[i]));
     }

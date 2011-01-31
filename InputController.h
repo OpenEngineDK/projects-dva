@@ -80,6 +80,10 @@ private:
     IRuleHandler* fleeRule;
     IRuleHandler* separationRule;
 
+    int countTendency;
+    Vector<2,float> cacheP0;
+    Vector<2,float> cacheP1;
+
 
     void Init();
 
