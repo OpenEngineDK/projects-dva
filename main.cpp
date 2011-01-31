@@ -582,17 +582,17 @@ void SetupScene() {
  
 
     // wave effect
-    PointWaveNode* waves;
-    if (LASER_SENSOR_ENABLED) 
-        waves = new LaserWaveNode(laserSensor, dimension[0], dimension[1], 30);
-    else {
-        waves = new PointWaveNode(dimension[0], dimension[1], 30); 
-    }
-    setup->GetMouse().MouseMovedEvent().Attach(*waves);
-    setup->GetMouse().MouseButtonEvent().Attach(*waves);
-    setup->GetRenderer().InitializeEvent().Attach(*waves);
-    scene->AddNode(waves); 
-    scene = waves;
+//     PointWaveNode* waves;
+//     if (LASER_SENSOR_ENABLED) 
+//         waves = new LaserWaveNode(laserSensor, dimension[0], dimension[1], 30);
+//     else {
+//         waves = new PointWaveNode(dimension[0], dimension[1], 30); 
+//     }
+//     setup->GetMouse().MouseMovedEvent().Attach(*waves);
+//     setup->GetMouse().MouseButtonEvent().Attach(*waves);
+//     setup->GetRenderer().InitializeEvent().Attach(*waves);
+//     scene->AddNode(waves); 
+//     scene = waves;
 
     // Create fog post process   
     IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
