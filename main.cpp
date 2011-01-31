@@ -584,12 +584,12 @@ void SetupScene() {
     // wave effect
     PointWaveNode* waves;
     if (LASER_SENSOR_ENABLED) 
-        waves = new LaserWaveNode(laserSensor, dimension[0], dimension[1], 10);
+        waves = new LaserWaveNode(laserSensor, dimension[0], dimension[1], 30);
     else {
-        waves = new PointWaveNode(dimension[0], dimension[1], 10); 
-        setup->GetMouse().MouseMovedEvent().Attach(*waves);
-        setup->GetMouse().MouseButtonEvent().Attach(*waves);
+        waves = new PointWaveNode(dimension[0], dimension[1], 30); 
     }
+    setup->GetMouse().MouseMovedEvent().Attach(*waves);
+    setup->GetMouse().MouseButtonEvent().Attach(*waves);
     setup->GetRenderer().InitializeEvent().Attach(*waves);
     scene->AddNode(waves); 
     scene = waves;

@@ -25,11 +25,13 @@ class LaserWaveNode
 private: 
     LaserSensor* l;
     unsigned int count;
+    float threshold;
 public:
     LaserWaveNode(LaserSensor* l, unsigned int width, unsigned int height, unsigned int maxPoints)
         : PointWaveNode(width, height, maxPoints)
         , l(l)
         , count(0)
+        , threshold(30.0 / float(width))
     {
         l->LaserInputEvent().Attach(*this);
     }
@@ -56,7 +58,7 @@ public:
                 itr1 = points.begin();
                 bool add = true;
                 for (; itr1 != points.end(); ++itr1) {
-                    if ((point - (*itr1).second).GetLength() < 0.02) {
+                    if ((point - (*itr1).second).GetLength() < threshold) {
                         add = false;
                         break;
                     }
