@@ -20,7 +20,7 @@ namespace dva {
 
 using OpenEngine::Animations::SeparationRule;
 
-const float SEPARATION_FACTOR = 0.1f;
+const float SEPARATION_FACTOR = 0.001f;
 
 /*
  * NOTE: this rule handler removes the two points which are furthest from
@@ -31,7 +31,6 @@ class SeparationRuleHandler : public IRuleHandler {
 public:
     SeparationRuleHandler(Flock* flock) 
         : IRuleHandler(new SeparationRule(), flock) {
-        logger.info << "[SeparationRuleHandler] created" << logger.end;
     }
 
     ~SeparationRuleHandler() {}
@@ -69,9 +68,18 @@ public:
                 points = exclude;
             }
      
-            maxDist *= SEPARATION_FACTOR;
+            const float MAX_DIST = 40.0f;
+            
+            //maxDist -= 80.0;
+            float relDist = (maxDist*maxDist) / (400.0 * 400.0);
+    
+            maxDist = relDist * MAX_DIST;
+            if(maxDist > 40.0 ) maxDist = 40.0;
+
+            logger.info << "dist: " << maxDist << logger.end;
+
+     
             ((SeparationRule*)rule)->SetDistance(maxDist);
-            //logger.info << "dist: " << maxDist << logger.end;
         }
 
     }
