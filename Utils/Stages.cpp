@@ -34,7 +34,7 @@ Stages::Stages(IFrame& frame, TextureLoader& tl, ICanvas* sceneStage)
     , sceneTime(0.5)
 {
     BlendCanvas* bc = new BlendCanvas(new TextureCopy());
-    ITexture2DPtr img = ResourceManager<ITextureResource>::Create("projects/dva/data/small.jpg");
+    ITexture2DPtr img = ResourceManager<ITextureResource>::Create("resources/textures/small.jpg");
     tl.Load(img);
     bc->AddTexture(img, 100, 100, Vector<4,float>(1.0, 1.0, 1.0, 1.0));
     bc->SetBackground(Vector<4,float>(1.0,1.0,1.0,1.0));

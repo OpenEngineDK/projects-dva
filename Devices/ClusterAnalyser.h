@@ -38,6 +38,8 @@ public:
     ClusterAnalyser(float epsilon, unsigned int minClusterPoints);
     ~ClusterAnalyser();
 
+    void SetEpsilon(float eps);
+    void SetMinClusterPoints(unsigned int min);
     vector< Vector<2,float> > AnalyseDataSet(vector< Vector<2,float> > points);
     
   

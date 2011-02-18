@@ -50,6 +50,7 @@ private:
     Mutex mutex;
     std::vector< Math::Vector<2,float> > curReadings;
     std::vector< Math::Vector<2,float> > curClusters;
+    Math::Vector<2,float> readingOffset;
 
     ClusterAnalyser* clusterAnalyser;
 
@@ -67,6 +68,11 @@ public:
                      float startAngle, float endAngle, 
                      float resolution, Math::Vector<2,float> rectBounds);
     ~SICKDeviceDriver();
+
+    void SetReadingsOffset(Math::Vector<2,float> readingOffset);
+    void SetClusterEpsilon(float eps);
+    void SetClusterMinPoints(unsigned int min);
+
 
     bool Connect(string ip, int port);
     void Close();

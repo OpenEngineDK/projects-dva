@@ -10,6 +10,7 @@ SET( PROJECT_SOURCES
   InputController.cpp
   ScreenplayController.cpp
   RelayBox.cpp
+  Projector.cpp
   Scene/GridNode.cpp
   Utils/Stages.cpp
   Devices/LaserSensor.cpp

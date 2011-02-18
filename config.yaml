@@ -62,8 +62,9 @@ meta:
         step: 0.01
 
 screen:
-  height: 768
-  width: 1024
+  width: 1280
+  height: 800
+  
 
 laserSensor:
   offset: [0.0, -800.0, 0.0]
@@ -71,6 +72,8 @@ laserSensor:
   minPoints: 3
 
 screenplay:
-  secsBeforeSharkAnimation: 10.0
+  secsBeforeSharkAnimationMin: 1.0
+  secsBeforeSharkAnimationMax: 5.0
   secsBeforeSharkReset: 2.0
+  secsBeforeWaterSplash: 35.0
   secsOfWaterSplash: 2.0

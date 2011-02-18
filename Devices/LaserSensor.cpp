@@ -11,7 +11,7 @@
 #include "SICKDeviceDriver.h"
 #include <Math/Vector.h>
 #include <Logging/Logger.h>
-
+#include "../InputController.h"
 
 namespace OpenEngine {
 namespace Devices {
@@ -76,6 +76,20 @@ void LaserSensor::Handle(Core::DeinitializeEventArg arg) {
     device->Close();
 }
 
+void LaserSensor::SetReadingsOffset(Math::Vector<3,float> off) {
+    Vector<2,float> offset(off[0], off[1]);
+    device->SetReadingsOffset(offset);
+}
+
+void LaserSensor::SetClusterEpsilon(float eps) {
+    device->SetClusterEpsilon(eps);
+}
+
+void LaserSensor::SetClusterMinPoints(unsigned int min) {
+    device->SetClusterMinPoints(min);
+}
+
+
 void LaserSensor::SetLaserDebug(LaserDebugPtr debug){
     this->laserDebug = debug;
 }
@@ -100,9 +114,12 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
         std::vector< Math::Vector<2,float> >::iterator itr;
         for(itr=readings.begin(); itr!=readings.end(); itr++){
             Vector<2,float> reading = *itr;
-            int x = ((reading[0] + 1) / 2.0) * (width - 1);
-            //int y = ((reading[1] + 1) / 2.0) * (height - 1);
-            int y = reading[1] * (height - 1);
+            
+            Vector<2,int> point = InputController::LaserPointToScreenCoordinates(reading);
+            int x = point[0];
+            int y = point[1];
+            //int x = ((reading[0] + 1) / 2.0) * (width - 1);
+            //int y = reading[1] * (height - 1);
 
             if( x >= 0 && x<width && y >= 0 && y<height ){
                 SetPixel(x,y,Vector<4,unsigned char>(0,255,0,255));
@@ -112,8 +129,12 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
         // Calculate all canvas points.
         for(unsigned int i=0; i<clusters.size(); i++){
             Vector<2,float> cc = clusters[i];
-            int xPos = ((cc[0] + 1) / 2.0) * (width - 1);
-            int yPos = cc[1] * (height - 1);
+            Vector<2,int> point = InputController::LaserPointToScreenCoordinates(cc);
+            int xPos = point[0];
+            int yPos = point[1];
+
+            //int xPos = ((cc[0] + 1) / 2.0) * (width - 1);
+            //int yPos = cc[1] * (height - 1);
             
             for(float r=0; r<2*PI; r+=PI/180){
                 int cX = (int)(cos(r) * 10) + xPos;
@@ -123,6 +144,10 @@ void LaserSensor::UpdateCalibrationCanvas(std::vector< Math::Vector<2,float> > r
                 }
                 SetPixel(100,100,Vector<4,unsigned char>(255,0,0,255));
              }
+        }
+
+        for(int i=0; i<height; i++){
+           SetPixel(width/2.0,i,Vector<4,unsigned char>(255,0,0,255));
         }
         //
         laserDebug->UpdateTexture();

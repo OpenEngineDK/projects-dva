@@ -72,9 +72,11 @@
 #include "Utils/CustomKeyHandler.h"
 #include "Devices/LaserSensor.h"
 #include "RelayBox.h"
+#include "Projector.h"
 #include "LaserDebug.h"
 #include "InputController.h"
 #include "Utils/Stages.h"
+
 #include "CameraSwitcher.h"
 #include "HandHeldCamera.h"
 #include "LightAnimator.h"
@@ -105,8 +107,8 @@ IMouse* mouse              = NULL;
 IKeyboard* keyboard        = NULL;
 RenderStateNode *rsn       = NULL;
 ISoundSystem* soundsystem  = NULL;
-//MusicPlayer* musicplayer   = NULL;
 
+// List of models added to the scene.
 vector<ISceneNode*> sceneNodes;
 
 // Model pointers.
@@ -120,18 +122,16 @@ CustomKeyHandler* ckh         = NULL;
 
 // Custom stuff
 LaserDebugPtr laserDebug;
-CameraSwitcher* camSwitch = NULL;
-FrameOption frameOption = FRAME_NONE;
-FlockPropertyReloader *rl = NULL;
-
-PropertyTree* ptree;
-AntTweakBar *atb;
-
-
-LaserSensor* laserSensor;
+LaserSensor* laserSensor      = NULL;
+CameraSwitcher* camSwitch     = NULL;
+FlockPropertyReloader *rl     = NULL;
+PropertyTree* ptree           = NULL;
+AntTweakBar* atb              = NULL;
+FrameOption frameOption       = FRAME_NONE;
+map<string,ISound*> sounds;
 
 // Setup Screenplay controller handling the sequence of events.
-ScreenplayController* screenplayCtrl;
+ScreenplayController* screenplayCtrl = NULL;
 
 // Forward declarations
 void SetupEngine();
@@ -140,7 +140,8 @@ void LoadResources();
 void SetupSound();
 void SetupScene();
 void SetupBoids();
-Animator* LoadAnimatedModel(string filename);
+void LoadAnimatedModel(string path, Vector<3,float> pos, float scale, float animSpeed);
+ISound* CreateSound(std::string filename);
 
 class DebugKeyHandler : public IListener<KeyboardEventArg> {
     AntTweakBar* bar;
@@ -162,6 +163,7 @@ public:
 // Helper function.
 AnimationNode* GetAnimationNode(ISceneNode* node) {
     SearchTool st;
+
     return st.DescendantAnimationNode(node);
 }
 
@@ -210,11 +212,6 @@ int main(int argc, char** argv) {
     bob->Bind(*setup->GetScene());
 
 
-    // Generate dot graph representation of the scene.    
-    DotVisitor dv;
-    ofstream os("graph.dot", ofstream::out);
-    dv.Write(*(setup->GetScene()), &os);
-
     // Start the engine, loop until quit.
     engine->Start();
 
@@ -225,12 +222,12 @@ int main(int argc, char** argv) {
 
 void SetupEngine() {
     //
-    string confPath = DirectoryManager::FindFileInPath("projects/dva/boids.yaml");
+    string confPath = DirectoryManager::FindFileInPath("config.yaml");
     ptree = new PropertyTree(confPath);  
 
     PropertyTreeNode* screenConf = ptree->GetRootNode()->GetNode("screen");
-    SCREEN_WIDTH = screenConf->GetPath("width",SCREEN_WIDTH);
-    SCREEN_HEIGHT = screenConf->GetPath("height",SCREEN_HEIGHT);
+    SCREEN_WIDTH = screenConf->GetPath("width", SCREEN_WIDTH);
+    SCREEN_HEIGHT = screenConf->GetPath("height", SCREEN_HEIGHT);
     
 
     // Create SDL environment handling display and input
@@ -282,6 +279,27 @@ void SetupDevices() {
     // Setup laser sensor device.
     if( LASER_SENSOR_ENABLED ) {
         laserSensor = new LaserSensor(LASER_SENSOR_IP, LASER_SENSOR_PORT);
+
+        PropertyTreeNode* dn = ptree->GetRootNode()->GetNode("laserSensor");
+
+        // 
+        new PropertyBinder<LaserSensor, Vector<3,float> >
+            (dn->GetNode("offset"),
+             *laserSensor,
+             &LaserSensor::SetReadingsOffset, Vector<3,float>(0.0) );
+
+        // 
+        new PropertyBinder<LaserSensor, float>
+            (dn->GetNode("epsilon"),
+             *laserSensor,
+             &LaserSensor::SetClusterEpsilon, 0.08 );
+        // 
+        new PropertyBinder<LaserSensor, unsigned int >
+            (dn->GetNode("minPoints"),
+             *laserSensor,
+             &LaserSensor::SetClusterMinPoints, 5 );
+  
+
         engine->InitializeEvent().Attach(*laserSensor);
         engine->ProcessEvent().Attach(*laserSensor);
         inputCtrl->SetInputDevice(laserSensor);
@@ -302,6 +320,13 @@ void SetupDevices() {
         RelayBox* relayBox = new RelayBox(RELAY_BOX_IP, RELAY_BOX_PORT);
         relayBox->Start();
         screenplayCtrl->SetRelayBox(relayBox);
+    }
+
+    // Configure projector.
+    if( PROJECTOR_ENABLED ){
+        Projector* projector = new Projector(PROJECTOR_IP, PROJECTOR_PORT);
+        projector->Start();
+        screenplayCtrl->SetProjector(projector);
     }
 
     // Static default view
@@ -385,37 +410,29 @@ void LoadResources() {
     sceneNodes.push_back(envTrans);
 
     // Load Seaweed
-//     path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
-
-//     Animator* seaweed0 = LoadAnimatedModel(path);
-//     Animator* seaweed1 = LoadAnimatedModel(path);
-//     Animator* seaweed2 = LoadAnimatedModel(path);
-//     Animator* seaweed3 = LoadAnimatedModel(path);
-
-//     seaweed0->SetSpeed(0.8);
-//     seaweed1->SetSpeed(0.9);
-//     seaweed2->SetSpeed(1.0);
-//     seaweed3->SetSpeed(1.1);
-
-//     TransformationNode* weedTrans0 = new TransformationNode();
-//     weedTrans0->AddNode(seaweed0->GetSceneNode());
-//     weedTrans0->SetPosition(Vector<3,float>(-20,0,-100));
-//     sceneNodes.push_back(weedTrans0);
-
-//     TransformationNode* weedTrans1 = new TransformationNode();
-//     weedTrans1->AddNode(seaweed1->GetSceneNode());
-//     weedTrans1->SetPosition(Vector<3,float>(-10,0,-100));
-//     sceneNodes.push_back(weedTrans1);
-
-//     TransformationNode* weedTrans2 = new TransformationNode();
-//     weedTrans2->AddNode(seaweed2->GetSceneNode());
-//     weedTrans2->SetPosition(Vector<3,float>(10,0,-100));
-//     sceneNodes.push_back(weedTrans2);
-
-//     TransformationNode* weedTrans3 = new TransformationNode();
-//     weedTrans3->AddNode(seaweed3->GetSceneNode());
-//     weedTrans3->SetPosition(Vector<3,float>(20,0,-100));
-//     sceneNodes.push_back(weedTrans3);
+    path = DirectoryManager::FindFileInPath("models/seaweed/Seaweed02.DAE");
+    LoadAnimatedModel(path, Vector<3,float>(55.4819,12.5436,-378.1620), 1.8822, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(-57.8628,15.0743,-125.1450), 1.1063, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(-173.4921,14.1558,-332.2480), 1.7772, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(-113.6161,16.7165,-334.0776), 1.4627, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(-97.0448,9.7250,-299.8900), 1.1677, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(-72.2820,14.7051,-151.8772), 1.1922, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(115.0769,17.4573,-586.6378), 1.8180, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(61.7028,16.5389,-430.1506), 1.1974, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(90.3367,16.0625,-510.3374), 1.4680, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(180.0788,18.5312,-317.6531), 1.7185, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(208.5876,13.8011,-329.6813), 1.6529, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(56.6983,16.2579,-123.0457), 1.0501, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(63.0623,17.2523,-203.0988), 1.0000, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(97.3310,13.4000,-182.8303), 1.2153, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(188.9363,15.5838,-435.9962), 1.4558, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(132.4635,17.8924,-481.6145), 1.7060, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(172.4414,16.7335,-482.2668), 1.4736, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(177.5081,15.3757,-392.1239), 1.4408, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(216.9511,15.7917,-385.4847), 1.6088, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(151.3088,14.4380,-444.5753), 1.6880, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(166.8658,17.8803,-216.7861), 1.3841, 1.0);
+    LoadAnimatedModel(path, Vector<3,float>(194.8776,12.3695,-201.9056), 1.6181, 1.0);
 
     // Load shark.
     path = DirectoryManager::FindFileInPath("models/sharky/Sharky09.DAE");
@@ -430,7 +447,6 @@ void LoadResources() {
         if( sharkAnimator->GetSceneNode() ){
             sharkAnimRoot = sharkAnim;
             TransformationNode* sharkTrans = new TransformationNode();
-            sharkTrans->SetInfo("SHARK TRANSFORMATION");
             sharkTrans->AddNode(sharkAnimator->GetSceneNode());
             sceneNodes.push_back(sharkTrans);
 
@@ -446,7 +462,7 @@ void LoadResources() {
         }
         setup->GetEngine().ProcessEvent().Attach(*sharkAnimator);
         sharkAnimator->SetActiveAnimation(0);
-        sharkAnimator->LoopAnimation(true);
+        sharkAnimator->LoopAnimation(false);
         //sharkAnimator->Play();
         screenplayCtrl->SetSharkAnimator(sharkAnimator);
     }
@@ -474,39 +490,13 @@ void LoadResources() {
     }
 }
 
-ISound* CreateSound(std::string filename) {
-    //IStreamingSoundResourcePtr resource = 
-        //ResourceManager<IStreamingSoundResource>::Create(filename);
-    ISoundResourcePtr resource = 
-        ResourceManager<ISoundResource>::Create(filename);
-	ISound* sound = soundsystem->CreateSound(resource);
-    if (sound->IsStereoSound()) {
-        IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
-        left->SetRelativePosition(true);
-        left->SetPosition(Vector<3,float>(-10.0,0.0,0.0));
-        
-        IMonoSound* right = ((IStereoSound*)sound)->GetRight();
-        right->SetRelativePosition(true);
-        right->SetPosition(Vector<3,float>(10.0,0.0,0.0));
-    }
-    else if (sound->IsMonoSound()) {
-        IMonoSound* mono = ((IMonoSound*)sound);
-        mono->SetRelativePosition(true);
-        mono->SetPosition(Vector<3,float>(0.0,0.0,0.0));
-    }
-    sound->SetLooping(true);
-    sound->SetGain(1.0);
-    return sound;
-}
-
 void SetupSound() {
     soundsystem = new OpenALSoundSystem();
     soundsystem->SetDevice(0);
     //musicplayer = new MusicPlayer(NULL, soundsystem);
-    bool enableSound = true;
-    if (enableSound) {
-        // setup the sound system
-        soundsystem->SetMasterGain(1.0);
+    if (SOUND_ENABLED) {
+        // Setup the sound system.
+        soundsystem->SetMasterGain(0.5);
         engine->InitializeEvent().Attach(*soundsystem);
         engine->ProcessEvent().Attach(*soundsystem);
         engine->DeinitializeEvent().Attach(*soundsystem);
@@ -515,33 +505,27 @@ void SetupSound() {
         ResourceManager<IStreamingSoundResource>::AddPlugin(new StreamingVorbisResourcePlugin());
         setup->GetRenderer().ProcessEvent().Attach(*soundsystem);
 
-        // static background sounds
-        ISound* sound1 = CreateSound("Baggrund.ogg");
-        ISound* sound2 = CreateSound("Baggrundbolger.ogg");
-        ISound* sound3 = CreateSound("BaggrundsBobler.ogg");
-        ISound* sound4 = CreateSound("BaggrundVariation.ogg");
-        ckh->AddSound(sound1, "sound1");
-        ckh->AddSound(sound2, "sound2");
-        ckh->AddSound(sound3, "sound3");
-        ckh->AddSound(sound4, "sound4");
+        // Static background sounds.
+        ISound* sound0 = CreateSound("Baggrund.ogg");
+        ISound* sound1 = CreateSound("Baggrundbolger.ogg");
+        ISound* sound2 = CreateSound("BaggrundsBobler.ogg");
+        ISound* sound3 = CreateSound("BaggrundVariation.ogg");
+        ISound* sound4 = CreateSound("Sharksound01_Master.ogg");
+        sounds["sound0"] = sound0;
+        sounds["sound1"] = sound1;
+        sounds["sound2"] = sound2;
+        sounds["sound3"] = sound3;
+        sounds["sound4"] = sound4;
+        // Add list of sounds to the screenplay controller.
+        screenplayCtrl->SetSounds(sounds);
+        // Just for debugging map keys to sounds.
+        ckh->SetSounds(sounds);
 
-        // sound with dynamic position
-        IStreamingSoundResourcePtr resource = 
-            ResourceManager<IStreamingSoundResource>::Create("Sharksound01_Master.ogg");
-        ISound* sound = soundsystem->CreateSound(resource);
-        sound->SetGain(1.0);
-        ckh->AddSound(sound, "sound5");
-        if (sound->IsStereoSound()) {
-            IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
-            IMonoSound* right = ((IStereoSound*)sound)->GetRight();
-            sharkHead->AddNode(new SoundNode(left));
-            sharkHead->AddNode(new SoundNode(right));
-        } else {
-            IMonoSound* mono = ((IMonoSound*)sound);
-            sharkHead->AddNode(new SoundNode(mono));
-        }
-
+        //sound1->Play();
+        //sound2->Play();
+        //sound4->Play();
         setup->GetRenderer().PreProcessEvent().Attach(*soundsystem);
+    
     }
 }
 
@@ -549,6 +533,7 @@ void SetupSound() {
 void SetupScene() {
     // Hook Screenplay controller into engine.
     engine->ProcessEvent().Attach(*screenplayCtrl);
+    atb->KeyEvent().Attach(*screenplayCtrl);
 
     // Setup stage fading Stuff
     BlendCanvas* b = new BlendCanvas(new TextureCopy());
@@ -564,10 +549,10 @@ void SetupScene() {
     engine->ProcessEvent().Attach(*stages);
 
     // Apply Heads Up Display
-//     string path = DirectoryManager::FindFileInPath("textures/hud/hud_default.tga");
+//     string path = DirectoryManager::FindFileInPath("textures/hud/projectorMask.png");
 //     ITexture2DPtr hud = ResourceManager<ITextureResource>::Create(path);
 //     setup->GetTextureLoader().Load(hud);
-//     b->AddTexture(hud, 0, 0, Vector<4,float>(1.0,1.0,1.0,0.5));
+//     b->AddTexture(hud, 0, 0, Vector<4,float>(1.0,1.0,1.0,1.0));
     
     // Start by setting the root node in the scene graph.
     ISceneNode* sceneRoot = new SceneNode();
@@ -595,14 +580,14 @@ void SetupScene() {
 //     scene = waves;
 
     // Create fog post process   
-    IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("projects/dva/effects/fog.glsl");
+    IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("shaders/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
     setup->GetRenderer().InitializeEvent().Attach(*fogNode);
     scene->AddNode(fogNode); 
     scene = fogNode;
 
     //Create Shadow post process
-    IShaderResourcePtr shadow = ResourceManager<IShaderResource>::Create("projects/dva/effects/shadowmap.glsl");
+    IShaderResourcePtr shadow = ResourceManager<IShaderResource>::Create("shaders/shadowmap.glsl");
     ShadowLightPostProcessNode* shadowPost = 
         new ShadowLightPostProcessNode(shadow, 
                                        dimension,
@@ -614,16 +599,16 @@ void SetupScene() {
     scene = shadowPost;
 
     // Setup shadow perspective
-    IViewingVolume* shadowView = new PerspectiveViewingVolume(100,2000);
+    IViewingVolume* shadowView = new PerspectiveViewingVolume(100,3000);
     Camera* shadowCam = new Camera(*(shadowView));
-    shadowCam->SetPosition(Vector<3,float>(0,800,500));
+    shadowCam->SetPosition(Vector<3,float>(0,800,550));
     shadowCam->LookAt(Vector<3,float>(0,0,-1000));
     camSwitch->AddCamera(shadowCam);    
     shadowPost->SetViewingVolume(shadowCam);
 
 
     // Create caustics post process
-    IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("projects/dva/effects/caustics.glsl");
+    IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("shaders/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
     setup->GetRenderer().InitializeEvent().Attach(*causticsNode);
@@ -701,9 +686,7 @@ void SetupScene() {
 
 void SetupBoids() {
 
-    // engine->InitializeEvent().Attach(*ptree);
     engine->ProcessEvent().Attach(*ptree);
-    // engine->DeinitializeEvent().Attach(*ptree);
 
      // Setup flock rules.
     Flock* flock = new Flock();
@@ -714,6 +697,7 @@ void SetupBoids() {
     flock->AddRule(new RandomRule());
         {
         MultiGotoRule* mgr = new MultiGotoRule();
+        mgr->SetEnabled(false);
         // Lets generate a logo || OpenEngine
         // int array[] = {0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         //                1,0,0,0,1,0,1,1,0,0,1,1,1,0,1,0,1,0,2,0,0,0,1,0,1,0,1,1,1,0,0,1,0,0,1,0,1,0,1,1,1,
@@ -755,9 +739,9 @@ void SetupBoids() {
                 
             }
         }
-
         flock->AddRule(mgr);
     }// done
+
     flock->AddRule(new BoxLimitRule(Vector<3,float>(-400,30,-400), 
                                     Vector<3,float>(400,400,400)));
 
@@ -827,17 +811,50 @@ void SetupBoids() {
     camSwitch->AddCamera(fcsm);
 }
 
-
-Animator* LoadAnimatedModel(string path){
+void LoadAnimatedModel(string path, Vector<3,float> pos, float scale, float animSpeed) {
     IModelResourcePtr model = ResourceManager<IModelResource>::Create(path);
     model->Load();
     AnimationNode* animNode = GetAnimationNode(model->GetSceneNode());
     Animator* animator = NULL;
     if( animNode ){
         animator = new Animator(animNode);
+        TransformationNode* weedTrans = new TransformationNode();
+        weedTrans->AddNode(animator->GetSceneNode());
+        weedTrans->SetPosition(pos);
+        weedTrans->SetScale(Vector<3,float>(scale));
+        weedTrans->Rotate(0, PI/4, 0);
+        sceneNodes.push_back(weedTrans);
+
         setup->GetEngine().ProcessEvent().Attach(*animator);
         animator->SetActiveAnimation(0);
+        animator->SetSpeed(animSpeed);
+        Thread::Sleep(100000);
         animator->Play();
-     }
-    return animator;
+    }
+}
+
+
+ISound* CreateSound(std::string filename) {
+    //
+    ISoundResourcePtr resource = ResourceManager<ISoundResource>::Create(filename);
+	ISound* sound = soundsystem->CreateSound(resource);
+    if (sound->IsStereoSound()) {
+        IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
+        left->SetRelativePosition(true);
+        left->SetPosition(Vector<3,float>(-10.0,0.0,0.0));
+        
+        IMonoSound* right = ((IStereoSound*)sound)->GetRight();
+        right->SetRelativePosition(true);
+        right->SetPosition(Vector<3,float>(10.0,0.0,0.0));
+        logger.info << "Stereo: " << filename << logger.end;
+    }
+    else if (sound->IsMonoSound()) {
+        IMonoSound* mono = ((IMonoSound*)sound);
+        mono->SetRelativePosition(true);
+        mono->SetPosition(Vector<3,float>(0.0,20.0,0.0));
+        logger.info << "Mono: " << filename << logger.end;
+    }
+    sound->SetLooping(true);
+    sound->SetGain(1.0);
+    return sound;
 }

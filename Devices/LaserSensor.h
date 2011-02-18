@@ -48,7 +48,12 @@ public:
     void Handle(Core::ProcessEventArg arg);
     void Handle(Core::DeinitializeEventArg arg);
 
+    void SetReadingsOffset(Math::Vector<3,float> readingOffset);
+    void SetClusterEpsilon(float eps);
+    void SetClusterMinPoints(unsigned int min);
+
     void SetLaserDebug(LaserDebugPtr debug);
+    
 
     Core::IEvent<LaserInputEventArg>& LaserInputEvent();
    

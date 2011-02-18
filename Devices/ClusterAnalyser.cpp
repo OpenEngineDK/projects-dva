@@ -10,6 +10,7 @@
 #include "ClusterAnalyser.h"
 #include <iostream>
 #include <cstring>
+#include <Logging/Logger.h>
 
 namespace OpenEngine {
 namespace Devices {
@@ -20,6 +21,14 @@ ClusterAnalyser::ClusterAnalyser(float epsilon, unsigned int minClusterPoints) :
 }
 
 ClusterAnalyser::~ClusterAnalyser() {
+}
+
+void ClusterAnalyser::SetEpsilon(float eps) {
+    this->epsilon = eps;
+}
+
+void ClusterAnalyser::SetMinClusterPoints(unsigned int min) {
+    this->minClusterPoints = min;
 }
 
 

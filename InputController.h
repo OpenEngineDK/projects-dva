@@ -79,6 +79,10 @@ private:
     IRuleHandler* followCircleRule;
     IRuleHandler* fleeRule;
     IRuleHandler* separationRule;
+    IRule* oe;
+    unsigned int oeLastVal;
+    int oeTabs;
+    bool oeRunning;
 
     int countTendency;
     Vector<2,float> cacheP0;

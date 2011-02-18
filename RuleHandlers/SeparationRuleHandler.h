@@ -68,15 +68,21 @@ public:
                 points = exclude;
             }
      
-            const float MAX_DIST = 40.0f;
+            const float MAX_DIST = 32.0f;
             
-            //maxDist -= 80.0;
+            maxDist -= 120.0;
+            if( maxDist < 0 ) maxDist = 0;
+            
+            //logger.info << "maxin: " << maxDist << logger.end;
+            
             float relDist = (maxDist*maxDist) / (400.0 * 400.0);
-    
-            maxDist = relDist * MAX_DIST;
-            if(maxDist > 40.0 ) maxDist = 40.0;
+            //logger.info << "MaxDist: " << maxDist << ", relDist: " << relDist * MAX_DIST << logger.end;
+            //
 
-            logger.info << "dist: " << maxDist << logger.end;
+            maxDist = relDist * MAX_DIST;
+            if(maxDist > MAX_DIST ) maxDist = MAX_DIST;
+
+            //
 
      
             ((SeparationRule*)rule)->SetDistance(maxDist);

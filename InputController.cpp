@@ -26,6 +26,8 @@
 #include "RuleHandlers/FlockFollowCircleRuleHandler.h"
 #include <vector>
 
+#include <Core/Exceptions.h>
+
 using namespace OpenEngine::Animations;
 using namespace std;
 
@@ -43,7 +45,10 @@ void InputController::Init() {
     followCircleRule = NULL;
     fleeRule = NULL;
     separationRule = NULL;
-
+    oe = NULL;
+    oeLastVal = 0;
+    oeTabs = 0;
+    oeRunning = false;
 }
 
 InputController::InputController(PropertyTreeNode* ptNode) {
@@ -114,6 +119,10 @@ void InputController::Handle(Core::InitializeEventArg arg) {
     separationRule = new SeparationRuleHandler(flock);
     separationRule->GetRule()->SetEnabled(false);
     ruleHandlers.push_back(separationRule);
+
+    // Get oe rule.
+    oe = flock->GetRuleNamed("MultiGoto");
+    if( oe ) timer.Start();
 }
 
 void InputController::Handle(Core::ProcessEventArg arg) {
@@ -124,7 +133,43 @@ void InputController::Handle(Core::ProcessEventArg arg) {
     // Handle input
     if( mouse ) HandleMouseInput();
     if( laser ) HandleLaserInput();
-    //logger.info << "LASER POINTS: " << laserPoints.size() << logger.end;
+    //    logger.info << "LASER POINTS: " << laserPoints.size() << logger.end;
+
+    if( oe ) {
+        
+        if( laserPoints.size() == 1 && oeLastVal == 0 && oeTabs < 42 ) {
+            float elaps = timer.GetElapsedTime().sec*1000000 + timer.GetElapsedTime().usec;
+            if( elaps > 100000 && elaps < 1000000 ){
+                oeTabs++;
+                oeLastVal = laserPoints.size();
+                timer.Reset();
+                timer.Start();
+            } else {
+                timer.Reset();
+                timer.Start();
+            }
+
+            if( elaps > 3000000 ){
+                oeTabs = 0;
+            }
+
+            //logger.info << "Tabs: " << oeTabs << " elaps: " << elaps << logger.end;
+        }else if( laserPoints.size() == 0 ){
+            oeLastVal = 0;
+        }
+
+        if( !oeRunning && oeTabs >= 42 ){
+            oe->SetEnabled(true);
+            timer.Reset();
+            timer.Start();
+            oeRunning = true;
+        }
+        if( oeRunning && timer.GetElapsedTime().sec > 5.0 ){
+            oe->SetEnabled(false);
+            oeTabs = 0;
+            oeRunning = false;
+        }
+    }
 
     SetupRules();
     
@@ -143,6 +188,8 @@ void InputController::SetupRules() {
 
     // Setup rules based on number of laser tracking points.
     switch( laserPoints.size() ) {
+    case 0:
+        break;
 
     case 1: 
         fleeRule->GetRule()->SetEnabled(true); 
@@ -152,12 +199,10 @@ void InputController::SetupRules() {
         separationRule->GetRule()->SetEnabled(true); 
         break;
 
-    case 3: 
+    // If 3 points or more, use both rules.. 
+    default: 
         separationRule->GetRule()->SetEnabled(true);
         fleeRule->GetRule()->SetEnabled(true);
-        break;
-
-    default:
         break;
     }
 }
@@ -192,7 +237,7 @@ void InputController::HandleLaserInput() {
         cacheP0 /= 2.0;
         cacheP1 += trackingPoints[1];
         cacheP1 /= 2.0;
-        if( countTendency < 10 ) countTendency++;
+        if( countTendency < 15 ) countTendency++;
     }else{
         countTendency--;
     }
@@ -213,8 +258,7 @@ void InputController::HandleLaserInput() {
         cacheP1 *= 0;
         countTendency = 0;
     }
-    logger.info << "numTracking: "<<trackingPoints.size() << ", tendency: " << countTendency << logger.end;
-
+    //logger.info << "numTracking: "<<trackingPoints.size() << ", tendency: " << countTendency << logger.end;
 
     for( unsigned int i=0 ; i<trackingPoints.size(); i++ ){
         laserPoints.push_back(LaserPointToScreenCoordinates(trackingPoints[i]));
@@ -224,17 +268,20 @@ void InputController::HandleLaserInput() {
 Vector<3,float> InputController::ScreenToSceneCoordinates(int x, int y) {
     float xRange = 370.0f;
     float yRange = 180.0f;
-    float yTop = 170.0;
+    //float yTop = 170.0;
 
     Vector<3,float> pos;
     pos[0] = (-xRange/2.0f) + ((x / (float)SCREEN_WIDTH) * xRange);
-    pos[1] = yTop - ((y / (float)SCREEN_HEIGHT) * yRange);
+    pos[1] = ((y / (float)SCREEN_HEIGHT) * yRange);
+
+    //    logger.info << "Y: " << y << ", SceneY: " << pos[1] << logger.end;
     return pos;
 }
 
 Vector<2,int> InputController::LaserPointToScreenCoordinates(Vector<2,float> p) {
     Vector<2,int> point;
     point[0] = ((p[0]+1)/2.0) * SCREEN_WIDTH;
+    //logger.info << "point[1]: " << p[1] << logger.end;
     point[1] = SCREEN_HEIGHT - (p[1] * SCREEN_HEIGHT);
     return point;
 }

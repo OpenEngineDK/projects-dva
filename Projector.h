@@ -8,8 +8,8 @@
 //--------------------------------------------------------------------
 
 
-#ifndef _OE_RELAY_BOX_H_
-#define _OE_RELAY_BOX_H_
+#ifndef _OE_PROJECTOR_H_
+#define _OE_PROJECTOR_H_
 
 #include <Core/Thread.h>
 #include <Core/Mutex.h>
@@ -29,15 +29,13 @@ using OpenEngine::Core::Thread;
 using OpenEngine::Core::Mutex;
 using OpenEngine::Network::TCPSocket;
 
-const unsigned int NUM_RELAYS = 4;
-
 /**
- * This class represents the relay box controlling the
- * water splash, the air and lighting.
+ * 
+ * 
  *
- * @class RelayBox RelayBox.h ts/dva/RelayBox.h
+ * @class Projector Projector.h ts/dva/Projector.h
  */
-class RelayBox : public Thread {
+class Projector : public Thread {
 private:
     NetStat status;
     TCPSocket* socket;
@@ -53,19 +51,16 @@ private:
     void Run();
 
 public:
-    RelayBox();
-    RelayBox(std::string ip, unsigned short port);
-    ~RelayBox();
+    Projector();
+    Projector(std::string ip, unsigned short port); 
+    ~Projector();
 
     bool Connect(std::string ip, unsigned short port);
     void Close();
     NetStat GetStatus();
 
-    void SetRelayState(unsigned int relayNo, bool state);
-    void ToggleRelay(unsigned int relayNo);
-
-    void DeactivateAll();
-    void ActivateAll();
+    void PowerOn();
+    void PowerOff();
 };
 
 } // NS dva

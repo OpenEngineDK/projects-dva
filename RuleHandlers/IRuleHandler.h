@@ -33,14 +33,12 @@ protected:
         if( !loaded ){
             flock->AddRule(rule);
             loaded = true;
-            logger.info << "[" << this << "] loaded" << logger.end;
         }
     }
     
     void Unload(){
         if( loaded ){
             flock->RemoveRule(rule);
-            logger.info << "[" << this << "] unloaded" << logger.end;
         }
     }
 

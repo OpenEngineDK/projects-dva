@@ -41,14 +41,23 @@ namespace dva {
     const std::string RELAY_BOX_IP         = "192.168.0.101";
     const int         RELAY_BOX_PORT       = 12302;
 
+    // Projector Setup (TCP/IP -> RS232 through Relay Box)
+    const bool        PROJECTOR_ENABLED    = true;  // Send wake up message to projector.
+    const std::string PROJECTOR_IP         = "192.168.0.101";
+    const int         PROJECTOR_PORT       = 10001;
+    
+
     // Cluster Analyser
-    const float CLUSTER_EPSILON    = 0.02; // Max distance between points in cluster.
+    const float CLUSTER_EPSILON    = 0.08; // Max distance between points in cluster.
     const int   CLUSTER_MIN_POINTS = 5;    // Minimum number of points to form a cluster.
 
+    // Sound System
+    const bool SOUND_ENABLED = true;
 
     // 
     const unsigned int NUM_SEAWEED_ANIMATORS = 3;
 
+    const bool CHECK_LICENSE = true;
     
 } // NS dva
 

@@ -52,16 +52,16 @@ public:
 
             case KEY_e : setup.ShowFPS(); break;
 
-            case KEY_SPACE: {
-                Animator* anim = (Animator*)UserDefaults::GetInstance()->map["SharkAnimator"];
-                if( anim ){
-                    if( anim->IsPlaying() )
-                        anim->Pause();
-                    else
-                        anim->Play();
-                }
-            }
-                break;
+//             case KEY_SPACE: {
+//                 Animator* anim = (Animator*)UserDefaults::GetInstance()->map["SharkAnimator"];
+//                 if( anim ){
+//                     if( anim->IsPlaying() )
+//                         anim->Pause();
+//                     else
+//                         anim->Play();
+//                 }
+//             }
+//                 break;
 
 
             case KEY_f: 
@@ -146,8 +146,8 @@ public:
         }
     }
 
-    void AddSound(ISound* sound, std::string str) {
-        sounds[str] = sound;
+    void SetSounds(std::map<std::string,ISound*> sounds) {
+        this->sounds = sounds;
     }
 };
 

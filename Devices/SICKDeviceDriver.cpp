@@ -50,11 +50,26 @@ SICKDeviceDriver::SICKDeviceDriver(string ip, unsigned short port,
     stringstream t;
     t << (char)ETX;
     term = t.str();
+
+    readingOffset = Vector<2,float>(0, -800);
 }
 
 SICKDeviceDriver::~SICKDeviceDriver() {
     delete clusterAnalyser;
 }
+
+void SICKDeviceDriver::SetReadingsOffset(Math::Vector<2,float> readingOffset) {
+    this->readingOffset = readingOffset;
+}
+    
+void SICKDeviceDriver::SetClusterEpsilon(float eps) {
+    clusterAnalyser->SetEpsilon(eps);
+}
+
+void SICKDeviceDriver::SetClusterMinPoints(unsigned int min) {
+    clusterAnalyser->SetMinClusterPoints(min);
+}
+
 
 
 std::vector< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
@@ -88,6 +103,9 @@ std::vector< Vector<2,float> > SICKDeviceDriver::ParseData(string data) {
             //logger.info << "[" << i << "]" << results[i] << ", dist: " << dist << ", (x,y): " << x << ", " << y << logger.end;
 
             Vector<2,float> point(x,y); 
+
+            // Add readings offset, depending on where the sensor is mounted.
+            point += readingOffset;
 
             // Check bounding condition.
             if( InsideBounds(point) ){
@@ -183,17 +201,12 @@ void SICKDeviceDriver::Run(){
             logger.error << "[SICKDeviceDriver] socket error." << logger.end;
         }
 
-        // Clear previous measurements.
-        curReadings.clear();
-        curClusters.clear();
-
         // Parse sensor readings.
         if( data.length() > 0 ){
             mutex.Lock();
             curReadings = ParseData(data);
             mutex.Unlock();
         
-            
             // Perform cluster analysis.            
             if( curReadings.size() > 0 ){
                 vector< Vector<2,float> > clusterCenters;
@@ -202,7 +215,14 @@ void SICKDeviceDriver::Run(){
                 mutex.Lock();
                 curClusters = clusterCenters;
                 mutex.Unlock();
+            }else {
+                curClusters.clear();
             }
+
+        }else {
+            // If no readings, clear previous measurements.
+            curReadings.clear();
+            curClusters.clear();
         }
         
     }
