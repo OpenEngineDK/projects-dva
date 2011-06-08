@@ -579,14 +579,14 @@ void SetupScene() {
 //     scene = waves;
 
     // Create fog post process   
-    IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("shaders/fog.glsl");
+    IShaderResourcePtr fog = ResourceManager<IShaderResource>::Create("effects/fog.glsl");
     PostProcessNode* fogNode = new PostProcessNode(fog, dimension); 
     setup->GetRenderer().InitializeEvent().Attach(*fogNode);
     scene->AddNode(fogNode); 
     scene = fogNode;
 
     //Create Shadow post process
-    IShaderResourcePtr shadow = ResourceManager<IShaderResource>::Create("shaders/shadowmap.glsl");
+    IShaderResourcePtr shadow = ResourceManager<IShaderResource>::Create("effects/shadowmap.glsl");
     ShadowLightPostProcessNode* shadowPost = 
         new ShadowLightPostProcessNode(shadow, 
                                        dimension,
@@ -607,7 +607,7 @@ void SetupScene() {
 
 
     // Create caustics post process
-    IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("shaders/caustics.glsl");
+    IShaderResourcePtr caustics = ResourceManager<IShaderResource>::Create("effects/caustics.glsl");
     caustics->SetUniform("lightDir", Vector<3, float>(0, -1, 0));
     PostProcessNode* causticsNode = new PostProcessNode(caustics, dimension); 
     setup->GetRenderer().InitializeEvent().Attach(*causticsNode);
