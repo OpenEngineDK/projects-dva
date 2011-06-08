@@ -16,6 +16,7 @@ dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/extensions/Assimp/
 dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/HeightMap/HeightMap.dist
 dist /extensions/Boids/Boids.dist http://openengine.dk/code/extensions/Boids/Boids.dist
 dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/extensions/OpenGLRenderer/OpenGLRenderer.dist
+dist /extensions/Sockets/Sockets.dist http://openengine.dk/code/extensions/Sockets/Sockets.dist
 
 # required extensions
 darcs /extensions/AnimationFramework		http://openengine.dk/code/extensions/AnimationFramework
@@ -23,7 +24,6 @@ darcs /extensions/SetupHelpers           	http://openengine.dk/code/extensions/S
 darcs /extensions/HUD                    	http://openengine.dk/code/extensions/HUD
 darcs /extensions/SDL                    	http://openengine.dk/code/extensions/SDL
 darcs /extensions/SDLImage               	http://openengine.dk/code/extensions/SDLImage
-darcs /extensions/Sockets			http://openengine.dk/code/extensions/Sockets
 darcs /extensions/CairoResource          	http://openengine.dk/code/extensions/CairoResource
 darcs /extensions/OpenGLPostProcessEffects      http://openengine.dk/code/extensions/OpenGLPostProcessEffects
 darcs /extensions/TGAResource            	http://openengine.dk/code/extensions/TGAResource
@@ -39,7 +39,6 @@ darcs-dev /extensions/HUD                    	fh.daimi.au.dk:/users/cgd/code/ext
 darcs-dev /extensions/SetupHelpers           	fh.daimi.au.dk:/users/cgd/code/extensions/SetupHelpers
 darcs-dev /extensions/SDL                    	fh.daimi.au.dk:/users/cgd/code/extensions/SDL
 darcs-dev /extensions/SDLImage               	fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
-darcs-dev /extensions/Sockets		     	fh.daimi.au.dk:/users/cgd/code/extensions/Sockets
 darcs-dev /extensions/TGAResource            	fh.daimi.au.dk:/users/cgd/code/extensions/TGAResource
 darcs-dev /extensions/OBJResource            	fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
 #darcs-dev /extensions/OpenGLRenderer         	fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
