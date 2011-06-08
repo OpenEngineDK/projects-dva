@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
 
 
 void SetupEngine() {
-    //
+    DirectoryManager::AppendPath("projects/dva/");
     string confPath = DirectoryManager::FindFileInPath("config.yaml");
     ptree = new PropertyTree(confPath);  
 
@@ -377,7 +377,6 @@ void SetupDevices() {
 void LoadResources() {
     ResourceManager<IModelResource>::AddPlugin(new AssimpPlugin());
     DirectoryManager::AppendPath("resources/");
-    DirectoryManager::AppendPath("projects/dva/");
     string path;
 
     // Load place holder box.
