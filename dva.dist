@@ -17,52 +17,27 @@ dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/H
 dist /extensions/Boids/Boids.dist http://openengine.dk/code/extensions/Boids/Boids.dist
 dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/extensions/OpenGLRenderer/OpenGLRenderer.dist
 dist /extensions/Sockets/Sockets.dist http://openengine.dk/code/extensions/Sockets/Sockets.dist
-
-# required extensions
-darcs /extensions/AnimationFramework		http://openengine.dk/code/extensions/AnimationFramework
-darcs /extensions/SetupHelpers           	http://openengine.dk/code/extensions/SetupHelpers
-darcs /extensions/HUD                    	http://openengine.dk/code/extensions/HUD
-darcs /extensions/SDL                    	http://openengine.dk/code/extensions/SDL
-darcs /extensions/SDLImage               	http://openengine.dk/code/extensions/SDLImage
-darcs /extensions/CairoResource          	http://openengine.dk/code/extensions/CairoResource
-darcs /extensions/OpenGLPostProcessEffects      http://openengine.dk/code/extensions/OpenGLPostProcessEffects
-darcs /extensions/TGAResource            	http://openengine.dk/code/extensions/TGAResource
-darcs /extensions/OBJResource            	http://openengine.dk/code/extensions/OBJResource
-darcs /extensions/AccelerationStructures 	http://openengine.dk/code/extensions/AccelerationStructures
-darcs /extensions/GenericHandlers 	 	http://openengine.dk/code/extensions/GenericHandlers
-
-#dev
-darcs-dev /extensions/AccelerationStructures	fh.daimi.au.dk:/users/cgd/code/extensions/AccelerationStructures
-darcs-dev /extensions/AnimationFramework     	fh.daimi.au.dk:/users/cgd/code/extensions/AnimationFramework
-darcs-dev /extensions/CairoResource          	fh.daimi.au.dk:/users/cgd/code/extensions/CairoResource
-darcs-dev /extensions/HUD                    	fh.daimi.au.dk:/users/cgd/code/extensions/HUD
-darcs-dev /extensions/SetupHelpers           	fh.daimi.au.dk:/users/cgd/code/extensions/SetupHelpers
-darcs-dev /extensions/SDL                    	fh.daimi.au.dk:/users/cgd/code/extensions/SDL
-darcs-dev /extensions/SDLImage               	fh.daimi.au.dk:/users/cgd/code/extensions/SDLImage
-darcs-dev /extensions/TGAResource            	fh.daimi.au.dk:/users/cgd/code/extensions/TGAResource
-darcs-dev /extensions/OBJResource            	fh.daimi.au.dk:/users/cgd/code/extensions/OBJResource
-#darcs-dev /extensions/OpenGLRenderer         	fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLRenderer
-darcs-dev /extensions/OpenGLPostProcessEffects 	fh.daimi.au.dk:/users/cgd/code/extensions/OpenGLPostProcessEffects
-darcs-dev /extensions/GenericHandlers 	 	fh.daimi.au.dk:/users/cgd/code/extensions/GenericHandlers
+dist /extensions/AccelerationStructures/AccelerationStructures.dist http://openengine.dk/code/extensions/AccelerationStructures/AccelerationStructures.dist
+dist /extensions/AnimationFramework/AnimationFramework.dist http://openengine.dk/code/extensions/AnimationFramework/AnimationFramework.dist
+dist /extensions/SetupHelpers/SetupHelpers.dist http://openengine.dk/code/extensions/SetupHelpers/SetupHelpers.dist
+dist /extensions/HUD/HUD.dist http://openengine.dk/code/extensions/HUD/HUD.dist
+dist /extensions/SDL/SDL.dist http://openengine.dk/code/extensions/SDL/SDL.dist
+dist /extensions/SDLImage/SDLImage.dist http://openengine.dk/code/extensions/SDLImage/SDLImage.dist
+dist /extensions/CairoResource/CairoResource.dist http://openengine.dk/code/extensions/CairoResource/CairoResource.dist
+dist /extensions/OpenGLPostProcessEffects/OpenGLPostProcessEffects.dist http://openengine.dk/code/extensions/OpenGLPostProcessEffects/OpenGLPostProcessEffects.dist
+dist /extensions/TGAResource/TGAResource.dist http://openengine.dk/code/extensions/TGAResource/TGAResource.dist
+dist /extensions/OBJResource/OBJResource.dist http://openengine.dk/code/extensions/OBJResource/OBJResource.dist
+dist /extensions/GenericHandlers/GenericHandlers.dist http://openengine.dk/code/extensions/GenericHandlers/GenericHandlers.dist
 
 #sound
-darcs /extensions/OpenALSoundSystem http://openengine.dk/code/extensions/OpenALSoundSystem
-darcs /extensions/VorbisResource    http://openengine.dk/code/extensions/VorbisResource
-darcs /extensions/MusicPlayer       http://openengine.dk/code/extensions/MusicPlayer
-darcs-dev /extensions/OpenALSoundSystem fh.daimi.au.dk:/users/cgd/code/extensions/OpenALSoundSystem
-darcs-dev /extensions/VorbisResource    fh.daimi.au.dk:/users/cgd/code/extensions/VorbisResource
-darcs-dev /extensions/MusicPlayer       fh.daimi.au.dk:/users/cgd/code/extensions/MusicPlayer
+dist /extensions/OpenALSoundSystem/OpenALSoundSystem.dist http://openengine.dk/code/extensions/OpenALSoundSystem/OpenALSoundSystem.dist
+dist /extensions/VorbisResource/VorbisResource.dist http://openengine.dk/code/extensions/VorbisResource/VorbisResource.dist
+dist /extensions/MusicPlayer/MusicPlayer.dist http://openengine.dk/code/extensions/MusicPlayer/MusicPlayer.dist
 
 # windows libraries
-win32 /libraries http://openengine.dk/data/libraries/boost-win32.zip
-win32 /libraries http://openengine.dk/data/libraries/glew-win32.zip
-win32 /libraries http://openengine.dk/data/libraries/sdl-win32.zip
-win32 /libraries http://openengine.dk/data/libraries/dlls-win32.zip
-
 # darwin libraries
 darwin /libraries http://openengine.dk/data/libraries/pcre-osx-i32.zip
 darwin /libraries http://openengine.dk/data/libraries/pcrecpp-osx-i32.zip
-
 # linux libraries
 
 # project data
