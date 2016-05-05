@@ -2,37 +2,37 @@
 # http://www.openengine.dk/wiki/Projects/dva
 
 # main repository
-darcs / http://openengine.dk/code/openengine
-darcs-dev / fh.daimi.au.dk:/users/cgd/code/openengine
+git / https://github.com/OpenEngineDK/openengine.git
+git-dev / git@github.com:OpenEngineDK/openengine.git
 
 # project repository
 # (uncomment the following two lines after uploading your project)
-darcs /projects/dva http://openengine.dk/code/projects/dva
-darcs-dev /projects/dva fh.daimi.au.dk:/users/cgd/code/projects/dva
+git /projects/dva https://github.com/OpenEngineDK/projects-dva.git
+git-dev /projects/dva git@github.com:OpenEngineDK/projects-dva.git
 
 # dist dependencies
-dist /extensions/PropertyBar/PropertyBar.dist http://openengine.dk/code/extensions/PropertyBar/PropertyBar.dist
-dist /extensions/Assimp/Assimp.dist http://openengine.dk/code/extensions/Assimp/Assimp.dist
-dist /extensions/HeightMap/HeightMap.dist http://openengine.dk/code/extensions/HeightMap/HeightMap.dist
-dist /extensions/Boids/Boids.dist http://openengine.dk/code/extensions/Boids/Boids.dist
-dist /extensions/OpenGLRenderer/OpenGLRenderer.dist http://openengine.dk/code/extensions/OpenGLRenderer/OpenGLRenderer.dist
-dist /extensions/Sockets/Sockets.dist http://openengine.dk/code/extensions/Sockets/Sockets.dist
-dist /extensions/AccelerationStructures/AccelerationStructures.dist http://openengine.dk/code/extensions/AccelerationStructures/AccelerationStructures.dist
-dist /extensions/AnimationFramework/AnimationFramework.dist http://openengine.dk/code/extensions/AnimationFramework/AnimationFramework.dist
-dist /extensions/SetupHelpers/SetupHelpers.dist http://openengine.dk/code/extensions/SetupHelpers/SetupHelpers.dist
-dist /extensions/HUD/HUD.dist http://openengine.dk/code/extensions/HUD/HUD.dist
-dist /extensions/SDL/SDL.dist http://openengine.dk/code/extensions/SDL/SDL.dist
-dist /extensions/SDLImage/SDLImage.dist http://openengine.dk/code/extensions/SDLImage/SDLImage.dist
-dist /extensions/CairoResource/CairoResource.dist http://openengine.dk/code/extensions/CairoResource/CairoResource.dist
-dist /extensions/OpenGLPostProcessEffects/OpenGLPostProcessEffects.dist http://openengine.dk/code/extensions/OpenGLPostProcessEffects/OpenGLPostProcessEffects.dist
-dist /extensions/TGAResource/TGAResource.dist http://openengine.dk/code/extensions/TGAResource/TGAResource.dist
-dist /extensions/OBJResource/OBJResource.dist http://openengine.dk/code/extensions/OBJResource/OBJResource.dist
-dist /extensions/GenericHandlers/GenericHandlers.dist http://openengine.dk/code/extensions/GenericHandlers/GenericHandlers.dist
+dist /extensions/PropertyBar/PropertyBar.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-PropertyBar/master/PropertyBar.dist
+dist /extensions/Assimp/Assimp.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-Assimp/master/Assimp.dist
+dist /extensions/HeightMap/HeightMap.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-HeightMap/master/HeightMap.dist
+dist /extensions/Boids/Boids.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-Boids/master/Boids.dist
+dist /extensions/OpenGLRenderer/OpenGLRenderer.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-OpenGLRenderer/master/OpenGLRenderer.dist
+dist /extensions/Sockets/Sockets.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-Sockets/master/Sockets.dist
+dist /extensions/AccelerationStructures/AccelerationStructures.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-AccelerationStructures/master/AccelerationStructures.dist
+dist /extensions/AnimationFramework/AnimationFramework.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-AnimationFramework/master/AnimationFramework.dist
+dist /extensions/SetupHelpers/SetupHelpers.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-SetupHelpers/master/SetupHelpers.dist
+dist /extensions/HUD/HUD.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-HUD/master/HUD.dist
+dist /extensions/SDL/SDL.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-SDL/master/SDL.dist
+dist /extensions/SDLImage/SDLImage.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-SDLImage/master/SDLImage.dist
+dist /extensions/CairoResource/CairoResource.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-CairoResource/master/CairoResource.dist
+dist /extensions/OpenGLPostProcessEffects/OpenGLPostProcessEffects.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-OpenGLPostProcessEffects/master/OpenGLPostProcessEffects.dist
+dist /extensions/TGAResource/TGAResource.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-TGAResource/master/TGAResource.dist
+dist /extensions/OBJResource/OBJResource.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-OBJResource/master/OBJResource.dist
+dist /extensions/GenericHandlers/GenericHandlers.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-GenericHandlers/master/GenericHandlers.dist
 
 #sound
-dist /extensions/OpenALSoundSystem/OpenALSoundSystem.dist http://openengine.dk/code/extensions/OpenALSoundSystem/OpenALSoundSystem.dist
-dist /extensions/VorbisResource/VorbisResource.dist http://openengine.dk/code/extensions/VorbisResource/VorbisResource.dist
-dist /extensions/MusicPlayer/MusicPlayer.dist http://openengine.dk/code/extensions/MusicPlayer/MusicPlayer.dist
+dist /extensions/OpenALSoundSystem/OpenALSoundSystem.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-OpenALSoundSystem/master/OpenALSoundSystem.dist
+dist /extensions/VorbisResource/VorbisResource.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-VorbisResource/master/VorbisResource.dist
+dist /extensions/MusicPlayer/MusicPlayer.dist https://raw.githubusercontent.com/OpenEngineDK/extensions-MusicPlayer/master/MusicPlayer.dist
 
 # windows libraries
 # darwin libraries
